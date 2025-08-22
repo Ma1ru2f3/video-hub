@@ -1,220 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Hub</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #1a73e8;
-            margin-bottom: 20px;
-        }
-
-        .search-box {
-            display: flex;
-            margin-bottom: 20px;
-        }
-
-        .search-box input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        .search-box button {
-            padding: 10px 15px;
-            border: none;
-            background-color: #1a73e8;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-left: 10px;
-        }
-
-        .search-box button:hover {
-            background-color: #155bb5;
-        }
-
-        #results {
-            text-align: left;
-        }
-
-        .result-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .result-item:hover {
-            background-color: #f9f9f9;
-        }
-
-        .result-item img {
-            width: 80px;
-            height: 80px;
-            border-radius: 4px;
-            margin-right: 15px;
-        }
-
-        .result-info {
-            flex-grow: 1;
-        }
-
-        .result-info h3 {
-            margin: 0 0 5px;
-            font-size: 18px;
-        }
-
-        .result-info p {
-            margin: 0;
-            color: #666;
-            font-size: 14px;
-        }
-
-        #loading, #error {
-            text-align: center;
-            font-size: 18px;
-            color: #1a73e8;
-            display: none;
-        }
-
-        #error {
-            color: #d9534f;
-        }
-
-        #player {
-            width: 100%;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ভিডিও হাব</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      text-align: center;
+    }
+    h1 {
+      color: #ef233c;
+    }
+    p {
+      color: #b3b3b3;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Video Hub</h1>
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search for songs...">
-            <button onclick="searchSong()">Search</button>
-        </div>
-        <div id="loading">Searching... Please wait.</div>
-        <div id="error"></div>
-        <div id="results"></div>
-        <audio id="player" controls></audio>
-    </div>
-
-    <script>
-        const searchInput = document.getElementById('searchInput');
-        const resultsDiv = document.getElementById('results');
-        const loadingDiv = document.getElementById('loading');
-        const errorDiv = document.getElementById('error');
-        const player = document.getElementById('player');
-
-        // আপনার নিজস্ব সার্ভারের API এন্ডপয়েন্ট
-        const MUSIC_API = {
-            SEARCH: "/search", 
-            DOWNLOAD: "/play"
-        };
-
-        async function searchSong() {
-            const query = searchInput.value.trim();
-            if (!query) return;
-
-            resultsDiv.innerHTML = '';
-            loadingDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
-
-            try {
-                const response = await fetch(`${MUSIC_API.SEARCH}?q=${encodeURIComponent(query)}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    displayResults(data);
-                } else {
-                    showError(data.error || 'An error occurred while searching.');
-                }
-            } catch (err) {
-                showError('Network error. Please try again later.');
-            } finally {
-                loadingDiv.style.display = 'none';
-            }
-        }
-
-        function displayResults(results) {
-            if (results.length === 0) {
-                resultsDiv.innerHTML = '<p>No results found.</p>';
-                return;
-            }
-
-            results.forEach(song => {
-                const item = document.createElement('div');
-                item.className = 'result-item';
-                item.onclick = () => playSong(song);
-                item.innerHTML = `
-                    <img src="${song.thumbnail}" alt="${song.title}">
-                    <div class="result-info">
-                        <h3>${song.title}</h3>
-                        <p>${song.channelTitle} - ${song.timestamp}</p>
-                    </div>
-                `;
-                resultsDiv.appendChild(item);
-            });
-        }
-
-        async function playSong(song) {
-            resultsDiv.style.display = 'none';
-            loadingDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
-
-            try {
-                const streamUrl = `${MUSIC_API.DOWNLOAD}?url=${encodeURIComponent(song.url)}`;
-                player.src = streamUrl;
-                player.load();
-                player.play();
-
-                player.oncanplay = () => {
-                    loadingDiv.style.display = 'none';
-                    resultsDiv.style.display = 'block';
-                };
-
-                player.onerror = () => {
-                    showError('Failed to play the song. Please try another one.');
-                    loadingDiv.style.display = 'none';
-                    resultsDiv.style.display = 'block';
-                };
-            } catch (err) {
-                showError('An unexpected error occurred during playback.');
-                loadingDiv.style.display = 'none';
-                resultsDiv.style.display = 'block';
-            }
-        }
-
-        function showError(message) {
-            errorDiv.innerHTML = message;
-            errorDiv.style.display = 'block';
-        }
-    </script>
+  <div class="container">
+    <h1>ভিডিও হাব সার্ভার চলছে!</h1>
+    <p>এই সার্ভারটি ব্যাকএন্ড API হিসেবে কাজ করছে।</p>
+    <p>ফ্রন্টএন্ড অ্যাপ্লিকেশন চালু করতে আপনার `index.html` ফাইলটি ব্রাউজারে খুলুন।</p>
+  </div>
 </body>
 </html>
