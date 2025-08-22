@@ -1,17 +1,17 @@
 {
-  "name": "your-video-hub",
+  "name": "video-hub-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "A simple server for a video hub application.",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "ytdl-core": "^4.11.5",
-    "ytsr": "^3.8.3"
-  }
+    "axios": "^1.6.8",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
 }
