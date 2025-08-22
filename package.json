@@ -1,17 +1,20 @@
 {
-  "name": "video-hub-server",
+  "name": "video-hub-project",
   "version": "1.0.0",
-  "description": "A simple server for a video hub application.",
-  "main": "index.js",
+  "description": "Backend server for the Video Hub application.",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "axios": "^1.6.8",
-    "express": "^4.19.2",
-    "nodemon": "^3.1.0"
+    "express": "^4.19.2"
   },
-  "author": "Your Name",
-  "license": "MIT"
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
 }
