@@ -1,125 +1,62 @@
 const express = require('express');
-const axios = require('axios');
-const path = require('path');
+const ytdl = require('ytdl-core');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-// Serve static files from the root directory
-app.use(express.static(__dirname));
+app.use(express.static('public')); // যদি আপনার index.html public ফোল্ডারে থাকে
 
-// API URL from GitHub Gist
-const baseApiUrl = async () => {
-    try {
-        const base = await axios.get(
-            `https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`
-        );
-        return base.data.api;
-    } catch (e) {
-        console.error("Failed to fetch base API URL:", e);
-        return null;
-    }
-};
-
-// API endpoint for homepage trending videos
-app.get('/home-api', async (req, res) => {
-    try {
-        const apiBase = await baseApiUrl();
-        if (apiBase) {
-            const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=trending songs`)).data.slice(0, 10);
-            res.json(searchResults);
-        } else {
-            res.status(500).json({ error: 'Failed to get API URL.' });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'An error occurred while fetching trending videos.' });
-    }
-});
-
-// API endpoint for search
+// Search API Endpoint (গান খোঁজার জন্য)
 app.get('/search-api', async (req, res) => {
     const query = req.query.q;
     if (!query) {
-        return res.status(400).json({ error: 'Search query is required.' });
+        return res.status(400).json({ error: 'Query parameter "q" is required' });
     }
 
     try {
-        const apiBase = await baseApiUrl();
-        if (apiBase) {
-            const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=${query}`)).data.slice(0, 10);
-            res.json(searchResults);
-        } else {
-            res.status(500).json({ error: 'Failed to get API URL.' });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'An error occurred while searching. Please try again later.' });
+        const results = await ytdl.search(query, { limit: 10 });
+        const videos = results.map(video => ({
+            id: video.id,
+            title: video.title,
+            thumbnail: video.thumbnails[0].url,
+            author: { name: video.author.name }
+        }));
+        res.json(videos);
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({ error: 'Failed to perform search' });
     }
 });
 
-// API endpoint to get a direct video link
-app.get('/video-link-api', async (req, res) => {
-    const videoId = req.query.id;
-    if (!videoId) {
-        return res.status(400).json({ error: 'Video ID is required.' });
-    }
-
-    try {
-        const apiBase = await baseApiUrl();
-        if (apiBase) {
-            const { data: { downloadLink } } = await axios.get(`${apiBase}/ytDl3?link=${videoId}&format=mp4&quality=3`);
-            res.json({ videoUrl: downloadLink });
-        } else {
-            res.status(500).json({ error: 'Failed to get API URL.' });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'An error occurred while fetching video link.' });
-    }
-});
-
-// API endpoint to fetch related videos
-app.get('/related-videos-api', async (req, res) => {
-    const videoId = req.query.id;
-    if (!videoId) {
-        return res.status(400).json({ error: 'Video ID is required.' });
-    }
-
-    try {
-        const apiBase = await baseApiUrl();
-        if (apiBase) {
-            const relatedVideos = (await axios.get(`${apiBase}/ytRelated?videoId=${videoId}`)).data.slice(0, 7);
-            res.json(relatedVideos);
-        } else {
-            res.status(500).json({ error: 'Failed to get API URL.' });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'An error occurred while fetching related videos.' });
-    }
-});
-
-// NEW: API endpoint to get a direct audio link
+// Audio Link API Endpoint (গানের অডিও URL পাওয়ার জন্য)
 app.get('/audio-link-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
-        return res.status(400).json({ error: 'Video ID is required.' });
+        return res.status(400).json({ error: 'Video ID parameter "id" is required' });
     }
+
     try {
-        const apiBase = await baseApiUrl();
-        if (apiBase) {
-            const { data: { downloadLink } } = await axios.get(`${apiBase}/ytDl3?link=${videoId}&format=mp3&quality=1`);
-            res.json({ audioUrl: downloadLink });
+        const info = await ytdl.getInfo(videoId);
+        const audioFormat = ytdl.chooseFormat(info.formats, {
+            filter: 'audioonly',
+            quality: 'highestaudio'
+        });
+
+        if (audioFormat) {
+            res.json({ audioUrl: audioFormat.url });
         } else {
-            res.status(500).json({ error: 'Failed to get API URL.' });
+            res.status(404).json({ error: 'Audio not found' });
         }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'An error occurred while fetching audio link.' });
+    } catch (error) {
+        console.error('Audio link error:', error);
+        res.status(500).json({ error: 'Failed to get audio link' });
     }
 });
 
+// Home page
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });
