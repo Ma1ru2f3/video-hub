@@ -16,67 +16,61 @@
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 20px 20px;
         }
 
-        /* Top Bar */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #333;
-        }
-
-        .top-bar-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .top-bar-buttons button {
-            background-color: #ff0000;
-            color: #fff;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .top-bar-buttons .download-apk {
-            background-color: #28a745;
-        }
-
-        /* Video Player Section */
+        /* Video Player and Top Bar */
         .video-player-container {
             width: 100%;
             position: relative;
             background-color: #000;
-            margin-top: 20px;
         }
 
         #videoPlayer {
             width: 100%;
             height: auto;
+            display: block; /* Removes extra space below video */
         }
 
-        .video-info {
+        /* Custom top bar for the player */
+        .player-top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            padding: 10px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+        .player-top-bar a {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            padding: 5px;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        /* Video Details Section */
+        .video-details {
             padding: 15px 0;
         }
 
-        .video-info h1 {
+        .video-details h1 {
             font-size: 24px;
             margin: 0;
             color: #f0f0f0;
         }
 
-        .video-meta {
+        .video-details .meta-info {
             font-size: 14px;
             color: #aaa;
             margin-top: 5px;
-        }
-
-        .video-meta .rating {
-            color: #ffc107;
         }
 
         .action-buttons {
@@ -87,37 +81,56 @@
         }
 
         .action-buttons button, .action-buttons a {
-            background-color: #3a3a3a;
+            background: linear-gradient(to right, #6a11cb, #2575fc); /* Watch Now */
             color: #fff;
             border: none;
-            padding: 10px 15px;
+            padding: 10px 20px;
             border-radius: 20px;
             cursor: pointer;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            font-weight: bold;
+            flex: 1; /* Make buttons fill space */
+            min-width: 120px;
+            transition: transform 0.2s ease-in-out;
         }
 
-        /* Recommendations Section */
-        .recommendations {
-            margin-top: 30px;
+        .action-buttons button:hover, .action-buttons a:hover {
+            transform: scale(1.05);
         }
 
-        .recommendations h2 {
+        #favoriteBtn {
+            background: linear-gradient(to right, #f7b733, #fc4a1a); /* Favorite */
+        }
+        
+        #downloadBtn {
+            background: linear-gradient(to right, #00c6ff, #0072ff); /* Download */
+        }
+
+        /* Description and Related Videos */
+        .description-section {
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .related-videos {
+            margin-top: 20px;
+        }
+
+        .related-videos h2 {
             font-size: 20px;
-            border-bottom: 2px solid #555;
-            padding-bottom: 5px;
+            margin-bottom: 15px;
         }
 
-        .movie-list {
+        .related-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
-            margin-top: 15px;
         }
 
-        .movie-card {
+        .video-card {
             background-color: #2a2a2a;
             border-radius: 8px;
             overflow: hidden;
@@ -126,67 +139,57 @@
             cursor: pointer;
         }
 
-        .movie-card img {
+        .video-card img {
             width: 100%;
             height: auto;
             border-radius: 5px;
         }
 
-        .movie-title {
+        .video-card .title {
             font-size: 14px;
             margin-top: 8px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        .movie-info {
-            font-size: 12px;
-            color: #aaa;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-bar">
-        <span>Video Hub</span>
-        <div class="top-bar-buttons">
-            <button class="logout-btn">Logout</button>
-            <button class="download-apk">Download APK</button>
-        </div>
-    </div>
-
     <div class="video-player-container">
+        <div class="player-top-bar">
+            <a href="javascript:history.back()">⬅️</a>
+        </div>
         <video id="videoPlayer" controls autoplay></video>
     </div>
-    
-    <div class="video-info">
+
+    <div class="video-details">
         <h1 id="videoTitle">Loading...</h1>
-        <div class="video-meta">
-            <span class="rating">★ 8.2</span> • <span id="videoYear">2023</span> • <span id="videoGenre">Action</span>
+        <div class="meta-info">
+            <span id="videoCategory">Trending, anime</span> • <span id="videoSeason">Season 1</span> • <span id="videoYear">2025</span>
         </div>
+
         <div class="action-buttons">
-            <button>➕ Add to list</button>
-            <button>🔗 Share</button>
+            <button>▶️ Watch Now</button>
+            <button id="favoriteBtn">⭐️ Favorite</button>
             <a href="#" id="downloadBtn">📥 Download</a>
-            <button>👁️ View</button>
         </div>
+
+        <p id="videoDescription">Enjoy Death Note hindi anime.</p>
     </div>
 
-    <div class="recommendations">
-        <h2>For you</h2>
-        <div class="movie-list">
+    <div class="related-videos">
+        <h2>Show More Videos</h2>
+        <div class="related-list" id="relatedVideosList">
             </div>
     </div>
-
-    <div class="comments">
-        <h2>Comments</h2>
-        </div>
 </div>
 
 <script>
     const API_URL = 'https://video-hub-6e40.onrender.com';
+    let currentVideoId;
+    let currentVideoTitle;
 
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -195,36 +198,53 @@
         const title = urlParams.get('title');
 
         if (videoId) {
-            document.getElementById('videoTitle').innerText = decodeURIComponent(title);
+            currentVideoId = videoId;
+            currentVideoTitle = decodeURIComponent(title);
+
+            document.getElementById('videoTitle').innerText = currentVideoTitle;
             document.getElementById('videoPlayer').src = `${API_URL}/ytb/stream?id=${videoId}&format=${format}`;
             document.getElementById('downloadBtn').href = `${API_URL}/ytb/stream?id=${videoId}&format=${format}`;
         } else {
             document.getElementById('videoTitle').innerText = 'Error: Video not found.';
         }
-        
-        // This is a placeholder for dynamic content loading, like movie recommendations.
-        // For a real-world app, you would fetch this data from your backend.
-        loadRecommendations();
+
+        // Load related videos based on the current video's ID
+        loadRelatedVideos(currentVideoId);
     });
 
-    function loadRecommendations() {
-        const movieData = [
-            { title: 'K.G.F: Chapter 1', image: 'https://via.placeholder.com/150' },
-            { title: 'RRR', image: 'https://via.placeholder.com/150' },
-            { title: 'Bajrangi Bhaijaan', image: 'https://via.placeholder.com/150' },
-            // Add more movie data as needed
+    function loadRelatedVideos(videoId) {
+        const relatedListContainer = document.getElementById('relatedVideosList');
+        relatedListContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Loading related videos...</p>';
+
+        // NOTE: This is a placeholder. You need a backend API endpoint for related videos.
+        // It would look something like: `/ytb/related?id=${videoId}`
+        // This example shows static data for demonstration purposes.
+        const staticRelatedVideos = [
+            { id: 'video1', title: 'Code Geass', thumbnail: 'https://via.placeholder.com/150' },
+            { id: 'video2', title: 'Attack on Titan', thumbnail: 'https://via.placeholder.com/150' },
+            { id: 'video3', title: 'One Punch Man', thumbnail: 'https://via.placeholder.com/150' },
+            { id: 'video4', title: 'Naruto', thumbnail: 'https://via.placeholder.com/150' },
+            { id: 'video5', title: 'Bleach', thumbnail: 'https://via.placeholder.com/150' },
+            { id: 'video6', title: 'Demon Slayer', thumbnail: 'https://via.placeholder.com/150' },
         ];
-        
-        const movieListContainer = document.querySelector('.movie-list');
-        movieData.forEach(movie => {
-            const movieCard = document.createElement('div');
-            movieCard.className = 'movie-card';
-            movieCard.innerHTML = `
-                <img src="${movie.image}" alt="${movie.title}">
-                <div class="movie-title">${movie.title}</div>
-            `;
-            movieListContainer.appendChild(movieCard);
-        });
+
+        setTimeout(() => {
+            relatedListContainer.innerHTML = '';
+            staticRelatedVideos.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                videoCard.innerHTML = `
+                    <img src="${video.thumbnail}" alt="${video.title}">
+                    <div class="title">${video.title}</div>
+                `;
+                // Add a click event to load the new video
+                videoCard.addEventListener('click', () => {
+                    // This reloads the page with the new video ID
+                    window.location.href = `watch.html?id=${video.id}&format=mp4&title=${encodeURIComponent(video.title)}`;
+                });
+                relatedListContainer.appendChild(videoCard);
+            });
+        }, 1000); // Simulate network delay
     }
 </script>
 
