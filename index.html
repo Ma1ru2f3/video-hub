@@ -65,7 +65,7 @@
         .hidden { display: none; }
         .video-player-container {
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
             max-width: 100%;
@@ -97,35 +97,130 @@
             z-index: 2;
         }
 
-        /* NEW: Music Player Bar Styles */
-        #music-player-bar {
+        /* NEW: Fullscreen Music Player Styles */
+        #fullscreen-player-section {
             position: fixed;
-            bottom: 65px; /* Adjust based on bottom-nav height */
+            top: 0;
             left: 0;
             width: 100%;
-            background-color: #333;
+            height: 100%;
+            background-color: #212121; /* Dark background */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #fullscreen-player-section .player-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #fullscreen-player-section .album-art {
+            width: 80%;
+            max-width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+        }
+        #fullscreen-player-section .song-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 0 0 5px;
+        }
+        #fullscreen-player-section .song-artist {
+            font-size: 1.2em;
+            color: #ccc;
+            margin: 0;
+        }
+        #fullscreen-player-section .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 30px;
+        }
+        #fullscreen-player-section .control-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2.5em;
+            cursor: pointer;
+            margin: 0 15px;
+        }
+        #fullscreen-player-section .control-button.large {
+            font-size: 4em;
+        }
+        #fullscreen-player-section .progress-bar-container {
+            width: 90%;
+            max-width: 400px;
+            height: 5px;
+            background-color: #555;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #fullscreen-player-section .progress-fill {
+            height: 100%;
+            background-color: #ff0000;
+            border-radius: 5px;
+            transition: width 0.1s linear;
+        }
+        #fullscreen-player-section .time-display {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 400px;
+            color: #ccc;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        #fullscreen-player-section .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        /* NEW: Persistent Music Player Card Styles */
+        #music-player-card {
+            position: fixed;
+            bottom: 65px; /* Adjust based on bottom-nav height */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background-color: #444;
             color: white;
             display: flex;
             align-items: center;
             padding: 10px;
+            border-radius: 10px;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
             z-index: 999;
-            transition: transform 0.3s ease-in-out;
-            transform: translateY(100%);
+            cursor: pointer;
+            transition: bottom 0.3s ease-in-out;
         }
-        #music-player-bar.active {
-            transform: translateY(0);
+        #music-player-card.hidden {
+            bottom: -100px;
         }
-        #music-player-bar .album-art {
+        #music-player-card .album-art-mini {
             width: 50px;
             height: 50px;
             border-radius: 5px;
             margin-right: 15px;
         }
-        #music-player-bar .song-info {
+        #music-player-card .song-info-mini {
             flex-grow: 1;
         }
-        #music-player-bar .song-title {
+        #music-player-card .song-title-mini {
             font-size: 1em;
             font-weight: bold;
             margin: 0;
@@ -133,36 +228,22 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        #music-player-bar .song-artist {
+        #music-player-card .song-artist-mini {
             font-size: 0.8em;
             color: #ccc;
             margin: 0;
         }
-        #music-player-bar .controls {
+        #music-player-card .controls-mini {
             display: flex;
             align-items: center;
         }
-        #music-player-bar .play-button {
+        #music-player-card .play-button-mini {
             font-size: 2em;
             background: none;
             border: none;
             color: white;
             cursor: pointer;
             margin-left: 10px;
-        }
-        #music-player-bar .progress-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: #555;
-        }
-        #music-player-bar .progress-fill {
-            height: 100%;
-            width: 0%;
-            background-color: #ff0000;
-            transition: width 0.1s linear;
         }
     </style>
 </head>
@@ -189,7 +270,6 @@
                 <video id="video-player" controls class="video-iframe"></video>
             </div>
             <div id="video-title-display" class="video-title-display"></div>
-
             <h3 id="related-videos-title" class="hidden">Related Videos</h3>
             <div id="related-videos-grid" class="video-grid"></div>
         </div>
@@ -210,16 +290,34 @@
         </div>
     </div>
 
-    <div id="music-player-bar" class="hidden">
-        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
-        <img id="bar-album-art" class="album-art" src="" alt="Album Art">
-        <div class="song-info">
-            <div id="bar-song-title" class="song-title"></div>
-            <div id="bar-song-artist" class="song-artist"></div>
+    <div id="fullscreen-player-section" class="hidden">
+        <button class="back-button" onclick="showMusicSection();">ᐸ</button>
+        <div class="player-content">
+            <img id="player-album-art" class="album-art" src="" alt="Album Art">
+            <h3 id="player-song-title" class="song-title"></h3>
+            <p id="player-song-artist" class="song-artist"></p>
+            <div class="progress-bar-container">
+                <div id="player-progress-fill" class="progress-fill"></div>
+            </div>
+            <div class="time-display">
+                <span id="player-current-time">0:00</span>
+                <span id="player-total-time">0:00</span>
+            </div>
+            <div class="player-controls">
+                <audio id="player-audio" style="display:none;"></audio>
+                <button class="control-button">⟲</button> <button id="player-play-pause" class="control-button large">▶</button>
+                <button class="control-button">⟳</button> </div>
         </div>
-        <div class="controls">
-            <audio id="bar-audio-player" style="display:none;"></audio>
-            <button id="bar-play-pause" class="play-button">▶</button>
+    </div>
+
+    <div id="music-player-card" class="hidden">
+        <img id="card-album-art" class="album-art-mini" src="" alt="Album Art">
+        <div class="song-info-mini">
+            <div id="card-song-title" class="song-title-mini"></div>
+            <div id="card-song-artist" class="song-artist-mini"></div>
+        </div>
+        <div class="controls-mini">
+            <button id="card-play-pause" class="play-button-mini">▶</button>
         </div>
     </div>
 
@@ -264,7 +362,7 @@
         const relatedVideosGrid = document.getElementById('related-videos-grid');
         const relatedVideosTitle = document.getElementById('related-videos-title');
 
-        // NEW: Selectors for the music section
+        // Music Section elements
         const musicLink = document.getElementById('music-link');
         const musicSection = document.getElementById('music-section');
         const musicSearchForm = document.getElementById('music-search-form');
@@ -272,88 +370,161 @@
         const musicVideoGrid = document.getElementById('music-video-grid');
         const musicErrorMessage = document.getElementById('music-error-message');
         const musicPageTitle = document.getElementById('music-page-title');
+        
+        // Fullscreen Music Player elements
+        const fullscreenPlayerSection = document.getElementById('fullscreen-player-section');
+        const playerAlbumArt = document.getElementById('player-album-art');
+        const playerSongTitle = document.getElementById('player-song-title');
+        const playerSongArtist = document.getElementById('player-song-artist');
+        const playerAudio = document.getElementById('player-audio');
+        const playerPlayPause = document.getElementById('player-play-pause');
+        const playerProgressFill = document.getElementById('player-progress-fill');
+        const playerCurrentTime = document.getElementById('player-current-time');
+        const playerTotalTime = document.getElementById('player-total-time');
 
-        // NEW: Selectors for the persistent music bar
-        const musicPlayerBar = document.getElementById('music-player-bar');
-        const barAlbumArt = document.getElementById('bar-album-art');
-        const barSongTitle = document.getElementById('bar-song-title');
-        const barSongArtist = document.getElementById('bar-song-artist');
-        const barPlayPause = document.getElementById('bar-play-pause');
-        const barAudioPlayer = document.getElementById('bar-audio-player');
-        const progressFill = document.getElementById('progress-fill');
+        // NEW: Persistent Music Player Card elements
+        const musicPlayerCard = document.getElementById('music-player-card');
+        const cardAlbumArt = document.getElementById('card-album-art');
+        const cardSongTitle = document.getElementById('card-song-title');
+        const cardSongArtist = document.getElementById('card-song-artist');
+        const cardPlayPause = document.getElementById('card-play-pause');
+
+        let currentSong = null;
 
         // Functions to toggle sections
         function showSearchSection() {
             searchSection.classList.remove('hidden');
             videoPlayerSection.classList.add('hidden');
             musicSection.classList.add('hidden');
+            fullscreenPlayerSection.classList.add('hidden');
             videoPlayer.src = '';
+            if (playerAudio.paused) {
+                 musicPlayerCard.classList.add('hidden');
+            }
         }
 
-        // NEW: Function to toggle to the music section
         function showMusicSection() {
             searchSection.classList.add('hidden');
             videoPlayerSection.classList.add('hidden');
             musicSection.classList.remove('hidden');
-            musicVideoGrid.innerHTML = '';
-            musicPageTitle.textContent = 'Search for Music';
+            fullscreenPlayerSection.classList.add('hidden');
         }
 
-        // NEW: Function to play audio
+        // NEW: Function to play audio and show the mini card
         async function playAudio(videoId, videoTitle, videoThumbnail, videoAuthor) {
-            musicPlayerBar.classList.remove('hidden'); // Show the music bar
-            musicPlayerBar.classList.add('active');
+            // Store the current song details
+            currentSong = {
+                id: videoId,
+                title: videoTitle,
+                thumbnail: videoThumbnail,
+                author: videoAuthor
+            };
 
-            // Set song info on the bar
-            barSongTitle.textContent = videoTitle;
-            barSongArtist.textContent = videoAuthor;
-            barAlbumArt.src = videoThumbnail;
-            barPlayPause.textContent = '⏸';
+            // Update mini card
+            cardAlbumArt.src = videoThumbnail;
+            cardSongTitle.textContent = videoTitle;
+            cardSongArtist.textContent = videoAuthor;
+            musicPlayerCard.classList.remove('hidden');
 
+            // Play the audio
             try {
                 const response = await fetch(`/audio-link-api?id=${videoId}`);
                 const data = await response.json();
 
                 if (response.ok && data.audioUrl) {
-                    barAudioPlayer.src = data.audioUrl;
-                    barAudioPlayer.play();
+                    playerAudio.src = data.audioUrl;
+                    playerAudio.play();
+                    cardPlayPause.textContent = '⏸';
+                    playerPlayPause.textContent = '⏸';
                 } else {
                     console.error('Failed to load audio:', data.error);
-                    barPlayPause.textContent = '▶';
+                    cardPlayPause.textContent = '▶';
+                    playerPlayPause.textContent = '▶';
                     alert('Error: Failed to load audio.');
                 }
             } catch (err) {
                 console.error(err);
-                barPlayPause.textContent = '▶';
+                cardPlayPause.textContent = '▶';
+                playerPlayPause.textContent = '▶';
                 alert('Error: An error occurred while loading the audio.');
             }
         }
         
-        // NEW: Function to toggle play/pause from the music bar
-        barPlayPause.addEventListener('click', () => {
-            if (barAudioPlayer.paused) {
-                barAudioPlayer.play();
-                barPlayPause.textContent = '⏸';
+        // NEW: Function to show the full-screen music player
+        function showFullscreenPlayer() {
+            if (!currentSong) return;
+
+            searchSection.classList.add('hidden');
+            videoPlayerSection.classList.add('hidden');
+            musicSection.classList.add('hidden');
+            fullscreenPlayerSection.classList.remove('hidden');
+            musicPlayerCard.classList.add('hidden');
+
+            // Update full-screen player with current song data
+            playerAlbumArt.src = currentSong.thumbnail;
+            playerSongTitle.textContent = currentSong.title;
+            playerSongArtist.textContent = currentSong.author;
+            
+            if (!playerAudio.paused) {
+                playerPlayPause.textContent = '⏸';
             } else {
-                barAudioPlayer.pause();
-                barPlayPause.textContent = '▶';
+                playerPlayPause.textContent = '▶';
+            }
+        }
+
+        // Event listener for the mini-card to open the full player
+        musicPlayerCard.addEventListener('click', () => {
+            showFullscreenPlayer();
+        });
+
+        // Event listener for play/pause button on the mini-card
+        cardPlayPause.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the card from opening the full player
+            if (playerAudio.paused) {
+                playerAudio.play();
+                cardPlayPause.textContent = '⏸';
+                playerPlayPause.textContent = '⏸';
+            } else {
+                playerAudio.pause();
+                cardPlayPause.textContent = '▶';
+                playerPlayPause.textContent = '▶';
             }
         });
-
-        // NEW: Update progress bar
-        barAudioPlayer.addEventListener('timeupdate', () => {
-            const progress = (barAudioPlayer.currentTime / barAudioPlayer.duration) * 100;
-            progressFill.style.width = `${progress}%`;
+        
+        // Event listener for play/pause button on the full player
+        playerPlayPause.addEventListener('click', () => {
+            if (playerAudio.paused) {
+                playerAudio.play();
+                playerPlayPause.textContent = '⏸';
+                cardPlayPause.textContent = '⏸';
+            } else {
+                playerAudio.pause();
+                playerPlayPause.textContent = '▶';
+                cardPlayPause.textContent = '▶';
+            }
+        });
+        
+        // Event listener for time updates to sync progress bar and time display
+        playerAudio.addEventListener('timeupdate', () => {
+            const progress = (playerAudio.currentTime / playerAudio.duration) * 100;
+            playerProgressFill.style.width = `${progress}%`;
+            playerCurrentTime.textContent = formatTime(playerAudio.currentTime);
         });
 
-        // NEW: Reset player state when song ends
-        barAudioPlayer.addEventListener('ended', () => {
-            barPlayPause.textContent = '▶';
-            progressFill.style.width = '0%';
+        // Event listener for loadedmetadata to get total duration
+        playerAudio.addEventListener('loadedmetadata', () => {
+            playerTotalTime.textContent = formatTime(playerAudio.duration);
         });
 
-
-        // NEW: Function to fetch and display music search results
+        // Function to format time from seconds
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Function to fetch and display music search results
         async function fetchMusicResults(query) {
             musicVideoGrid.innerHTML = 'Loading...';
             musicErrorMessage.innerHTML = '';
@@ -392,17 +563,18 @@
                 musicVideoGrid.innerHTML = '';
             }
         }
-
-        // Function to show the video player by fetching a direct video link
+        
         async function showVideoPlayerSection(videoId, videoTitle) {
             searchSection.classList.add('hidden');
             videoPlayerSection.classList.remove('hidden');
             musicSection.classList.add('hidden');
-
+            fullscreenPlayerSection.classList.add('hidden');
             videoTitleDisplay.textContent = 'Loading video...';
             videoPlayer.src = '';
             relatedVideosGrid.innerHTML = '';
             relatedVideosTitle.classList.add('hidden');
+            playerAudio.pause();
+            musicPlayerCard.classList.add('hidden');
 
             try {
                 const response = await fetch(`/video-link-api?id=${videoId}`);
@@ -413,8 +585,6 @@
                     videoPlayer.load();
                     videoPlayer.play();
                     videoTitleDisplay.textContent = videoTitle;
-
-                    // NEW: Fetch and display related videos
                     fetchRelatedVideos(videoId);
                 } else {
                     videoTitleDisplay.textContent = 'Error: Failed to load video.';
@@ -425,7 +595,6 @@
             }
         }
 
-        // NEW: Function to fetch and display related videos
         async function fetchRelatedVideos(videoId) {
             relatedVideosTitle.classList.remove('hidden');
             relatedVideosGrid.innerHTML = 'Loading related videos...';
@@ -449,8 +618,6 @@
                             </div>
                         `;
                         relatedVideosGrid.appendChild(card);
-
-                        // Fetch duration for each related video
                         fetchAndDisplayDuration(video.id, card);
                     });
                 } else {
@@ -462,19 +629,16 @@
             }
         }
 
-        // Function to convert seconds to HH:MM:SS format
         function formatDuration(seconds) {
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = seconds % 60;
-
             let formatted = '';
             if (h > 0) formatted += `${h}:`;
             formatted += `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             return formatted;
         }
 
-        // Function to fetch and display video duration
         async function fetchAndDisplayDuration(videoId, cardElement) {
             try {
                 const response = await fetch(`/video-info-api?id=${videoId}`);
@@ -491,7 +655,6 @@
             }
         }
 
-        // Function to fetch and display videos
         async function fetchVideos(url, title) {
             videoGrid.innerHTML = 'Loading...';
             errorMessage.innerHTML = '';
@@ -519,8 +682,6 @@
                                 </div>
                             `;
                             videoGrid.appendChild(card);
-
-                            // Fetch duration for each video card
                             fetchAndDisplayDuration(video.id, card);
                         });
                     }
@@ -534,12 +695,10 @@
             }
         }
 
-        // Load trending videos on page load
         document.addEventListener('DOMContentLoaded', () => {
             fetchVideos('/home-api', 'Trending Videos');
         });
 
-        // Handle search form submission
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const query = searchInput.value;
@@ -548,14 +707,12 @@
             }
         });
 
-        // Handle home button click
         homeLink.addEventListener('click', (e) => {
             e.preventDefault();
             showSearchSection();
             fetchVideos('/home-api', 'Trending Videos');
         });
 
-        // NEW: Event listener for music search form
         musicSearchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const query = musicSearchInput.value;
@@ -564,7 +721,6 @@
             }
         });
 
-        // NEW: Event listener for the music button in the bottom nav
         musicLink.addEventListener('click', (e) => {
             e.preventDefault();
             showMusicSection();
