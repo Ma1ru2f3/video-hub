@@ -20,15 +20,33 @@ const baseApiUrl = async () => {
     }
 };
 
+// API endpoint for homepage trending videos
+app.get('/home-api', async (req, res) => {
+    try {
+        const apiBase = await baseApiUrl();
+        if (apiBase) {
+            const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=trending songs`)).data.slice(0, 10);
+            res.json(searchResults);
+        } else {
+            res.status(500).json({ error: 'Failed to get API URL.' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred while fetching trending videos.' });
+    }
+});
+
 // API endpoint for search
 app.get('/search-api', async (req, res) => {
     const query = req.query.q;
-    if (!query) return res.status(400).json({ error: 'Search query is required.' });
+    if (!query) {
+        return res.status(400).json({ error: 'Search query is required.' });
+    }
 
     try {
         const apiBase = await baseApiUrl();
         if (apiBase) {
-            const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=${query}`)).data.slice(0, 6);
+            const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=${query}`)).data.slice(0, 10);
             res.json(searchResults);
         } else {
             res.status(500).json({ error: 'Failed to get API URL.' });
@@ -36,33 +54,6 @@ app.get('/search-api', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'An error occurred while searching. Please try again later.' });
-    }
-});
-
-// API endpoint for video info
-app.get('/info-api', async (req, res) => {
-    const videoID = req.query.v;
-    if (!videoID) return res.status(400).json({ error: 'Video ID is required.' });
-
-    try {
-        const apiBase = await baseApiUrl();
-        if (apiBase) {
-            const { data } = await axios.get(`${apiBase}/ytfullinfo?videoID=${videoID}`);
-            const videoInfo = {
-                title: data.title,
-                duration: (data.duration / 60).toFixed(2),
-                view_count: data.view_count,
-                like_count: data.like_count,
-                comment_count: data.comment_count,
-                thumbnail: data.thumbnail
-            };
-            res.json(videoInfo);
-        } else {
-            res.status(500).json({ error: 'Failed to get API URL.' });
-        }
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: 'Failed to retrieve video info. Please check the video ID.' });
     }
 });
 
