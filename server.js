@@ -1,71 +1,67 @@
 const express = require('express');
 const axios = require('axios');
+const path = require('path');
+const cors = require('cors');
+const fs = require('fs');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 
-// YouTube ভিডিওর সময়কাল পার্স করার জন্য একটি ফাংশন
-const parseDuration = (timestamp) => {
-  const parts = timestamp.split(':').map(part => parseInt(part));
-  let seconds = 0;
-  if (parts.length === 3) {
-    seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
-  } else if (parts.length === 2) {
-    seconds = parts[0] * 60 + parts[1];
-  }
-  return seconds;
-};
+const baseApiUrl = "https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json";
 
-// Search API Endpoint
-app.get('/search', async (req, res) => {
-  const query = req.query.q;
-  if (!query) {
-    return res.status(400).json({ error: 'Search query (q) is required' });
-  }
-
-  try {
-    const searchResponse = await axios.get(`https://www.x-noobs-apis.42web.io/mostakim/ytSearch?search=${encodeURIComponent(query)}`);
-    const filteredVideos = searchResponse.data.filter(video => {
-      try {
-        const totalSeconds = parseDuration(video.timestamp);
-        return totalSeconds < 600; // 10 মিনিটের নিচে
-      } catch {
-        return false;
-      }
-    });
-
-    if (filteredVideos.length === 0) {
-      return res.status(404).json({ error: 'No videos under 10 minutes found.' });
-    }
-
-    res.json(filteredVideos);
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred while searching.' });
-  }
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Play (Download) API Endpoint
-app.get('/play', async (req, res) => {
-  const videoUrl = req.query.url;
-  if (!videoUrl) {
-    return res.status(400).json({ error: 'Video URL (url) is required' });
-  }
+app.get('/ytb/search', async (req, res) => {
+    const keyWord = req.query.q;
+    if (!keyWord) {
+        return res.status(400).json({ error: 'Search query (q) is required' });
+    }
 
-  try {
-    const apiResponse = await axios.get(`https://www.x-noobs-apis.42web.io/m/sing?url=${encodeURIComponent(videoUrl)}`);
+    try {
+        const apiBase = (await axios.get(baseApiUrl)).data.api;
+        const maxResults = 6;
+        const result = (await axios.get(`${apiBase}/ytFullSearch?songName=${encodeURIComponent(keyWord)}`)).data.slice(0, maxResults);
 
-    if (!apiResponse.data.url) {
-      throw new Error('No audio URL found in response');
+        if (result.length === 0) {
+            return res.status(404).json({ error: 'No search results match the keyword.' });
+        }
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: 'An error occurred during search: ' + err.message });
+    }
+});
+
+app.get('/ytb/download', async (req, res) => {
+    const videoID = req.query.id;
+    const format = req.query.format;
+
+    if (!videoID || !format) {
+        return res.status(400).json({ error: 'Video ID and format are required.' });
     }
     
-    // সরাসরি অডিও URL রিডাইরেক্ট করা হচ্ছে
-    res.redirect(apiResponse.data.url);
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred while getting the audio file.' });
-  }
+    try {
+        const apiBase = (await axios.get(baseApiUrl)).data.api;
+        const { data } = await axios.get(`${apiBase}/ytDl3?link=${videoID}&format=${format}&quality=3`);
+        
+        if (!data.downloadLink) {
+            return res.status(500).json({ error: 'Download link not found.' });
+        }
+        
+        res.json({
+            title: data.title,
+            quality: data.quality,
+            url: data.downloadLink
+        });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to download the file. Please try again later.' });
+    }
 });
 
 app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+    console.log(`Server is running at http://localhost:${port}`);
 });
