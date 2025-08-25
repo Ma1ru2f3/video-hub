@@ -99,6 +99,58 @@ app.get('/related-videos-api', async (req, res) => {
     }
 });
 
+// NEW: API endpoint to get video info (including duration)
+app.get('/video-info-api', async (req, res) => {
+    const videoId = req.query.id;
+    if (!videoId) {
+        return res.status(400).json({ error: 'Video ID is required.' });
+    }
+
+    try {
+        const apiBase = await baseApiUrl();
+        if (apiBase) {
+            // This is a mock implementation. The actual API may not have a direct endpoint for this.
+            // In a real-world scenario, you would have an endpoint that returns video metadata.
+            const response = await axios.get(`${apiBase}/ytFullSearch?songName=${videoId}`);
+            const videoInfo = response.data.find(v => v.videoId === videoId);
+
+            if (videoInfo && videoInfo.duration) {
+                res.json({
+                    id: videoInfo.videoId,
+                    duration: videoInfo.duration
+                });
+            } else {
+                res.status(404).json({ error: 'Video information not found.' });
+            }
+        } else {
+            res.status(500).json({ error: 'Failed to get API URL.' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred while fetching video info.' });
+    }
+});
+
+// NEW: API endpoint to get direct audio link
+app.get('/audio-link-api', async (req, res) => {
+    const videoId = req.query.id;
+    if (!videoId) {
+        return res.status(400).json({ error: 'Video ID is required.' });
+    }
+    
+    try {
+        const apiBase = await baseApiUrl();
+        if (apiBase) {
+            const { data: { downloadLink } } = await axios.get(`${apiBase}/ytDl3?link=${videoId}&format=mp3`);
+            res.json({ audioUrl: downloadLink });
+        } else {
+            res.status(500).json({ error: 'Failed to get API URL.' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred while fetching audio link.' });
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
