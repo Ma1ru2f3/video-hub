@@ -31,13 +31,31 @@ app.get('/ytb/search', async (req, res) => {
 
     try {
         const apiBase = (await axios.get(baseApiUrl)).data.api;
-        const maxResults = 6;
-        const result = (await axios.get(`${apiBase}/ytFullSearch?songName=${encodeURIComponent(keyWord)}`)).data.slice(0, maxResults);
+        const result = (await axios.get(`${apiBase}/ytFullSearch?songName=${encodeURIComponent(keyWord)}`)).data;
+        
+        // এখানে ফিল্টার যোগ করা হয়েছে: শুধুমাত্র ৬০ সেকেন্ডের বেশি দৈর্ঘ্যের ভিডিওগুলো নেওয়া হবে।
+        const longVideos = result.filter(video => {
+            if (video.time) {
+                // ভিডিওর সময় (time) ফরম্যাট "HH:MM:SS" বা "MM:SS" হয়।
+                const timeParts = video.time.split(':').map(Number);
+                let totalSeconds;
+                if (timeParts.length === 3) { // HH:MM:SS
+                    totalSeconds = timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2];
+                } else if (timeParts.length === 2) { // MM:SS
+                    totalSeconds = timeParts[0] * 60 + timeParts[1];
+                }
+                return totalSeconds > 60;
+            }
+            return false;
+        });
 
-        if (result.length === 0) {
-            return res.status(404).json({ error: 'No search results match the keyword.' });
+        // শুধুমাত্র প্রথম ৬টি লম্বা ভিডিও দেখানো হবে
+        const limitedResults = longVideos.slice(0, 6);
+
+        if (limitedResults.length === 0) {
+            return res.status(404).json({ error: 'No long videos found for the keyword.' });
         }
-        res.json(result);
+        res.json(limitedResults);
     } catch (err) {
         res.status(500).json({ error: 'An error occurred during search: ' + err.message });
     }
@@ -66,6 +84,7 @@ app.get('/ytb/stream', async (req, res) => {
         res.status(500).json({ error: 'Failed to get video stream. Please try again later.' });
     }
 });
+
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
