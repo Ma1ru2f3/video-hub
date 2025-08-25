@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from the root directory
 app.use(express.static(__dirname));
 
-// Asynchronous function to fetch the base API URL from a GitHub Gist
+// API URL from GitHub Gist
 const baseApiUrl = async () => {
     try {
         const base = await axios.get(
@@ -25,7 +25,6 @@ app.get('/home-api', async (req, res) => {
     try {
         const apiBase = await baseApiUrl();
         if (apiBase) {
-            // Fetch trending videos and limit to 10 results
             const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=trending songs`)).data.slice(0, 10);
             res.json(searchResults);
         } else {
@@ -37,7 +36,7 @@ app.get('/home-api', async (req, res) => {
     }
 });
 
-// API endpoint for general video search
+// API endpoint for search
 app.get('/search-api', async (req, res) => {
     const query = req.query.q;
     if (!query) {
@@ -47,7 +46,6 @@ app.get('/search-api', async (req, res) => {
     try {
         const apiBase = await baseApiUrl();
         if (apiBase) {
-            // Search for videos based on the user's query and limit to 10 results
             const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=${query}`)).data.slice(0, 10);
             res.json(searchResults);
         } else {
@@ -59,7 +57,7 @@ app.get('/search-api', async (req, res) => {
     }
 });
 
-// API endpoint to get a direct video link
+// NEW: API endpoint to get a direct video link
 app.get('/video-link-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
@@ -69,7 +67,6 @@ app.get('/video-link-api', async (req, res) => {
     try {
         const apiBase = await baseApiUrl();
         if (apiBase) {
-            // Use the external API to get a direct MP4 download link for the video
             const { data: { downloadLink } } = await axios.get(`${apiBase}/ytDl3?link=${videoId}&format=mp4&quality=3`);
             res.json({ videoUrl: downloadLink });
         } else {
@@ -81,7 +78,7 @@ app.get('/video-link-api', async (req, res) => {
     }
 });
 
-// API endpoint to fetch related videos
+// NEW: API endpoint to fetch related videos
 app.get('/related-videos-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
@@ -91,7 +88,6 @@ app.get('/related-videos-api', async (req, res) => {
     try {
         const apiBase = await baseApiUrl();
         if (apiBase) {
-            // Fetch related videos from the external API and limit to 7 results
             const relatedVideos = (await axios.get(`${apiBase}/ytRelated?videoId=${videoId}`)).data.slice(0, 7);
             res.json(relatedVideos);
         } else {
@@ -103,11 +99,11 @@ app.get('/related-videos-api', async (req, res) => {
     }
 });
 
-// NEW: API endpoint for music search
+// নতুন: মিউজিক খোঁজার জন্য API endpoint
 app.get('/music-search-api', async (req, res) => {
     const query = req.query.q;
     if (!query) {
-        // If no query is provided, fetch a default list of trending songs
+        // যদি কোনো query না দেওয়া হয়, তাহলে trending songs-এর একটি ডিফল্ট তালিকা আনুন
         try {
             const apiBase = await baseApiUrl();
             if (apiBase) {
@@ -121,7 +117,7 @@ app.get('/music-search-api', async (req, res) => {
             res.status(500).json({ error: 'An error occurred while fetching trending songs.' });
         }
     } else {
-        // If a query is provided, search for specific songs
+        // যদি একটি query দেওয়া হয়, তাহলে নির্দিষ্ট গানগুলি খুঁজুন
         try {
             const apiBase = await baseApiUrl();
             if (apiBase) {
@@ -137,7 +133,7 @@ app.get('/music-search-api', async (req, res) => {
     }
 });
 
-// NEW: API endpoint to get a direct song link
+// নতুন: গানের সরাসরি লিঙ্ক পাওয়ার জন্য API endpoint
 app.get('/song-link-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
@@ -147,7 +143,7 @@ app.get('/song-link-api', async (req, res) => {
     try {
         const apiBase = await baseApiUrl();
         if (apiBase) {
-            // Use the external API to get a direct MP3 download link for the song's audio
+            // গানের অডিওর জন্য সরাসরি MP3 ডাউনলোড লিঙ্ক পেতে এক্সটার্নাল API ব্যবহার করুন
             const { data: { downloadLink } } = await axios.get(`${apiBase}/ytDl3?link=${videoId}&format=mp3&quality=1`);
             res.json({ audioUrl: downloadLink });
         } else {
