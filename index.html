@@ -102,7 +102,7 @@
         <button class="tab-button active" id="searchVideoBtn">Video</button>
         <button class="tab-button" id="searchAudioBtn">Audio</button>
     </div>
-    
+
     <div id="results">
         <p style="text-align: center; color: #aaa;">Search for a video or audio to get started.</p>
     </div>
@@ -131,21 +131,21 @@
     searchInput.addEventListener('input', async (e) => {
         const query = e.target.value.trim();
         resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Searching...</p>';
-        
+
         if (query === '') {
             resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Search for a video or audio to get started.</p>';
             return;
         }
-        
+
         try {
             const response = await fetch(`http://localhost:3000/ytb/search?q=${encodeURIComponent(query)}`);
             const data = await response.json();
-            
+
             if (data.error) {
                 resultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">${data.error}</p>`;
                 return;
             }
-            
+
             displayResults(data);
         } catch (error) {
             resultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">Failed to fetch search results.</p>`;
@@ -164,7 +164,7 @@
                 <div class="video-meta">Channel: ${video.channel.name}</div>
                 <button class="download-btn" data-id="${video.id}">Download</button>
             `;
-            
+
             card.querySelector('.download-btn').addEventListener('click', async (e) => {
                 const videoId = e.target.dataset.id;
                 const format = currentMode === 'video' ? 'mp4' : 'mp3';
@@ -174,7 +174,7 @@
                 try {
                     const downloadResponse = await fetch(`http://localhost:3000/ytb/download?id=${videoId}&format=${format}`);
                     const downloadData = await downloadResponse.json();
-                    
+
                     if (downloadData.error) {
                         alert(downloadData.error);
                     } else {
@@ -193,11 +193,10 @@
                     e.target.disabled = false;
                 }
             });
-            
+
             resultsContainer.appendChild(card);
         });
     }
 </script>
-
 </body>
 </html>
