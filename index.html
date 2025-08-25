@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video & Music Hub</title>
+    <title>Video Hub</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; background-color: #f4f4f4; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
@@ -96,21 +96,6 @@
             font-size: 0.8em;
             z-index: 2;
         }
-
-        /* --- New styles for Music Section --- */
-        .music-player-container {
-            text-align: center;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .music-player-container audio {
-            width: 100%;
-            max-width: 600px;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -140,25 +125,25 @@
             <h3 id="related-videos-title" class="hidden">Related Videos</h3>
             <div id="related-videos-grid" class="video-grid"></div>
         </div>
-        
+
         <div id="music-section" class="hidden">
             <div class="header">
-                <a href="#" onclick="showMusicSection();"><h1>🎶 Music Hub</h1></a>
+                <a href="#" onclick="showMusicSection();"><h1>🎧 Music Hub</h1></a>
             </div>
             <div class="search-form">
                 <form id="music-search-form">
-                    <input type="text" class="search-input" id="music-search-input" name="q" placeholder="Search songs...">
+                    <input type="text" class="search-input" id="music-search-input" name="q" placeholder="Search for a song...">
                     <button type="submit" class="search-button">Search</button>
                 </form>
             </div>
-            <h2 id="music-page-title">Top Songs</h2>
-            <div id="music-player-container" class="music-player-container hidden">
-                <div id="now-playing-title" class="video-title-display"></div>
-                <audio id="music-player" controls></audio>
+            <h2 id="music-page-title" class="page-title">Search for Music</h2>
+            <div id="music-error-message" class="error-message"></div>
+            <div id="music-video-grid" class="video-grid"></div>
+            <div id="audio-player-container" class="hidden">
+                <h3 id="audio-title-display"></h3>
+                <audio id="audio-player" controls style="width: 100%; margin-top: 10px;"></audio>
             </div>
-            <div id="music-grid" class="video-grid"></div>
         </div>
-
     </div>
 
     <div class="bottom-nav">
@@ -169,15 +154,15 @@
             </a>
         </div>
         <div class="nav-item">
-            <a href="#" class="nav-link" id="search-link">
-                <span class="nav-icon">🔍</span>
-                Search
-            </a>
-        </div>
-        <div class="nav-item">
             <a href="#" class="nav-link" id="music-link">
                 <span class="nav-icon">🎶</span>
                 Music
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="#" class="nav-link" onclick="document.getElementById('search-input').focus();">
+                <span class="nav-icon">🔍</span>
+                Search
             </a>
         </div>
         <div class="nav-item">
@@ -189,14 +174,12 @@
     </div>
 
     <script>
-        // --- Video Section Elements ---
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         const videoGrid = document.getElementById('video-grid');
         const errorMessage = document.getElementById('error-message');
         const pageTitle = document.getElementById('page-title');
         const homeLink = document.getElementById('home-link');
-        const searchLink = document.getElementById('search-link');
         const searchSection = document.getElementById('search-section');
         const videoPlayerSection = document.getElementById('video-player-section');
         const videoPlayer = document.getElementById('video-player');
@@ -204,186 +187,250 @@
         const relatedVideosGrid = document.getElementById('related-videos-grid');
         const relatedVideosTitle = document.getElementById('related-videos-title');
 
-        // --- Music Section Elements ---
+        // NEW: Selectors for the music section
         const musicLink = document.getElementById('music-link');
         const musicSection = document.getElementById('music-section');
         const musicSearchForm = document.getElementById('music-search-form');
         const musicSearchInput = document.getElementById('music-search-input');
-        const musicGrid = document.getElementById('music-grid');
+        const musicVideoGrid = document.getElementById('music-video-grid');
+        const audioPlayerContainer = document.getElementById('audio-player-container');
+        const audioPlayer = document.getElementById('audio-player');
+        const audioTitleDisplay = document.getElementById('audio-title-display');
+        const musicErrorMessage = document.getElementById('music-error-message');
         const musicPageTitle = document.getElementById('music-page-title');
-        const musicPlayerContainer = document.getElementById('music-player-container');
-        const nowPlayingTitle = document.getElementById('now-playing-title');
-        const musicPlayer = document.getElementById('music-player');
 
-        // --- View Management Functions ---
-        function hideAllSections() {
-            searchSection.classList.add('hidden');
+
+        // Functions to toggle sections
+        function showSearchSection() {
+            searchSection.classList.remove('hidden');
             videoPlayerSection.classList.add('hidden');
             musicSection.classList.add('hidden');
-        }
-
-        function showSearchSection() {
-            hideAllSections();
-            searchSection.classList.remove('hidden');
             videoPlayer.src = '';
         }
 
-        function showVideoPlayerSection(videoId, videoTitle) {
-            hideAllSections();
+        // NEW: Function to toggle to the music section
+        function showMusicSection() {
+            searchSection.classList.add('hidden');
+            videoPlayerSection.classList.add('hidden');
+            musicSection.classList.remove('hidden');
+            audioPlayerContainer.classList.add('hidden');
+            audioPlayer.src = '';
+            musicVideoGrid.innerHTML = '';
+            musicPageTitle.textContent = 'Search for Music';
+        }
+
+        // NEW: Function to play audio
+        async function playAudio(videoId, videoTitle) {
+            audioPlayerContainer.classList.remove('hidden');
+            audioTitleDisplay.textContent = `Loading: ${videoTitle}...`;
+            audioPlayer.src = '';
+            
+            try {
+                const response = await fetch(`/audio-link-api?id=${videoId}`);
+                const data = await response.json();
+
+                if (response.ok && data.audioUrl) {
+                    audioPlayer.src = data.audioUrl;
+                    audioPlayer.load();
+                    audioPlayer.play();
+                    audioTitleDisplay.textContent = `Now Playing: ${videoTitle}`;
+                } else {
+                    audioTitleDisplay.textContent = 'Error: Failed to load audio.';
+                }
+            } catch (err) {
+                console.error(err);
+                audioTitleDisplay.textContent = 'Error: An error occurred while loading the audio.';
+            }
+        }
+        // NEW: Function to fetch and display music search results
+        async function fetchMusicResults(query) {
+            musicVideoGrid.innerHTML = 'Loading...';
+            musicErrorMessage.innerHTML = '';
+            musicPageTitle.textContent = `Music Search Results for "${query}"`;
+            audioPlayerContainer.classList.add('hidden');
+            
+            try {
+                const response = await fetch(`/search-api?q=${encodeURIComponent(query)}`);
+                const videos = await response.json();
+
+                if (response.ok) {
+                    if (videos.length === 0) {
+                        musicVideoGrid.innerHTML = `<p style="text-align: center;">No music results found.</p>`;
+                    } else {
+                        musicVideoGrid.innerHTML = '';
+                        videos.forEach(video => {
+                            const card = document.createElement('div');
+                            card.className = 'video-card';
+                            card.innerHTML = `
+                                <a href="#" onclick="playAudio('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
+                                    <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+                                </a>
+                                <div class="video-info">
+                                    <h3 class="video-title">${video.title}</h3>
+                                    <button onclick="playAudio('${video.id}', '${video.title.replace(/'/g, "\\'")}');" class="info-button">Play Music</button>
+                                </div>
+                            `;
+                            musicVideoGrid.appendChild(card);
+                        });
+                    }
+                } else {
+                    musicErrorMessage.innerHTML = videos.error || 'Failed to fetch music videos.';
+                    musicVideoGrid.innerHTML = '';
+                }
+            } catch (err) {
+                musicErrorMessage.innerHTML = 'An error occurred. Please try again later.';
+                musicVideoGrid.innerHTML = '';
+            }
+        }
+
+
+        // Function to show the video player by fetching a direct video link
+        async function showVideoPlayerSection(videoId, videoTitle) {
+            searchSection.classList.add('hidden');
             videoPlayerSection.classList.remove('hidden');
+            musicSection.classList.add('hidden');
 
             videoTitleDisplay.textContent = 'Loading video...';
             videoPlayer.src = '';
             relatedVideosGrid.innerHTML = '';
             relatedVideosTitle.classList.add('hidden');
 
-            // --- Simulate API call for video link ---
-            // In a real app, this would fetch from your backend
-            const videoUrl = `https://www.w3schools.com/html/mov_bbb.mp4`; // Example URL
-            videoPlayer.src = videoUrl;
-            videoPlayer.play();
-            videoTitleDisplay.textContent = videoTitle;
-
-            // --- Fetch and display related videos ---
-            fetchRelatedVideos(videoId);
-        }
-        
-        function showMusicSection() {
-            hideAllSections();
-            musicSection.classList.remove('hidden');
-            musicPlayer.pause();
-            musicPlayerContainer.classList.add('hidden');
-            musicPageTitle.textContent = 'Top Songs';
-            musicGrid.innerHTML = ''; // Clear previous results
-            fetchSongs(''); // Load default/trending songs on page load
-        }
-
-        // --- Video Related Functions ---
-        async function fetchVideos(url, title) {
-            videoGrid.innerHTML = 'Loading...';
-            errorMessage.innerHTML = '';
-            pageTitle.textContent = title;
-
             try {
-                // --- Simulate API call ---
-                const videos = [
-                    { id: '1', title: 'Funny Cats Compilation', thumbnail: 'https://placekitten.com/300/180', duration: 185 },
-                    { id: '2', title: 'Amazing Nature Documentary', thumbnail: 'https://placekitten.com/301/181', duration: 1450 },
-                    { id: '3', title: 'How to Learn JavaScript', thumbnail: 'https://placekitten.com/302/182', duration: 720 },
-                ];
-                
-                videoGrid.innerHTML = '';
-                videos.forEach(video => {
-                    const card = document.createElement('div');
-                    card.className = 'video-card';
-                    card.innerHTML = `
-                        <a href="#" onclick="showVideoPlayerSection('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
-                            <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
-                            <span class="duration-badge">${formatDuration(video.duration)}</span>
-                        </a>
-                        <div class="video-info">
-                            <h3 class="video-title">${video.title}</h3>
-                        </div>
-                    `;
-                    videoGrid.appendChild(card);
-                });
+                const response = await fetch(`/video-link-api?id=${videoId}`);
+                const data = await response.json();
+
+                if (response.ok && data.videoUrl) {
+                    videoPlayer.src = data.videoUrl;
+                    videoPlayer.load();
+                    videoPlayer.play();
+                    videoTitleDisplay.textContent = videoTitle;
+
+                    // NEW: Fetch and display related videos
+                    fetchRelatedVideos(videoId);
+                } else {
+                    videoTitleDisplay.textContent = 'Error: Failed to load video.';
+                }
             } catch (err) {
-                errorMessage.innerHTML = 'An error occurred. Please try again later.';
-                videoGrid.innerHTML = '';
+                console.error(err);
+                videoTitleDisplay.textContent = 'Error: An error occurred while loading the video.';
             }
         }
 
+        // NEW: Function to fetch and display related videos
+        async function fetchRelatedVideos(videoId) {
+            relatedVideosTitle.classList.remove('hidden');
+            relatedVideosGrid.innerHTML = 'Loading related videos...';
+
+            try {
+                const response = await fetch(`/related-videos-api?id=${videoId}`);
+                const videos = await response.json();
+
+                if (response.ok && videos.length > 0) {
+                    relatedVideosGrid.innerHTML = '';
+                    videos.forEach(video => {
+                        const card = document.createElement('div');
+                        card.className = 'video-card';
+                        card.innerHTML = `
+                            <a href="#" onclick="showVideoPlayerSection('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
+                                <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+                                <span class="duration-badge hidden"></span>
+                            </a>
+                            <div class="video-info">
+                                <h3 class="video-title">${video.title}</h3>
+                            </div>
+                        `;
+                        relatedVideosGrid.appendChild(card);
+
+                        // Fetch duration for each related video
+                        fetchAndDisplayDuration(video.id, card);
+                    });
+                } else {
+                    relatedVideosGrid.innerHTML = '<p>No related videos found.</p>';
+                }
+            } catch (err) {
+                console.error("Failed to fetch related videos:", err);
+                relatedVideosGrid.innerHTML = '<p>Failed to load related videos.</p>';
+            }
+        }
+
+        // Function to convert seconds to HH:MM:SS format
         function formatDuration(seconds) {
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = seconds % 60;
+
             let formatted = '';
             if (h > 0) formatted += `${h}:`;
             formatted += `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             return formatted;
         }
 
-        async function fetchRelatedVideos(videoId) {
-            relatedVideosTitle.classList.remove('hidden');
-            relatedVideosGrid.innerHTML = 'Loading related videos...';
-            // --- Simulate API call ---
-            const relatedVideos = [
-                { id: '4', title: 'More Cute Cats!', thumbnail: 'https://placekitten.com/303/183', duration: 110 },
-                { id: '5', title: 'Deep Sea Life', thumbnail: 'https://placekitten.com/304/184', duration: 1500 }
-            ];
-            
-            relatedVideosGrid.innerHTML = '';
-            relatedVideos.forEach(video => {
-                const card = document.createElement('div');
-                card.className = 'video-card';
-                card.innerHTML = `
-                    <a href="#" onclick="showVideoPlayerSection('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
-                        <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
-                        <span class="duration-badge">${formatDuration(video.duration)}</span>
-                    </a>
-                    <div class="video-info">
-                        <h3 class="video-title">${video.title}</h3>
-                    </div>
-                `;
-                relatedVideosGrid.appendChild(card);
-            });
-        }
-
-        // --- Music Related Functions ---
-        async function fetchSongs(query) {
-            musicGrid.innerHTML = 'Loading...';
-            musicPageTitle.textContent = query ? `Search Results for "${query}"` : 'Top Songs';
-
+        // Function to fetch and display video duration
+        async function fetchAndDisplayDuration(videoId, cardElement) {
             try {
-                // --- Simulate API call for songs ---
-                // Replace this with a real API endpoint
-                const songs = [
-                    { id: 's1', title: 'Shape of You', artist: 'Ed Sheeran', thumbnail: 'https://via.placeholder.com/300x180.png?text=Shape+of+You', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
-                    { id: 's2', title: 'Levitating', artist: 'Dua Lipa', thumbnail: 'https://via.placeholder.com/300x180.png?text=Levitating', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
-                    { id: 's3', title: 'Blinding Lights', artist: 'The Weeknd', thumbnail: 'https://via.placeholder.com/300x180.png?text=Blinding+Lights', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
-                ];
-
-                const filteredSongs = query 
-                    ? songs.filter(song => song.title.toLowerCase().includes(query.toLowerCase()) || song.artist.toLowerCase().includes(query.toLowerCase()))
-                    : songs;
-
-                if (filteredSongs.length === 0) {
-                    musicGrid.innerHTML = `<p style="text-align: center;">No songs found for "${query}".</p>`;
-                } else {
-                    musicGrid.innerHTML = '';
-                    filteredSongs.forEach(song => {
-                        const card = document.createElement('div');
-                        card.className = 'video-card'; // Reusing video-card for consistent styling
-                        card.innerHTML = `
-                            <a href="#" onclick="playSong('${song.audioUrl}', '${song.title.replace(/'/g, "\\'")} - ${song.artist.replace(/'/g, "\\'")}')">
-                                <img src="${song.thumbnail}" alt="${song.title}" class="video-thumbnail">
-                            </a>
-                            <div class="video-info">
-                                <h3 class="video-title">${song.title}</h3>
-                                <p>${song.artist}</p>
-                            </div>
-                        `;
-                        musicGrid.appendChild(card);
-                    });
+                const response = await fetch(`/video-info-api?id=${videoId}`);
+                if (response.ok) {
+                    const videoInfo = await response.json();
+                    if (videoInfo && videoInfo.duration) {
+                        const durationBadge = cardElement.querySelector('.duration-badge');
+                        durationBadge.textContent = formatDuration(videoInfo.duration);
+                        durationBadge.classList.remove('hidden');
+                    }
                 }
             } catch (err) {
-                musicGrid.innerHTML = '<p>Failed to load songs.</p>';
+                console.error("Failed to fetch video duration:", err);
             }
         }
 
-        function playSong(audioUrl, songTitle) {
-            musicPlayerContainer.classList.remove('hidden');
-            nowPlayingTitle.textContent = `Now Playing: ${songTitle}`;
-            musicPlayer.src = audioUrl;
-            musicPlayer.load();
-            musicPlayer.play();
+        // Function to fetch and display videos
+        async function fetchVideos(url, title) {
+            videoGrid.innerHTML = 'Loading...';
+            errorMessage.innerHTML = '';
+            pageTitle.textContent = title;
+
+            try {
+                const response = await fetch(url);
+                const videos = await response.json();
+
+                if (response.ok) {
+                    if (videos.length === 0) {
+                        videoGrid.innerHTML = `<p style="text-align: center;">No results found.</p>`;
+                    } else {
+                        videoGrid.innerHTML = '';
+                        videos.forEach(video => {
+                            const card = document.createElement('div');
+                            card.className = 'video-card';
+                            card.innerHTML = `
+                                <a href="#" onclick="showVideoPlayerSection('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
+                                    <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+                                    <span class="duration-badge hidden"></span>
+                                </a>
+                                <div class="video-info">
+                                    <h3 class="video-title">${video.title}</h3>
+                                </div>
+                            `;
+                            videoGrid.appendChild(card);
+
+                            // Fetch duration for each video card
+                            fetchAndDisplayDuration(video.id, card);
+                        });
+                    }
+                } else {
+                    errorMessage.innerHTML = videos.error || 'Failed to fetch videos.';
+                    videoGrid.innerHTML = '';
+                }
+            } catch (err) {
+                errorMessage.innerHTML = 'An error occurred. Please try again later.';
+                videoGrid.innerHTML = '';
+            }
         }
 
-        // --- Event Listeners ---
+        // Load trending videos on page load
         document.addEventListener('DOMContentLoaded', () => {
-            fetchVideos('', 'Trending Videos');
+            fetchVideos('/home-api', 'Trending Videos');
         });
 
+        // Handle search form submission
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const query = searchInput.value;
@@ -392,24 +439,23 @@
             }
         });
 
-        musicSearchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const query = musicSearchInput.value;
-            fetchSongs(query);
-        });
-        
+        // Handle home button click
         homeLink.addEventListener('click', (e) => {
             e.preventDefault();
             showSearchSection();
             fetchVideos('/home-api', 'Trending Videos');
         });
 
-        searchLink.addEventListener('click', (e) => {
+        // NEW: Event listener for music search form
+        musicSearchForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            showSearchSection();
-            searchInput.focus();
+            const query = musicSearchInput.value;
+            if (query) {
+                fetchMusicResults(query);
+            }
         });
 
+        // NEW: Event listener for the music button in the bottom nav
         musicLink.addEventListener('click', (e) => {
             e.preventDefault();
             showMusicSection();
