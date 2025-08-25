@@ -121,6 +121,9 @@
                 <video id="video-player" controls class="video-iframe"></video>
             </div>
             <div id="video-title-display" class="video-title-display"></div>
+            
+            <h3 id="related-videos-title" class="hidden">Related Videos</h3>
+            <div id="related-videos-grid" class="video-grid"></div>
         </div>
     </div>
     
@@ -156,21 +159,25 @@
         const videoPlayerSection = document.getElementById('video-player-section');
         const videoPlayer = document.getElementById('video-player');
         const videoTitleDisplay = document.getElementById('video-title-display');
-        
+        const relatedVideosGrid = document.getElementById('related-videos-grid');
+        const relatedVideosTitle = document.getElementById('related-videos-title');
+
         // Functions to toggle sections
         function showSearchSection() {
             searchSection.classList.remove('hidden');
             videoPlayerSection.classList.add('hidden');
-            videoPlayer.src = ''; // Stop video playback
+            videoPlayer.src = '';
         }
-        
+
         // NEW: Function to show the video player by fetching a direct video link
         async function showVideoPlayerSection(videoId, videoTitle) {
             searchSection.classList.add('hidden');
             videoPlayerSection.classList.remove('hidden');
-
+        
             videoTitleDisplay.textContent = 'Loading video...';
             videoPlayer.src = '';
+            relatedVideosGrid.innerHTML = '';
+            relatedVideosTitle.classList.add('hidden');
             
             try {
                 const response = await fetch(`/video-link-api?id=${videoId}`);
@@ -181,12 +188,52 @@
                     videoPlayer.load();
                     videoPlayer.play();
                     videoTitleDisplay.textContent = videoTitle;
+                    
+                    // NEW: Fetch and display related videos
+                    fetchRelatedVideos(videoId);
                 } else {
                     videoTitleDisplay.textContent = 'Error: Failed to load video.';
                 }
             } catch (err) {
                 console.error(err);
                 videoTitleDisplay.textContent = 'Error: An error occurred while loading the video.';
+            }
+        }
+        
+        // NEW: Function to fetch and display related videos
+        async function fetchRelatedVideos(videoId) {
+            relatedVideosTitle.classList.remove('hidden');
+            relatedVideosGrid.innerHTML = 'Loading related videos...';
+            
+            try {
+                const response = await fetch(`/related-videos-api?id=${videoId}`);
+                const videos = await response.json();
+                
+                if (response.ok && videos.length > 0) {
+                    relatedVideosGrid.innerHTML = '';
+                    videos.forEach(video => {
+                        const card = document.createElement('div');
+                        card.className = 'video-card';
+                        card.innerHTML = `
+                            <a href="#" onclick="showVideoPlayerSection('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
+                                <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+                                <span class="duration-badge hidden"></span>
+                            </a>
+                            <div class="video-info">
+                                <h3 class="video-title">${video.title}</h3>
+                            </div>
+                        `;
+                        relatedVideosGrid.appendChild(card);
+                        
+                        // Fetch duration for each related video
+                        fetchAndDisplayDuration(video.id, card);
+                    });
+                } else {
+                    relatedVideosGrid.innerHTML = '<p>No related videos found.</p>';
+                }
+            } catch (err) {
+                console.error("Failed to fetch related videos:", err);
+                relatedVideosGrid.innerHTML = '<p>Failed to load related videos.</p>';
             }
         }
 
