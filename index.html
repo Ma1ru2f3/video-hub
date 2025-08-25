@@ -3,25 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ভিডিও হাব</title>
+    <title>video hub</title>
     <!-- Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .video-container, .audio-container {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-            height: 0;
-            overflow: hidden;
-            border-radius: 0.5rem; /* rounded-lg */
-        }
-        .video-container iframe, .audio-player {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen p-4 flex flex-col items-center">
@@ -46,11 +32,16 @@
             <button id="videoModeBtn" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105">ভিডিও</button>
             <button id="audioModeBtn" class="bg-gray-300 text-gray-800 font-semibold py-2 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105">অডিও</button>
         </div>
-
+        
         <!-- Audio Player Section -->
         <div id="audioPlayerSection" class="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-8 hidden">
             <audio id="audioPlayer" controls class="w-full"></audio>
-            <h2 id="audioTitle" class="text-xl md:text-2xl font-semibold mt-4 text-center"></h2>
+            <h2 id="audioTitle" class="text-lg md:text-xl font-semibold mt-4 text-center"></h2>
+        </div>
+        
+        <!-- Messages Section -->
+        <div id="messageSection" class="w-full hidden">
+            <div id="messageText" class="p-4 rounded-lg text-center font-semibold"></div>
         </div>
 
         <!-- Main Content Area -->
@@ -76,13 +67,29 @@
             const audioPlayerSection = document.getElementById('audioPlayerSection');
             const audioPlayer = document.getElementById('audioPlayer');
             const audioTitle = document.getElementById('audioTitle');
+            const messageSection = document.getElementById('messageSection');
+            const messageText = document.getElementById('messageText');
             
             let currentMode = 'video';
+            const BASE_API_URL = 'https://api-yt-search-bengali.vercel.app/api'; // A direct, working API endpoint
 
+            // Function to show a message
+            const showMessage = (text, type = 'info') => {
+                messageText.textContent = text;
+                showElement(messageSection);
+                if (type === 'error') {
+                    messageText.classList.remove('bg-blue-200', 'text-blue-800');
+                    messageText.classList.add('bg-red-200', 'text-red-800');
+                } else {
+                    messageText.classList.remove('bg-red-200', 'text-red-800');
+                    messageText.classList.add('bg-blue-200', 'text-blue-800');
+                }
+            };
+            
             // Function to show and hide elements
             const showElement = (element) => element.classList.remove('hidden');
             const hideElement = (element) => element.classList.add('hidden');
-
+            
             // Toggle search modes
             const setMode = (mode) => {
                 currentMode = mode;
@@ -102,7 +109,7 @@
                 }
                 fetchTrending();
             };
-
+            
             // Create a video card
             const createVideoCard = (video) => {
                 const card = document.createElement('div');
@@ -115,14 +122,11 @@
                     </div>
                 `;
                 card.onclick = () => {
-                    // This section will need to be implemented on the video-play page
-                    // For now, it will not do anything.
-                    console.log(`Playing video with ID: ${video.videoId}`);
-                    alert('ভিডিও প্লে করার ফিচারটি এই সংস্করণে নেই।');
+                    showMessage('ভিডিও প্লে করার ফিচারটি এই সংস্করণে নেই।');
                 };
                 return card;
             };
-
+            
             // Create an audio card
             const createAudioCard = (audio) => {
                 const card = document.createElement('div');
@@ -141,18 +145,16 @@
                 card.onclick = () => playAudio(audio.videoId, audio.title);
                 return card;
             };
-
+            
             // Fetch and display trending items
             const fetchTrending = async () => {
                 showElement(loadingIndicator);
                 hideElement(resultsGrid);
                 hideElement(noResultsMessage);
-
-                let apiUrl = '/home-api';
-                if (currentMode === 'audio') {
-                    apiUrl = '/audio-search-api'; // Assumes this endpoint works like home-api
-                }
-
+                hideElement(messageSection);
+                
+                let apiUrl = `${BASE_API_URL}/ytFullSearch?songName=trending songs`;
+                
                 try {
                     const response = await fetch(apiUrl);
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -160,7 +162,8 @@
                     
                     resultsGrid.innerHTML = '';
                     if (results.length > 0) {
-                        results.forEach(item => {
+                        const top10Results = results.slice(0, 10);
+                        top10Results.forEach(item => {
                             if (currentMode === 'video') {
                                 resultsGrid.appendChild(createVideoCard(item));
                             } else {
@@ -173,35 +176,33 @@
                     }
                 } catch (error) {
                     console.error('Error fetching trending items:', error);
-                    noResultsMessage.textContent = 'লোড করতে ব্যর্থ হয়েছে।';
-                    showElement(noResultsMessage);
+                    showMessage('লোড করতে ব্যর্থ হয়েছে।', 'error');
                 } finally {
                     hideElement(loadingIndicator);
                 }
             };
-
+            
             // Handle search
             const handleSearch = async () => {
                 const query = searchInput.value.trim();
                 if (query === '') return;
-
+                
                 showElement(loadingIndicator);
                 hideElement(resultsGrid);
                 hideElement(noResultsMessage);
+                hideElement(messageSection);
                 
-                let apiUrl = `/search-api?q=${encodeURIComponent(query)}`;
-                if (currentMode === 'audio') {
-                    apiUrl = `/audio-search-api?q=${encodeURIComponent(query)}`;
-                }
+                const apiUrl = `${BASE_API_URL}/ytFullSearch?songName=${encodeURIComponent(query)}`;
                 
                 try {
                     const response = await fetch(apiUrl);
                     if (!response.ok) throw new Error('Search failed');
                     const results = await response.json();
-
+                    
                     resultsGrid.innerHTML = '';
                     if (results.length > 0) {
-                        results.forEach(item => {
+                        const top10Results = results.slice(0, 10);
+                        top10Results.forEach(item => {
                             if (currentMode === 'video') {
                                 resultsGrid.appendChild(createVideoCard(item));
                             } else {
@@ -214,38 +215,39 @@
                     }
                 } catch (error) {
                     console.error('Search error:', error);
-                    noResultsMessage.textContent = 'সার্চ করতে ব্যর্থ হয়েছে।';
-                    showElement(noResultsMessage);
+                    showMessage('সার্চ করতে ব্যর্থ হয়েছে।', 'error');
                 } finally {
                     hideElement(loadingIndicator);
                 }
             };
-
+            
             // Play audio and show player section
             const playAudio = async (videoId, title) => {
                 showElement(loadingIndicator);
                 hideElement(resultsGrid);
                 hideElement(noResultsMessage);
+                hideElement(messageSection);
+                
+                const audioLinkUrl = `${BASE_API_URL}/ytDl3?link=${encodeURIComponent(videoId)}&format=mp3`;
                 
                 try {
-                    const audioLinkResponse = await fetch(`/audio-link-api?id=${encodeURIComponent(videoId)}`);
+                    const audioLinkResponse = await fetch(audioLinkUrl);
                     if (!audioLinkResponse.ok) throw new Error('Failed to get audio link');
                     const audioData = await audioLinkResponse.json();
                     
-                    audioPlayer.src = audioData.audioUrl;
+                    audioPlayer.src = audioData.downloadLink;
                     audioTitle.textContent = title;
                     audioPlayer.play();
                     showElement(audioPlayerSection);
                 } catch (error) {
                     console.error('Error playing audio:', error);
-                    noResultsMessage.textContent = 'গানটি প্লে করতে ব্যর্থ হয়েছে।';
-                    showElement(noResultsMessage);
-                    hideElement(loadingIndicator);
+                    showMessage('গানটি প্লে করতে ব্যর্থ হয়েছে।', 'error');
+                    hideElement(audioPlayerSection);
                 } finally {
                     hideElement(loadingIndicator);
                 }
             };
-
+            
             // Event Listeners
             searchButton.addEventListener('click', handleSearch);
             searchInput.addEventListener('keypress', (e) => {
@@ -255,7 +257,7 @@
             });
             videoModeBtn.addEventListener('click', () => setMode('video'));
             audioModeBtn.addEventListener('click', () => setMode('audio'));
-
+            
             // Initial load
             fetchTrending();
         });
