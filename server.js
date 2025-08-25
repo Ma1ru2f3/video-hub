@@ -57,7 +57,7 @@ app.get('/search-api', async (req, res) => {
     }
 });
 
-// NEW: API endpoint to get a direct video link
+// API endpoint to get a direct video link
 app.get('/video-link-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
@@ -78,7 +78,7 @@ app.get('/video-link-api', async (req, res) => {
     }
 });
 
-// NEW: API endpoint to fetch related videos
+// API endpoint to fetch related videos
 app.get('/related-videos-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
@@ -99,51 +99,15 @@ app.get('/related-videos-api', async (req, res) => {
     }
 });
 
-// নতুন: মিউজিক খোঁজার জন্য API endpoint
-app.get('/music-search-api', async (req, res) => {
-    const query = req.query.q;
-    if (!query) {
-        // যদি কোনো query না দেওয়া হয়, তাহলে trending songs-এর একটি ডিফল্ট তালিকা আনুন
-        try {
-            const apiBase = await baseApiUrl();
-            if (apiBase) {
-                const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=trending songs`)).data.slice(0, 10);
-                res.json(searchResults);
-            } else {
-                res.status(500).json({ error: 'Failed to get API URL.' });
-            }
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'An error occurred while fetching trending songs.' });
-        }
-    } else {
-        // যদি একটি query দেওয়া হয়, তাহলে নির্দিষ্ট গানগুলি খুঁজুন
-        try {
-            const apiBase = await baseApiUrl();
-            if (apiBase) {
-                const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=${query} audio`)).data.slice(0, 10);
-                res.json(searchResults);
-            } else {
-                res.status(500).json({ error: 'Failed to get API URL.' });
-            }
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'An error occurred while searching for music. Please try again later.' });
-        }
-    }
-});
-
-// নতুন: গানের সরাসরি লিঙ্ক পাওয়ার জন্য API endpoint
-app.get('/song-link-api', async (req, res) => {
+// NEW: API endpoint to get a direct audio link
+app.get('/audio-link-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
         return res.status(400).json({ error: 'Video ID is required.' });
     }
-
     try {
         const apiBase = await baseApiUrl();
         if (apiBase) {
-            // গানের অডিওর জন্য সরাসরি MP3 ডাউনলোড লিঙ্ক পেতে এক্সটার্নাল API ব্যবহার করুন
             const { data: { downloadLink } } = await axios.get(`${apiBase}/ytDl3?link=${videoId}&format=mp3&quality=1`);
             res.json({ audioUrl: downloadLink });
         } else {
@@ -151,7 +115,7 @@ app.get('/song-link-api', async (req, res) => {
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'An error occurred while fetching song link.' });
+        res.status(500).json({ error: 'An error occurred while fetching audio link.' });
     }
 });
 
