@@ -97,14 +97,13 @@
             z-index: 2;
         }
 
-        /* NEW: Fullscreen Music Player Styles */
         #fullscreen-player-section {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #212121; /* Dark background */
+            background-color: #212121;
             color: white;
             display: flex;
             flex-direction: column;
@@ -189,10 +188,9 @@
             cursor: pointer;
         }
 
-        /* NEW: Persistent Music Player Card Styles */
         #music-player-card {
             position: fixed;
-            bottom: 65px; /* Adjust based on bottom-nav height */
+            bottom: 65px;
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
@@ -305,8 +303,10 @@
             </div>
             <div class="player-controls">
                 <audio id="player-audio" style="display:none;"></audio>
-                <button class="control-button">⟲</button> <button id="player-play-pause" class="control-button large">▶</button>
-                <button class="control-button">⟳</button> </div>
+                <button class="control-button">⟲</button>
+                <button id="player-play-pause" class="control-button large">▶</button>
+                <button class="control-button">⟳</button>
+            </div>
         </div>
     </div>
 
@@ -362,7 +362,6 @@
         const relatedVideosGrid = document.getElementById('related-videos-grid');
         const relatedVideosTitle = document.getElementById('related-videos-title');
 
-        // Music Section elements
         const musicLink = document.getElementById('music-link');
         const musicSection = document.getElementById('music-section');
         const musicSearchForm = document.getElementById('music-search-form');
@@ -371,7 +370,6 @@
         const musicErrorMessage = document.getElementById('music-error-message');
         const musicPageTitle = document.getElementById('music-page-title');
         
-        // Fullscreen Music Player elements
         const fullscreenPlayerSection = document.getElementById('fullscreen-player-section');
         const playerAlbumArt = document.getElementById('player-album-art');
         const playerSongTitle = document.getElementById('player-song-title');
@@ -382,7 +380,6 @@
         const playerCurrentTime = document.getElementById('player-current-time');
         const playerTotalTime = document.getElementById('player-total-time');
 
-        // NEW: Persistent Music Player Card elements
         const musicPlayerCard = document.getElementById('music-player-card');
         const cardAlbumArt = document.getElementById('card-album-art');
         const cardSongTitle = document.getElementById('card-song-title');
@@ -391,7 +388,6 @@
 
         let currentSong = null;
 
-        // Functions to toggle sections
         function showSearchSection() {
             searchSection.classList.remove('hidden');
             videoPlayerSection.classList.add('hidden');
@@ -410,9 +406,7 @@
             fullscreenPlayerSection.classList.add('hidden');
         }
 
-        // NEW: Function to play audio and show the mini card
         async function playAudio(videoId, videoTitle, videoThumbnail, videoAuthor) {
-            // Store the current song details
             currentSong = {
                 id: videoId,
                 title: videoTitle,
@@ -420,13 +414,11 @@
                 author: videoAuthor
             };
 
-            // Update mini card
             cardAlbumArt.src = videoThumbnail;
             cardSongTitle.textContent = videoTitle;
             cardSongArtist.textContent = videoAuthor;
             musicPlayerCard.classList.remove('hidden');
 
-            // Play the audio
             try {
                 const response = await fetch(`/audio-link-api?id=${videoId}`);
                 const data = await response.json();
@@ -450,7 +442,6 @@
             }
         }
         
-        // NEW: Function to show the full-screen music player
         function showFullscreenPlayer() {
             if (!currentSong) return;
 
@@ -460,7 +451,6 @@
             fullscreenPlayerSection.classList.remove('hidden');
             musicPlayerCard.classList.add('hidden');
 
-            // Update full-screen player with current song data
             playerAlbumArt.src = currentSong.thumbnail;
             playerSongTitle.textContent = currentSong.title;
             playerSongArtist.textContent = currentSong.author;
@@ -472,14 +462,12 @@
             }
         }
 
-        // Event listener for the mini-card to open the full player
         musicPlayerCard.addEventListener('click', () => {
             showFullscreenPlayer();
         });
 
-        // Event listener for play/pause button on the mini-card
         cardPlayPause.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent the card from opening the full player
+            e.stopPropagation();
             if (playerAudio.paused) {
                 playerAudio.play();
                 cardPlayPause.textContent = '⏸';
@@ -491,7 +479,6 @@
             }
         });
         
-        // Event listener for play/pause button on the full player
         playerPlayPause.addEventListener('click', () => {
             if (playerAudio.paused) {
                 playerAudio.play();
@@ -504,19 +491,16 @@
             }
         });
         
-        // Event listener for time updates to sync progress bar and time display
         playerAudio.addEventListener('timeupdate', () => {
             const progress = (playerAudio.currentTime / playerAudio.duration) * 100;
             playerProgressFill.style.width = `${progress}%`;
             playerCurrentTime.textContent = formatTime(playerAudio.currentTime);
         });
 
-        // Event listener for loadedmetadata to get total duration
         playerAudio.addEventListener('loadedmetadata', () => {
             playerTotalTime.textContent = formatTime(playerAudio.duration);
         });
 
-        // Function to format time from seconds
         function formatTime(seconds) {
             if (isNaN(seconds)) return '0:00';
             const minutes = Math.floor(seconds / 60);
@@ -524,7 +508,6 @@
             return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
         }
         
-        // Function to fetch and display music search results
         async function fetchMusicResults(query) {
             musicVideoGrid.innerHTML = 'Loading...';
             musicErrorMessage.innerHTML = '';
