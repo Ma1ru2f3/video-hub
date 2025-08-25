@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Video</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .video-container {
+            width: 90%;
+            max-width: 1280px;
+            text-align: center;
+        }
+        h1 {
+            color: #f0f0f0;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="video-container">
+    <h1 id="videoTitle">Loading...</h1>
+    <video id="videoPlayer" controls autoplay></video>
+</div>
+
+<script>
+    const API_URL = 'https://video-hub-1.onrender.com';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('id');
+        const format = urlParams.get('format');
+        const title = urlParams.get('title');
+
+        if (videoId && format) {
+            document.getElementById('videoTitle').innerText = decodeURIComponent(title);
+            document.getElementById('videoPlayer').src = `${API_URL}/ytb/stream?id=${videoId}&format=${format}`;
+        } else {
+            document.getElementById('videoTitle').innerText = 'Error: Video not found.';
+        }
+    });
+</script>
+
+</body>
+</html>
