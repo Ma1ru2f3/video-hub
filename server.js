@@ -10,6 +10,9 @@ const port = process.env.PORT || 3000;
 // Use CORS to allow requests from your front-end
 app.use(cors());
 
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
+
 // Search for videos
 app.get('/ytb/search', async (req, res) => {
     try {
@@ -62,7 +65,7 @@ app.get('/ytb/stream', async (req, res) => {
         stream = ytdl(videoId, options);
         stream.pipe(res);
     } catch (error) {
-error('Stream error:', error);
+        console.error('Stream error:', error);
         res.status(500).send('Failed to stream video.');
     }
 });
@@ -94,7 +97,6 @@ app.get('/ytb/trending', async (req, res) => {
                 channel: { name: 'Pinkfong Baby Shark' },
                 time: '2:16'
             },
-            // Add more trending videos here
         ];
         res.json(trendingVideos);
     } catch (error) {
