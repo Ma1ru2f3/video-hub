@@ -9,12 +9,20 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// This is the base URL for the external API that handles YouTube data.
 const baseApiUrl = "https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json";
 
+// Serves the HTML file for the root URL
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Serves the watch.html file for watching videos
+app.get('/watch.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'watch.html'));
+});
+
+// API endpoint for searching YouTube videos
 app.get('/ytb/search', async (req, res) => {
     const keyWord = req.query.q;
     if (!keyWord) {
@@ -35,55 +43,29 @@ app.get('/ytb/search', async (req, res) => {
     }
 });
 
-app.get('/ytb/download', async (req, res) => {
-    const videoID = req.query.id;
-    const format = req.query.format;
-
-    if (!videoID || !format) {
-        return res.status(400).json({ error: 'Video ID and format are required.' });
-    }
-
-    try {
-        const apiBase = (await axios.get(baseApiUrl)).data.api;
-        const { data } = await axios.get(`${apiBase}/ytDl3?link=${videoID}&format=${format}&quality=3`);
-
-        if (!data.downloadLink) {
-            return res.status(500).json({ error: 'Download link not found.' });
-        }
-
-        res.json({
-            title: data.title,
-            quality: data.quality,
-            url: data.downloadLink
-        });
-    } catch (e) {
-        res.status(500).json({ error: 'Failed to download the file. Please try again later.' });
-    }
-});
-
-// নতুন এন্ডপয়েন্ট ভিডিও স্ট্রিম করার জন্য
+// New endpoint for streaming video
 app.get('/ytb/stream', async (req, res) => {
     const videoID = req.query.id;
+    const format = req.query.format || 'mp4'; // Default to mp4 if not specified
     if (!videoID) {
         return res.status(400).json({ error: 'Video ID is required.' });
     }
 
     try {
         const apiBase = (await axios.get(baseApiUrl)).data.api;
-        const { data } = await axios.get(`${apiBase}/ytDl3?link=${videoID}&format=mp4&quality=3`);
-
+        const { data } = await axios.get(`${apiBase}/ytDl3?link=${videoID}&format=${format}&quality=3`);
+        
         if (!data.downloadLink) {
             return res.status(500).json({ error: 'Video stream link not found.' });
         }
         
-        // ব্রাউজারকে সরাসরি ভিডিও ফাইল দেখানোর জন্য রিডাইরেক্ট করা
-        res.setHeader('Content-Type', 'video/mp4');
+        // Redirect the browser to the direct video link for streaming
+        res.setHeader('Content-Type', format === 'mp3' ? 'audio/mpeg' : 'video/mp4');
         res.redirect(data.downloadLink);
     } catch (e) {
         res.status(500).json({ error: 'Failed to get video stream. Please try again later.' });
     }
 });
-
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
