@@ -57,24 +57,24 @@ app.get('/search-api', async (req, res) => {
     }
 });
 
-// API endpoint to get video info including duration
-app.get('/video-info-api', async (req, res) => {
+// NEW: API endpoint to get a direct video link
+app.get('/video-link-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
         return res.status(400).json({ error: 'Video ID is required.' });
     }
-    
+
     try {
         const apiBase = await baseApiUrl();
         if (apiBase) {
-            const videoInfo = (await axios.get(`${apiBase}/ytInfo?videoId=${videoId}`)).data;
-            res.json(videoInfo);
+            const { data: { downloadLink } } = await axios.get(`${apiBase}/ytDl3?link=${videoId}&format=mp4&quality=3`);
+            res.json({ videoUrl: downloadLink });
         } else {
             res.status(500).json({ error: 'Failed to get API URL.' });
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'An error occurred while fetching video info.' });
+        res.status(500).json({ error: 'An error occurred while fetching video link.' });
     }
 });
 
