@@ -152,11 +152,43 @@
             font-size: 12px;
             color: #b3b3b3;
         }
+        .full-player-view {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+        }
+        .full-player-view .controls {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .full-player-view .controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+        }
+        .full-player-view .controls .play-pause {
+            font-size: 70px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="homeView">
         <div class="header">
             <h1>Browse</h1>
             <div class="profile-icon"></div>
@@ -168,10 +200,31 @@
         </div>
 
         <div id="results" class="result-grid">
+            </div>
+
+        <div id="popularSongsSection">
+            <h2 style="font-size: 24px; font-weight: 700;">Your top mixes</h2>
+            <div class="result-grid" id="popularSongsGrid">
+                </div>
         </div>
     </div>
 
-    <div id="playingBar" class="playing-bar">
+    <div id="fullPlayer" class="full-player-view" style="display: none;">
+        <div style="position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer;" onclick="hideFullPlayer()">
+            &#x276E;
+        </div>
+        <div style="position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer;">
+            &#x22EE;
+        </div>
+        
+        <div style="text-align: center;">
+            <img id="fullPlayerThumbnail" src="" alt="Album Art" style="width: 80%; max-width: 300px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);">
+            <h2 id="fullPlayerTitle" style="margin-top: 20px; font-size: 24px;"></h2>
+            <h3 id="fullPlayerArtist" style="color: #b3b3b3; font-size: 18px;"></h3>
+        </div>
+    </div>
+
+    <div id="playingBar" class="playing-bar" onclick="showFullPlayer()">
         <div class="song-info">
             <img id="playingThumbnail" src="" alt="Album Art">
             <div class="text">
@@ -198,18 +251,39 @@
     </div>
 
     <script>
-        document.getElementById('searchButton').addEventListener('click', search);
-        document.getElementById('searchInput').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                search();
-            }
+        const popularSongs = [
+            { id: "vB0X57E5M8A", title: "Sroto Shini", channel: "Encore", thumbnail: "https://i.ytimg.com/vi/vB0X57E5M8A/mqdefault.jpg" },
+            { id: "t_v21wNfSGY", title: "Karnival", channel: "HIGHWAY", thumbnail: "https://i.ytimg.com/vi/t_v21wNfSGY/mqdefault.jpg" },
+            { id: "2-T33r4W4_Q", title: "Ondho Deyal", channel: "Shonar Bangla Circus", thumbnail: "https://i.ytimg.com/vi/2-T33r4W4_Q/mqdefault.jpg" },
+            { id: "lC14E94x57c", title: "Adhunik Prem", channel: "Aftermath", thumbnail: "https://i.ytimg.com/vi/lC14E94x57c/mqdefault.jpg" },
+            { id: "p1314tD_b2g", title: "Bishonno Adhar", channel: "Black", thumbnail: "https://i.ytimg.com/vi/p1314tD_b2g/mqdefault.jpg" },
+            { id: "6-U_wIqE_uU", title: "Amake Nao", channel: "Artcell", thumbnail: "https://i.ytimg.com/vi/6-U_wIqE_uU/mqdefault.jpg" },
+            { id: "x0v1oY73K6g", title: "Tumi Robe Nirobe", channel: "Shironamhin", thumbnail: "https://i.ytimg.com/vi/x0v1oY73K6g/mqdefault.jpg" },
+            { id: "7r4G_I4H_K4", title: "Ekla Ghor", channel: "Warfaze", thumbnail: "https://i.ytimg.com/vi/7r4G_I4H_K4/mqdefault.jpg" },
+            { id: "98m3Fh1yD4s", title: "Abar", channel: "Coke Studio Bangla", thumbnail: "https://i.ytimg.com/vi/98m3Fh1yD4s/mqdefault.jpg" },
+            { id: "98m3Fh1yD4s", title: "Tumi Naki", channel: "Fuad Al Muqtadir", thumbnail: "https://i.ytimg.com/vi/98m3Fh1yD4s/mqdefault.jpg" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateSongs(popularSongs, document.getElementById('popularSongsGrid'));
+            document.getElementById('searchButton').addEventListener('click', search);
+            document.getElementById('searchInput').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    search();
+                }
+            });
         });
 
         async function search() {
             const query = document.getElementById('searchInput').value;
-            if (!query) return;
+            if (!query) {
+                populateSongs(popularSongs, document.getElementById('popularSongsGrid'));
+                return;
+            }
 
             const resultsDiv = document.getElementById('results');
+            const popularSongsSection = document.getElementById('popularSongsSection');
+            popularSongsSection.style.display = 'none';
             resultsDiv.innerHTML = '<p style="text-align:center;color:#b3b3b3;">খোঁজা হচ্ছে...</p>';
 
             try {
@@ -227,21 +301,7 @@
                 }
 
                 resultsDiv.innerHTML = '';
-                data.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <img src="${item.thumbnail}" alt="${item.title}">
-                        <div class="title">${item.title}</div>
-                        <div class="artist">${item.channel}</div>
-                        <button class="play-button" data-id="${item.id}" data-title="${item.title}" data-artist="${item.channel}" data-thumbnail="${item.thumbnail}">গান চালান</button>
-                    `;
-                    resultsDiv.appendChild(card);
-                });
-
-                document.querySelectorAll('.play-button').forEach(button => {
-                    button.addEventListener('click', playSong);
-                });
+                populateSongs(data, resultsDiv);
 
             } catch (error) {
                 console.error('Fetch error:', error);
@@ -261,14 +321,49 @@
             const playingArtist = document.getElementById('playingArtist');
             const playingThumbnail = document.getElementById('playingThumbnail');
 
-            audioPlayer.src = `/api/download?id=${videoId}&format=mp3`;
-            
+            const fullPlayer = document.getElementById('fullPlayer');
+            const fullPlayerTitle = document.getElementById('fullPlayerTitle');
+            const fullPlayerArtist = document.getElementById('fullPlayerArtist');
+            const fullPlayerThumbnail = document.getElementById('fullPlayerThumbnail');
+
             playingTitle.textContent = videoTitle;
             playingArtist.textContent = videoArtist;
             playingThumbnail.src = videoThumbnail;
             playingBar.style.display = 'flex';
+
+            fullPlayerTitle.textContent = videoTitle;
+            fullPlayerArtist.textContent = videoArtist;
+            fullPlayerThumbnail.src = videoThumbnail;
             
+            audioPlayer.src = `/api/download?id=${videoId}&format=mp3`;
             audioPlayer.play();
+        }
+
+        function showFullPlayer() {
+            document.getElementById('fullPlayer').style.display = 'flex';
+        }
+
+        function hideFullPlayer() {
+            document.getElementById('fullPlayer').style.display = 'none';
+        }
+
+        function populateSongs(songs, targetElement) {
+            targetElement.innerHTML = '';
+            songs.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${item.thumbnail}" alt="${item.title}">
+                    <div class="title">${item.title}</div>
+                    <div class="artist">${item.channel}</div>
+                    <button class="play-button" data-id="${item.id}" data-title="${item.title}" data-artist="${item.channel}" data-thumbnail="${item.thumbnail}">গান চালান</button>
+                `;
+                targetElement.appendChild(card);
+            });
+
+            targetElement.querySelectorAll('.play-button').forEach(button => {
+                button.addEventListener('click', playSong);
+            });
         }
     </script>
 </body>
