@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watch Video</title>
     <style>
-        /* (Style unchanged, same as before) */
         body {
             background-color: #1a1a1a;
             color: #ffffff;
@@ -20,7 +19,6 @@
             padding: 0 20px 20px;
         }
 
-        /* Video Player and Top Bar */
         .video-player-container {
             width: 100%;
             position: relative;
@@ -30,10 +28,9 @@
         #videoPlayer {
             width: 100%;
             height: auto;
-            display: block; /* Removes extra space below video */
+            display: block;
         }
 
-        /* Custom top bar for the player */
         .player-top-bar {
             position: absolute;
             top: 0;
@@ -57,7 +54,6 @@
             font-size: 24px;
         }
 
-        /* Video Details Section */
         .video-details {
             padding: 15px 0;
         }
@@ -82,7 +78,7 @@
         }
 
         .action-buttons button, .action-buttons a {
-            background: linear-gradient(to right, #6a11cb, #2575fc); /* Watch Now */
+            background: linear-gradient(to right, #6a11cb, #2575fc);
             color: #fff;
             border: none;
             padding: 10px 20px;
@@ -93,7 +89,7 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            flex: 1; /* Make buttons fill space */
+            flex: 1;
             min-width: 120px;
             transition: transform 0.2s ease-in-out;
         }
@@ -103,14 +99,13 @@
         }
 
         #favoriteBtn {
-            background: linear-gradient(to right, #f7b733, #fc4a1a); /* Favorite */
+            background: linear-gradient(to right, #f7b733, #fc4a1a);
         }
         
         #downloadBtn {
-            background: linear-gradient(to right, #00c6ff, #0072ff); /* Download */
+            background: linear-gradient(to right, #00c6ff, #0072ff);
         }
 
-        /* Description and Related Videos */
         .description-section {
             padding: 15px 0;
             border-bottom: 1px solid #333;
@@ -209,7 +204,6 @@
             document.getElementById('videoTitle').innerText = 'Error: Video not found.';
         }
 
-        // Load related videos based on the current video's ID
         loadRelatedVideos(currentVideoId);
     });
 
