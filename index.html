@@ -1,267 +1,419 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ভিডিও হাব</title>
-    <!-- Tailwind CSS for modern styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Video & Music Hub</title>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
+        .header { background-color: #ff0000; color: white; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 2.5em; }
+        .header a { color: white; text-decoration: none; }
+        .search-form { text-align: center; margin-bottom: 30px; }
+        .search-input { width: 70%; max-width: 500px; padding: 12px; border: 2px solid #ddd; border-radius: 25px; font-size: 16px; }
+        .search-button { padding: 12px 25px; background-color: #007bff; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 16px; margin-left: 10px; }
+        .search-button:hover { background-color: #0056b3; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .video-card { 
+            background-color: white; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            transition: transform 0.2s;
+            position: relative;
+        }
+        .video-card:hover { transform: translateY(-5px); }
+        .video-thumbnail { width: 100%; height: 180px; object-fit: cover; }
+        .video-info { padding: 15px; }
+        .video-title { font-size: 1.1em; font-weight: bold; margin: 0 0 5px; }
+        .info-button { display: block; text-align: center; padding: 10px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px; }
+        .info-button:hover { background-color: #218838; }
+        .error-message { color: red; text-align: center; margin-top: 20px; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background-color: #fff;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+            z-index: 1000;
+        }
+        .nav-item {
+            text-align: center;
+            flex-grow: 1;
+        }
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #555;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .nav-link:hover {
+            color: #ff0000;
+        }
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        #page-title { text-align: center; color: #ff0000; }
+        .hidden { display: none; }
+        .video-player-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
+        }
+        .video-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .video-title-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .duration-badge {
+            position: absolute;
+            bottom: 80px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            z-index: 2;
+        }
+
+        /* --- New styles for Music Section --- */
+        .music-player-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .music-player-container audio {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 10px;
+        }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen p-4 flex flex-col items-center">
-
-    <div class="container mx-auto p-4 md:p-8 w-full max-w-4xl">
-        <!-- Title and Search Bar -->
-        <h1 class="text-4xl md:text-5xl font-extrabold text-center text-indigo-600 mb-6">ভিডিও হাব</h1>
-
-        <div class="flex items-center space-x-2 md:space-x-4 mb-8">
-            <input type="text" id="searchInput" placeholder="ভিডিও বা গান খুঁজুন..."
-                   class="w-full p-3 md:p-4 rounded-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 shadow-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-            <button id="searchButton"
-                    class="p-3 md:p-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full shadow-lg transition-transform transform hover:scale-105">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- Search Mode Toggles -->
-        <div class="flex justify-center mb-6 space-x-4">
-            <button id="videoModeBtn" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105">ভিডিও</button>
-            <button id="audioModeBtn" class="bg-gray-300 text-gray-800 font-semibold py-2 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105">অডিও</button>
-        </div>
-        
-        <!-- Audio Player Section -->
-        <div id="audioPlayerSection" class="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-8 hidden">
-            <audio id="audioPlayer" controls class="w-full"></audio>
-            <h2 id="audioTitle" class="text-lg md:text-xl font-semibold mt-4 text-center"></h2>
-        </div>
-        
-        <!-- Messages Section -->
-        <div id="messageSection" class="w-full hidden">
-            <div id="messageText" class="p-4 rounded-lg text-center font-semibold"></div>
-        </div>
-
-        <!-- Main Content Area -->
-        <div id="contentContainer" class="w-full">
-            <div id="loadingIndicator" class="text-center text-lg hidden">লোড হচ্ছে...</div>
-            <div id="resultsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- Results will be injected here -->
+<body>
+    <div class="container">
+        <div id="search-section">
+            <div class="header">
+                <a href="#" onclick="showSearchSection();"><h1>🎥 Video Hub</h1></a>
             </div>
-            <p id="noResultsMessage" class="text-center text-gray-500 hidden mt-4">কোনো ফলাফল পাওয়া যায়নি।</p>
+            <div class="search-form">
+                <form id="search-form">
+                    <input type="text" class="search-input" id="search-input" name="q" placeholder="Search YouTube videos...">
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+            </div>
+            <h2 id="page-title">Trending Videos</h2>
+            <div id="error-message" class="error-message"></div>
+            <div id="video-grid" class="video-grid"></div>
+        </div>
+
+        <div id="video-player-section" class="hidden">
+            <a href="#" class="back-button" onclick="showSearchSection();">Back to Search</a>
+            <div class="video-player-container">
+                <video id="video-player" controls class="video-iframe"></video>
+            </div>
+            <div id="video-title-display" class="video-title-display"></div>
+
+            <h3 id="related-videos-title" class="hidden">Related Videos</h3>
+            <div id="related-videos-grid" class="video-grid"></div>
+        </div>
+        
+        <div id="music-section" class="hidden">
+            <div class="header">
+                <a href="#" onclick="showMusicSection();"><h1>🎶 Music Hub</h1></a>
+            </div>
+            <div class="search-form">
+                <form id="music-search-form">
+                    <input type="text" class="search-input" id="music-search-input" name="q" placeholder="Search songs...">
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+            </div>
+            <h2 id="music-page-title">Top Songs</h2>
+            <div id="music-player-container" class="music-player-container hidden">
+                <div id="now-playing-title" class="video-title-display"></div>
+                <audio id="music-player" controls></audio>
+            </div>
+            <div id="music-grid" class="video-grid"></div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item">
+            <a href="#" class="nav-link" id="home-link">
+                <span class="nav-icon">🏠</span>
+                Home
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="#" class="nav-link" id="search-link">
+                <span class="nav-icon">🔍</span>
+                Search
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="#" class="nav-link" id="music-link">
+                <span class="nav-icon">🎶</span>
+                Music
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="#" class="nav-link" onclick="alert('History functionality is not yet available in this version.');">
+                <span class="nav-icon">⏳</span>
+                History
+            </a>
         </div>
     </div>
 
-    <!-- JavaScript to handle fetching and displaying data -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            const videoModeBtn = document.getElementById('videoModeBtn');
-            const audioModeBtn = document.getElementById('audioModeBtn');
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const resultsGrid = document.getElementById('resultsGrid');
-            const noResultsMessage = document.getElementById('noResultsMessage');
-            const audioPlayerSection = document.getElementById('audioPlayerSection');
-            const audioPlayer = document.getElementById('audioPlayer');
-            const audioTitle = document.getElementById('audioTitle');
-            const messageSection = document.getElementById('messageSection');
-            const messageText = document.getElementById('messageText');
-            
-            let currentMode = 'video';
-            const BASE_API_URL = 'https://api-yt.bessun.workers.dev';
+        // --- Video Section Elements ---
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const videoGrid = document.getElementById('video-grid');
+        const errorMessage = document.getElementById('error-message');
+        const pageTitle = document.getElementById('page-title');
+        const homeLink = document.getElementById('home-link');
+        const searchLink = document.getElementById('search-link');
+        const searchSection = document.getElementById('search-section');
+        const videoPlayerSection = document.getElementById('video-player-section');
+        const videoPlayer = document.getElementById('video-player');
+        const videoTitleDisplay = document.getElementById('video-title-display');
+        const relatedVideosGrid = document.getElementById('related-videos-grid');
+        const relatedVideosTitle = document.getElementById('related-videos-title');
 
-            // Function to show a message
-            const showMessage = (text, type = 'info') => {
-                messageText.textContent = text;
-                showElement(messageSection);
-                if (type === 'error') {
-                    messageText.classList.remove('bg-blue-200', 'text-blue-800');
-                    messageText.classList.add('bg-red-200', 'text-red-800');
-                } else {
-                    messageText.classList.remove('bg-red-200', 'text-red-800');
-                    messageText.classList.add('bg-blue-200', 'text-blue-800');
-                }
-            };
-            
-            // Function to show and hide elements
-            const showElement = (element) => element.classList.remove('hidden');
-            const hideElement = (element) => element.classList.add('hidden');
-            
-            // Toggle search modes
-            const setMode = (mode) => {
-                currentMode = mode;
-                if (mode === 'video') {
-                    videoModeBtn.classList.replace('bg-gray-300', 'bg-indigo-600');
-                    videoModeBtn.classList.replace('text-gray-800', 'text-white');
-                    audioModeBtn.classList.replace('bg-indigo-600', 'bg-gray-300');
-                    audioModeBtn.classList.replace('text-white', 'text-gray-800');
-                    searchInput.placeholder = 'ভিডিও খুঁজুন...';
-                    hideElement(audioPlayerSection);
-                } else { // audio
-                    audioModeBtn.classList.replace('bg-gray-300', 'bg-indigo-600');
-                    audioModeBtn.classList.replace('text-gray-800', 'text-white');
-                    videoModeBtn.classList.replace('bg-indigo-600', 'bg-gray-300');
-                    videoModeBtn.classList.replace('text-white', 'text-gray-800');
-                    searchInput.placeholder = 'গান খুঁজুন...';
-                }
-                fetchTrending();
-            };
-            
-            // Create a video card
-            const createVideoCard = (video) => {
-                const card = document.createElement('div');
-                card.classList.add('bg-white', 'dark:bg-gray-800', 'rounded-lg', 'shadow-md', 'overflow-hidden', 'cursor-pointer', 'transition-transform', 'transform', 'hover:scale-105');
-                card.innerHTML = `
-                    <img src="${video.thumbnail}" alt="${video.title}" class="w-full h-40 object-cover">
-                    <div class="p-3">
-                        <h3 class="text-sm font-semibold truncate mb-1" title="${video.title}">${video.title}</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">by ${video.author}</p>
-                    </div>
-                `;
-                card.onclick = () => {
-                    showMessage('ভিডিও প্লে করার ফিচারটি এই সংস্করণে নেই।');
-                };
-                return card;
-            };
-            
-            // Create an audio card
-            const createAudioCard = (audio) => {
-                const card = document.createElement('div');
-                card.classList.add('bg-white', 'dark:bg-gray-800', 'rounded-lg', 'shadow-md', 'p-3', 'cursor-pointer', 'transition-transform', 'transform', 'hover:scale-105');
-                card.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19H3v-7h6M21 16V6M9 19c-3.111 0-5.875-1.92-7-5.5a9.542 9.542 0 00-1-2.5" />
-                        </svg>
-                        <div class="flex-grow">
-                            <h3 class="text-sm font-semibold truncate" title="${audio.title}">${audio.title}</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">by ${audio.author}</p>
+        // --- Music Section Elements ---
+        const musicLink = document.getElementById('music-link');
+        const musicSection = document.getElementById('music-section');
+        const musicSearchForm = document.getElementById('music-search-form');
+        const musicSearchInput = document.getElementById('music-search-input');
+        const musicGrid = document.getElementById('music-grid');
+        const musicPageTitle = document.getElementById('music-page-title');
+        const musicPlayerContainer = document.getElementById('music-player-container');
+        const nowPlayingTitle = document.getElementById('now-playing-title');
+        const musicPlayer = document.getElementById('music-player');
+
+        // --- View Management Functions ---
+        function hideAllSections() {
+            searchSection.classList.add('hidden');
+            videoPlayerSection.classList.add('hidden');
+            musicSection.classList.add('hidden');
+        }
+
+        function showSearchSection() {
+            hideAllSections();
+            searchSection.classList.remove('hidden');
+            videoPlayer.src = '';
+        }
+
+        function showVideoPlayerSection(videoId, videoTitle) {
+            hideAllSections();
+            videoPlayerSection.classList.remove('hidden');
+
+            videoTitleDisplay.textContent = 'Loading video...';
+            videoPlayer.src = '';
+            relatedVideosGrid.innerHTML = '';
+            relatedVideosTitle.classList.add('hidden');
+
+            // --- Simulate API call for video link ---
+            // In a real app, this would fetch from your backend
+            const videoUrl = `https://www.w3schools.com/html/mov_bbb.mp4`; // Example URL
+            videoPlayer.src = videoUrl;
+            videoPlayer.play();
+            videoTitleDisplay.textContent = videoTitle;
+
+            // --- Fetch and display related videos ---
+            fetchRelatedVideos(videoId);
+        }
+        
+        function showMusicSection() {
+            hideAllSections();
+            musicSection.classList.remove('hidden');
+            musicPlayer.pause();
+            musicPlayerContainer.classList.add('hidden');
+            musicPageTitle.textContent = 'Top Songs';
+            musicGrid.innerHTML = ''; // Clear previous results
+            fetchSongs(''); // Load default/trending songs on page load
+        }
+
+        // --- Video Related Functions ---
+        async function fetchVideos(url, title) {
+            videoGrid.innerHTML = 'Loading...';
+            errorMessage.innerHTML = '';
+            pageTitle.textContent = title;
+
+            try {
+                // --- Simulate API call ---
+                const videos = [
+                    { id: '1', title: 'Funny Cats Compilation', thumbnail: 'https://placekitten.com/300/180', duration: 185 },
+                    { id: '2', title: 'Amazing Nature Documentary', thumbnail: 'https://placekitten.com/301/181', duration: 1450 },
+                    { id: '3', title: 'How to Learn JavaScript', thumbnail: 'https://placekitten.com/302/182', duration: 720 },
+                ];
+                
+                videoGrid.innerHTML = '';
+                videos.forEach(video => {
+                    const card = document.createElement('div');
+                    card.className = 'video-card';
+                    card.innerHTML = `
+                        <a href="#" onclick="showVideoPlayerSection('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
+                            <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+                            <span class="duration-badge">${formatDuration(video.duration)}</span>
+                        </a>
+                        <div class="video-info">
+                            <h3 class="video-title">${video.title}</h3>
                         </div>
+                    `;
+                    videoGrid.appendChild(card);
+                });
+            } catch (err) {
+                errorMessage.innerHTML = 'An error occurred. Please try again later.';
+                videoGrid.innerHTML = '';
+            }
+        }
+
+        function formatDuration(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            let formatted = '';
+            if (h > 0) formatted += `${h}:`;
+            formatted += `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            return formatted;
+        }
+
+        async function fetchRelatedVideos(videoId) {
+            relatedVideosTitle.classList.remove('hidden');
+            relatedVideosGrid.innerHTML = 'Loading related videos...';
+            // --- Simulate API call ---
+            const relatedVideos = [
+                { id: '4', title: 'More Cute Cats!', thumbnail: 'https://placekitten.com/303/183', duration: 110 },
+                { id: '5', title: 'Deep Sea Life', thumbnail: 'https://placekitten.com/304/184', duration: 1500 }
+            ];
+            
+            relatedVideosGrid.innerHTML = '';
+            relatedVideos.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.innerHTML = `
+                    <a href="#" onclick="showVideoPlayerSection('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
+                        <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+                        <span class="duration-badge">${formatDuration(video.duration)}</span>
+                    </a>
+                    <div class="video-info">
+                        <h3 class="video-title">${video.title}</h3>
                     </div>
                 `;
-                card.onclick = () => playAudio(audio.videoId, audio.title);
-                return card;
-            };
-            
-            // Fetch and display trending items
-            const fetchTrending = async () => {
-                showElement(loadingIndicator);
-                hideElement(resultsGrid);
-                hideElement(noResultsMessage);
-                hideElement(messageSection);
-                
-                let apiUrl = `${BASE_API_URL}/api/search?q=trending songs`;
-                
-                try {
-                    const response = await fetch(apiUrl);
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    const results = await response.json();
-                    
-                    resultsGrid.innerHTML = '';
-                    if (results.length > 0) {
-                        const top10Results = results.slice(0, 10);
-                        top10Results.forEach(item => {
-                            if (currentMode === 'video') {
-                                resultsGrid.appendChild(createVideoCard(item));
-                            } else {
-                                resultsGrid.appendChild(createAudioCard(item));
-                            }
-                        });
-                        showElement(resultsGrid);
-                    } else {
-                        showElement(noResultsMessage);
-                    }
-                } catch (error) {
-                    console.error('Error fetching trending items:', error);
-                    showMessage('লোড করতে ব্যর্থ হয়েছে।', 'error');
-                } finally {
-                    hideElement(loadingIndicator);
-                }
-            };
-            
-            // Handle search
-            const handleSearch = async () => {
-                const query = searchInput.value.trim();
-                if (query === '') return;
-                
-                showElement(loadingIndicator);
-                hideElement(resultsGrid);
-                hideElement(noResultsMessage);
-                hideElement(messageSection);
-                
-                const apiUrl = `${BASE_API_URL}/api/search?q=${encodeURIComponent(query)}`;
-                
-                try {
-                    const response = await fetch(apiUrl);
-                    if (!response.ok) throw new Error('Search failed');
-                    const results = await response.json();
-                    
-                    resultsGrid.innerHTML = '';
-                    if (results.length > 0) {
-                        const top10Results = results.slice(0, 10);
-                        top10Results.forEach(item => {
-                            if (currentMode === 'video') {
-                                resultsGrid.appendChild(createVideoCard(item));
-                            } else {
-                                resultsGrid.appendChild(createAudioCard(item));
-                            }
-                        });
-                        showElement(resultsGrid);
-                    } else {
-                        showElement(noResultsMessage);
-                    }
-                } catch (error) {
-                    console.error('Search error:', error);
-                    showMessage('সার্চ করতে ব্যর্থ হয়েছে।', 'error');
-                } finally {
-                    hideElement(loadingIndicator);
-                }
-            };
-            
-            // Play audio and show player section
-            const playAudio = async (videoId, title) => {
-                showElement(loadingIndicator);
-                hideElement(resultsGrid);
-                hideElement(noResultsMessage);
-                hideElement(messageSection);
-                
-                const audioLinkUrl = `${BASE_API_URL}/api/audio?id=${encodeURIComponent(videoId)}`;
-                
-                try {
-                    const audioLinkResponse = await fetch(audioLinkUrl);
-                    if (!audioLinkResponse.ok) throw new Error('Failed to get audio link');
-                    const audioData = await audioLinkResponse.json();
-                    
-                    audioPlayer.src = audioData.url;
-                    audioTitle.textContent = title;
-                    audioPlayer.play();
-                    showElement(audioPlayerSection);
-                } catch (error) {
-                    console.error('Error playing audio:', error);
-                    showMessage('গানটি প্লে করতে ব্যর্থ হয়েছে।', 'error');
-                    hideElement(audioPlayerSection);
-                } finally {
-                    hideElement(loadingIndicator);
-                }
-            };
-            
-            // Event Listeners
-            searchButton.addEventListener('click', handleSearch);
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    handleSearch();
-                }
+                relatedVideosGrid.appendChild(card);
             });
-            videoModeBtn.addEventListener('click', () => setMode('video'));
-            audioModeBtn.addEventListener('click', () => setMode('audio'));
-            
-            // Initial load
-            fetchTrending();
+        }
+
+        // --- Music Related Functions ---
+        async function fetchSongs(query) {
+            musicGrid.innerHTML = 'Loading...';
+            musicPageTitle.textContent = query ? `Search Results for "${query}"` : 'Top Songs';
+
+            try {
+                // --- Simulate API call for songs ---
+                // Replace this with a real API endpoint
+                const songs = [
+                    { id: 's1', title: 'Shape of You', artist: 'Ed Sheeran', thumbnail: 'https://via.placeholder.com/300x180.png?text=Shape+of+You', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+                    { id: 's2', title: 'Levitating', artist: 'Dua Lipa', thumbnail: 'https://via.placeholder.com/300x180.png?text=Levitating', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
+                    { id: 's3', title: 'Blinding Lights', artist: 'The Weeknd', thumbnail: 'https://via.placeholder.com/300x180.png?text=Blinding+Lights', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
+                ];
+
+                const filteredSongs = query 
+                    ? songs.filter(song => song.title.toLowerCase().includes(query.toLowerCase()) || song.artist.toLowerCase().includes(query.toLowerCase()))
+                    : songs;
+
+                if (filteredSongs.length === 0) {
+                    musicGrid.innerHTML = `<p style="text-align: center;">No songs found for "${query}".</p>`;
+                } else {
+                    musicGrid.innerHTML = '';
+                    filteredSongs.forEach(song => {
+                        const card = document.createElement('div');
+                        card.className = 'video-card'; // Reusing video-card for consistent styling
+                        card.innerHTML = `
+                            <a href="#" onclick="playSong('${song.audioUrl}', '${song.title.replace(/'/g, "\\'")} - ${song.artist.replace(/'/g, "\\'")}')">
+                                <img src="${song.thumbnail}" alt="${song.title}" class="video-thumbnail">
+                            </a>
+                            <div class="video-info">
+                                <h3 class="video-title">${song.title}</h3>
+                                <p>${song.artist}</p>
+                            </div>
+                        `;
+                        musicGrid.appendChild(card);
+                    });
+                }
+            } catch (err) {
+                musicGrid.innerHTML = '<p>Failed to load songs.</p>';
+            }
+        }
+
+        function playSong(audioUrl, songTitle) {
+            musicPlayerContainer.classList.remove('hidden');
+            nowPlayingTitle.textContent = `Now Playing: ${songTitle}`;
+            musicPlayer.src = audioUrl;
+            musicPlayer.load();
+            musicPlayer.play();
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchVideos('', 'Trending Videos');
+        });
+
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = searchInput.value;
+            if (query) {
+                fetchVideos(`/search-api?q=${encodeURIComponent(query)}`, `Search Results for "${query}"`);
+            }
+        });
+
+        musicSearchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = musicSearchInput.value;
+            fetchSongs(query);
+        });
+        
+        homeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSearchSection();
+            fetchVideos('/home-api', 'Trending Videos');
+        });
+
+        searchLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSearchSection();
+            searchInput.focus();
+        });
+
+        musicLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showMusicSection();
         });
     </script>
-
 </body>
 </html>
