@@ -1,120 +1,71 @@
 const express = require('express');
-const ytdl = require('ytdl-core');
-const ytsr = require('ytsr');
-const ytpl = require('ytpl');
-const cors = require('cors');
-
+const axios = require('axios');
+const path = require('path');
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// Use CORS to allow requests from your front-end
-app.use(cors());
+// Serve static files from the root directory
+app.use(express.static(__dirname));
 
-// Serve static files from the 'public' directory
-app.use(express.static('public'));
-
-// Search for videos
-app.get('/ytb/search', async (req, res) => {
+// API URL from GitHub Gist
+const baseApiUrl = async () => {
     try {
-        const query = req.query.q;
-        if (!query) {
-            return res.status(400).json({ error: 'Query parameter "q" is required.' });
-        }
-
-        const filters = await ytsr.getFilters(query);
-        const filter = filters.get('Type').get('Video');
-        const searchResults = await ytsr(filter.url, { limit: 20 });
-
-        const videos = searchResults.items.map(item => ({
-            id: item.id,
-            title: item.title,
-            thumbnail: item.thumbnails[0].url,
-            channel: { name: item.author.name },
-            time: item.duration
-        }));
-
-        res.json(videos);
-    } catch (error) {
-        console.error('Search error:', error);
-        res.status(500).json({ error: 'Failed to fetch search results.' });
+        const base = await axios.get(
+            `https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`
+        );
+        return base.data.api;
+    } catch (e) {
+        console.error("Failed to fetch base API URL:", e);
+        return null;
     }
-});
+};
 
-// Stream video or audio
-app.get('/ytb/stream', async (req, res) => {
-    const videoId = req.query.id;
-    const format = req.query.format || 'mp4'; // Default to mp4
-
-    if (!videoId) {
-        return res.status(400).json({ error: 'Video ID is required.' });
-    }
+// API endpoint for search
+app.get('/search-api', async (req, res) => {
+    const query = req.query.q;
+    if (!query) return res.status(400).json({ error: 'Search query is required.' });
 
     try {
-        let stream;
-        let options = { quality: 'highest' };
-
-        if (format === 'mp3') {
-            options.filter = 'audioonly';
-            res.header('Content-Disposition', `attachment; filename="${videoId}.mp3"`);
-            res.header('Content-Type', 'audio/mpeg');
+        const apiBase = await baseApiUrl();
+        if (apiBase) {
+            const searchResults = (await axios.get(`${apiBase}/ytFullSearch?songName=${query}`)).data.slice(0, 6);
+            res.json(searchResults);
         } else {
-            options.filter = 'videoandaudio';
-            res.header('Content-Type', 'video/mp4');
+            res.status(500).json({ error: 'Failed to get API URL.' });
         }
-
-        stream = ytdl(videoId, options);
-        stream.pipe(res);
-    } catch (error) {
-        console.error('Stream error:', error);
-        res.status(500).send('Failed to stream video.');
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred while searching. Please try again later.' });
     }
 });
 
-// Get real trending videos
-app.get('/ytb/trending', async (req, res) => {
-    try {
-        const filters = await ytsr.getFilters('trending');
-        const filter = filters.get('Type').get('Video');
-        const searchResults = await ytsr(filter.url, { limit: 20 });
-
-        const videos = searchResults.items.map(item => ({
-            id: item.id,
-            title: item.title,
-            thumbnail: item.thumbnails[0].url,
-            channel: { name: item.author.name },
-            time: item.duration
-        }));
-
-        res.json(videos);
-    } catch (error) {
-        console.error('Trending error:', error);
-        res.status(500).json({ error: 'Failed to fetch trending videos.' });
-    }
-});
-
-// Get related videos based on video ID
-app.get('/ytb/related', async (req, res) => {
-    const videoId = req.query.id;
-    if (!videoId) {
-        return res.status(400).json({ error: 'Video ID is required.' });
-    }
+// API endpoint for video info
+app.get('/info-api', async (req, res) => {
+    const videoID = req.query.v;
+    if (!videoID) return res.status(400).json({ error: 'Video ID is required.' });
 
     try {
-        const info = await ytdl.getInfo(videoId);
-        const relatedVideos = info.related_videos.slice(0, 6).map(video => ({
-            id: video.id,
-            title: video.title,
-            thumbnail: video.thumbnails[0].url,
-            channel: { name: video.author.name }
-        }));
-
-        res.json(relatedVideos);
-    } catch (error) {
-        console.error('Related videos error:', error);
-        res.status(500).json({ error: 'Failed to fetch related videos.' });
+        const apiBase = await baseApiUrl();
+        if (apiBase) {
+            const { data } = await axios.get(`${apiBase}/ytfullinfo?videoID=${videoID}`);
+            const videoInfo = {
+                title: data.title,
+                duration: (data.duration / 60).toFixed(2),
+                view_count: data.view_count,
+                like_count: data.like_count,
+                comment_count: data.comment_count,
+                thumbnail: data.thumbnail
+            };
+            res.json(videoInfo);
+        } else {
+            res.status(500).json({ error: 'Failed to get API URL.' });
+        }
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Failed to retrieve video info. Please check the video ID.' });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
