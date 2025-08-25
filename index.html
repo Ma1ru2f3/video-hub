@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #f0f0f0;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #fff;
+        }
+        .tab-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: #fff;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            background-color: #ff0000;
+        }
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .video-card {
+            background-color: #3a3a3a;
+            border-radius: 8px;
+            overflow: hidden;
+            text-align: center;
+            padding: 10px;
+        }
+        .video-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .video-title {
+            font-size: 14px;
+            margin: 10px 0 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .video-meta {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            text-align: center;
+        }
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>YouTube Downloader</h1>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search for video or audio...">
+        <button class="tab-button active" id="searchVideoBtn">Video</button>
+        <button class="tab-button" id="searchAudioBtn">Audio</button>
+    </div>
+    
+    <div id="results">
+        <p style="text-align: center; color: #aaa;">Search for a video or audio to get started.</p>
+    </div>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const searchVideoBtn = document.getElementById('searchVideoBtn');
+    const searchAudioBtn = document.getElementById('searchAudioBtn');
+    const resultsContainer = document.getElementById('results');
+
+    let currentMode = 'video';
+
+    searchVideoBtn.addEventListener('click', () => {
+        currentMode = 'video';
+        searchVideoBtn.classList.add('active');
+        searchAudioBtn.classList.remove('active');
+    });
+
+    searchAudioBtn.addEventListener('click', () => {
+        currentMode = 'audio';
+        searchAudioBtn.classList.add('active');
+        searchVideoBtn.classList.remove('active');
+    });
+
+    searchInput.addEventListener('input', async (e) => {
+        const query = e.target.value.trim();
+        resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Searching...</p>';
+        
+        if (query === '') {
+            resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Search for a video or audio to get started.</p>';
+            return;
+        }
+        
+        try {
+            const response = await fetch(`http://localhost:3000/ytb/search?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            if (data.error) {
+                resultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">${data.error}</p>`;
+                return;
+            }
+            
+            displayResults(data);
+        } catch (error) {
+            resultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">Failed to fetch search results.</p>`;
+        }
+    });
+
+    async function displayResults(videos) {
+        resultsContainer.innerHTML = '';
+        videos.forEach(video => {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            card.innerHTML = `
+                <img src="${video.thumbnail}" alt="${video.title}">
+                <div class="video-title">${video.title}</div>
+                <div class="video-meta">Duration: ${video.time}</div>
+                <div class="video-meta">Channel: ${video.channel.name}</div>
+                <button class="download-btn" data-id="${video.id}">Download</button>
+            `;
+            
+            card.querySelector('.download-btn').addEventListener('click', async (e) => {
+                const videoId = e.target.dataset.id;
+                const format = currentMode === 'video' ? 'mp4' : 'mp3';
+                e.target.textContent = 'Downloading...';
+                e.target.disabled = true;
+
+                try {
+                    const downloadResponse = await fetch(`http://localhost:3000/ytb/download?id=${videoId}&format=${format}`);
+                    const downloadData = await downloadResponse.json();
+                    
+                    if (downloadData.error) {
+                        alert(downloadData.error);
+                    } else {
+                        const a = document.createElement('a');
+                        a.href = downloadData.url;
+                        a.download = `${downloadData.title}.${format}`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        alert(`Download of "${downloadData.title}" started.`);
+                    }
+                } catch (error) {
+                    alert('An error occurred during download.');
+                } finally {
+                    e.target.textContent = 'Download';
+                    e.target.disabled = false;
+                }
+            });
+            
+            resultsContainer.appendChild(card);
+        });
+    }
+</script>
+
+</body>
+</html>
