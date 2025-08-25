@@ -5,7 +5,6 @@ const port = process.env.PORT || 3000;
 
 app.use(express.static('public')); // যদি আপনার index.html public ফোল্ডারে থাকে
 
-// Search API Endpoint (গান খোঁজার জন্য)
 app.get('/search-api', async (req, res) => {
     const query = req.query.q;
     if (!query) {
@@ -13,21 +12,15 @@ app.get('/search-api', async (req, res) => {
     }
 
     try {
-        const results = await ytdl.search(query, { limit: 10 });
-        const videos = results.map(video => ({
-            id: video.id,
-            title: video.title,
-            thumbnail: video.thumbnails[0].url,
-            author: { name: video.author.name }
-        }));
-        res.json(videos);
+        const results = await ytdl.getInfo(query);
+        const videos = results.related_videos;
+        res.json(videos.filter(v => v.type === 'video')); // Only return video results
     } catch (error) {
         console.error('Search error:', error);
         res.status(500).json({ error: 'Failed to perform search' });
     }
 });
 
-// Audio Link API Endpoint (গানের অডিও URL পাওয়ার জন্য)
 app.get('/audio-link-api', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
@@ -52,7 +45,6 @@ app.get('/audio-link-api', async (req, res) => {
     }
 });
 
-// Home page
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
