@@ -220,6 +220,14 @@
             color: #b3b3b3;
             margin-top: 5px;
         }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -246,7 +254,7 @@
     </div>
 
     <div id="fullPlayer" class="full-player-view">
-        <div style="position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer;" onclick="hideFullPlayer()">
+        <div class="back-button" onclick="hideFullPlayer()">
             &#x276E;
         </div>
         <div style="position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer;">
