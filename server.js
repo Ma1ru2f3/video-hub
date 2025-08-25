@@ -1,49 +1,114 @@
-const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
-require("dotenv").config();
+const express = require('express');
+const axios = require('axios');
+const path = require('path');
 
 const app = express();
-app.use(cors());
-app.use(express.static(".")); // index.html serve করবে
+const port = 3000;
 
-let accessToken = "";
-
-// Spotify access token আনতে ফাংশন
-async function getAccessToken() {
-  const resp = await axios.post(
-    "https://accounts.spotify.com/api/token",
-    "grant_type=client_credentials",
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization:
-          "Basic " +
-          Buffer.from(
-            process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET
-          ).toString("base64"),
-      },
+// Helper function to get the base API URL
+const baseApiUrl = async () => {
+    try {
+        const response = await axios.get(
+            `https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`
+        );
+        return response.data.api;
+    } catch (err) {
+        console.error('Error fetching base API URL:', err.message);
+        throw new Error('Failed to connect to the API server.');
     }
-  );
-  accessToken = resp.data.access_token;
-  console.log("✅ Spotify Access Token Updated!");
-}
-getAccessToken();
-setInterval(getAccessToken, 3600 * 1000); // প্রতি ১ ঘন্টায় নতুন টোকেন
+};
 
-// নতুন গান আনার API
-app.get("/api/new-releases", async (req, res) => {
-  try {
-    const result = await axios.get(
-      "https://api.spotify.com/v1/browse/new-releases?limit=10",
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
-    );
-    res.json(result.data.albums.items);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
+
+// Search endpoint
+app.get('/api/search', async (req, res) => {
+    const { query } = req.query;
+    if (!query) {
+        return res.status(400).json({ error: 'Search query is required.' });
+    }
+
+    try {
+        const maxResults = 10;
+        const apiUrl = await baseApiUrl();
+        const results = (await axios.get(`${apiUrl}/ytFullSearch?songName=${encodeURIComponent(query)}`)).data.slice(0, maxResults);
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: `No results found for "${query}".` });
+        }
+
+        const formattedResults = results.map(video => ({
+            id: video.id,
+            title: video.title,
+            duration: video.time,
+            channel: video.channel.name,
+            thumbnail: video.thumbnail
+        }));
+
+        res.json(formattedResults);
+    } catch (error) {
+        console.error('Search error:', error.message);
+        res.status(500).json({ error: 'An error occurred during search. Please try again later.' });
+    }
 });
 
-app.listen(5000, () => console.log("🚀 Server running at http://localhost:5000"));
+// Info endpoint
+app.get('/api/info', async (req, res) => {
+    const { id } = req.query;
+    if (!id) {
+        return res.status(400).json({ error: 'Video ID is required.' });
+    }
+
+    try {
+        const apiUrl = await baseApiUrl();
+        const { data } = await axios.get(`${apiUrl}/ytfullinfo?videoID=${id}`);
+        
+        const formattedInfo = {
+            title: data.title,
+            duration: data.duration,
+            viewCount: data.view_count,
+            likes: data.like_count,
+            channel: data.channel,
+            subscribers: data.channel_follower_count,
+            thumbnail: data.thumbnail
+        };
+
+        res.json(formattedInfo);
+    } catch (error) {
+        console.error('Info error:', error.message);
+        res.status(500).json({ error: 'Failed to retrieve video info.' });
+    }
+});
+
+// Download endpoint
+app.get('/api/download', async (req, res) => {
+    const { id, format } = req.query;
+    if (!id || !format || !['mp4', 'mp3'].includes(format)) {
+        return res.status(400).json({ error: 'Video ID and a valid format (mp4/mp3) are required.' });
+    }
+
+    try {
+        const apiUrl = await baseApiUrl();
+        const { data: { title, downloadLink } } = await axios.get(`${apiUrl}/ytDl3?link=${id}&format=${format}&quality=3`);
+        
+        const response = await axios({
+            method: 'get',
+            url: downloadLink,
+            responseType: 'stream'
+        });
+        
+        const filename = `${title.replace(/[\\/:"*?<>|]/g, '').slice(0, 50)}.${format}`;
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', response.headers['content-type']);
+        response.data.pipe(res);
+
+    } catch (error) {
+        console.error('Download error:', error.message);
+        res.status(500).json({ error: 'Failed to download the file. The video might be restricted or unavailable.' });
+    }
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+});
