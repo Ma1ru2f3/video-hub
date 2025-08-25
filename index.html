@@ -71,8 +71,8 @@
             const messageText = document.getElementById('messageText');
             
             let currentMode = 'video';
-            // NEW: Updated API URL for better reliability
-            const BASE_API_URL = 'https://api-yt-downloader-3.vercel.app/api';
+            // NEW and reliable API URL
+            const BASE_API_URL = 'https://api-yt.bessun.workers.dev';
 
             // Function to show a message
             const showMessage = (text, type = 'info') => {
@@ -154,7 +154,7 @@
                 hideElement(noResultsMessage);
                 hideElement(messageSection);
                 
-                let apiUrl = `${BASE_API_URL}/ytFullSearch?songName=trending songs`;
+                let apiUrl = `${BASE_API_URL}/api/search?q=trending songs`;
                 
                 try {
                     const response = await fetch(apiUrl);
@@ -193,7 +193,7 @@
                 hideElement(noResultsMessage);
                 hideElement(messageSection);
                 
-                const apiUrl = `${BASE_API_URL}/ytFullSearch?songName=${encodeURIComponent(query)}`;
+                const apiUrl = `${BASE_API_URL}/api/search?q=${encodeURIComponent(query)}`;
                 
                 try {
                     const response = await fetch(apiUrl);
@@ -229,14 +229,14 @@
                 hideElement(noResultsMessage);
                 hideElement(messageSection);
                 
-                const audioLinkUrl = `${BASE_API_URL}/ytDl3?link=${encodeURIComponent(videoId)}&format=mp3`;
+                const audioLinkUrl = `${BASE_API_URL}/api/audio?id=${encodeURIComponent(videoId)}`;
                 
                 try {
                     const audioLinkResponse = await fetch(audioLinkUrl);
                     if (!audioLinkResponse.ok) throw new Error('Failed to get audio link');
                     const audioData = await audioLinkResponse.json();
                     
-                    audioPlayer.src = audioData.downloadLink;
+                    audioPlayer.src = audioData.url;
                     audioTitle.textContent = title;
                     audioPlayer.play();
                     showElement(audioPlayerSection);
