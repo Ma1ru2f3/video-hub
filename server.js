@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -302,7 +301,10 @@
 
         // NEW: Function to play audio
         async function playAudio(videoId, videoTitle, videoThumbnail, videoAuthor) {
+            musicPlayerBar.classList.remove('hidden'); // Show the music bar
             musicPlayerBar.classList.add('active');
+
+            // Set song info on the bar
             barSongTitle.textContent = videoTitle;
             barSongArtist.textContent = videoAuthor;
             barAlbumArt.src = videoThumbnail;
