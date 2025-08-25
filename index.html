@@ -1,1439 +1,304 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Video Hub</title>
-  <style>
-    :root{
-      --bg-dark: #121212;
-      --card-bg: #1e1e1e;
-      --text-primary: #ffffff;
-      --text-secondary: #b3b3b3;
-      --accent: #ef233c;
-      --border-color: #333333;
-      --rounded: 10px;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    html,body{height:100%;margin:0;background:var(--bg-dark);color:var(--text-primary)}
-    .container{max-width:1100px;margin:0 auto;padding:18px}
-    header{position:sticky;top:0;background:var(--bg-dark);border-bottom:1px solid var(--border-color);z-index:100;padding:18px 0;}
-    .hdr{display:flex;align-items:center;gap:12px;padding:14px 0}
-    .logo{font-size:26px}
-    .site-title{font-weight:800;font-size:18px}
-    .site-sub{font-size:12px;color:var(--text-secondary)}
-    
-    main{padding:18px 0;padding-bottom:100px}
-    .grid{display:grid;gap:14px}
-    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
-    .card{background:var(--card-bg);border-radius:var(--rounded);overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.2)}
-    .card-body{padding:12px}
-    .meta{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:13px}
-    input[type="text"], input[type="password"], textarea, select{width:100%;padding:10px;border-radius:12px;border:1px solid var(--border-color);outline:none;background:var(--card-bg);color:var(--text-primary)}
-    button{cursor:pointer;border:0;padding:8px 12px;border-radius:10px;font-weight:700}
-    .btn-primary{background:linear-gradient(90deg,#60a5fa,#7c3aed);color:white}
-    .btn-emerald{background:linear-gradient(90deg,#34d399,#10b981);color:white}
-    .btn-red{background:linear-gradient(90deg,#ef4444,#dc2626);color:white}
-    .muted{color:var(--text-secondary)}
-    .tiny{font-size:12px}
-    .row{display:flex;gap:12px;align-items:center}
-    .col{display:flex;flex-direction:column;gap:8px}
-    .progress-wrap{height:10px;background:var(--border-color);border-radius:999px;overflow:hidden}
-    .progress-bar{height:100%;background:linear-gradient(90deg,#34d399,#f59e0b);width:0%}
-    .owner-block{padding:12px;border-radius:10px;background:var(--card-bg);border:1px dashed rgba(255,255,255,0.1)}
-    .searchbar{display:flex;gap:8px}
-    .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--card-bg);border:1px solid var(--border-color);font-weight:600;cursor:pointer}
-    .small-muted{font-size:12px;color:var(--text-secondary)}
-    .scroll-x{overflow-x:auto;display:flex;gap:12px;padding:8px 0;scrollbar-width:none}
-    .scroll-x::-webkit-scrollbar{display:none}
-    .section-title{font-weight:800;font-size:18px;margin-top:20px;margin-bottom:12px}
-    .content-card{width:160px;flex-shrink:0; cursor:pointer;}
-    .content-card img{width:100%;height:90px;object-fit:cover;border-radius:8px}
-    .content-card-title{font-size:14px;font-weight:600;margin-top:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-    .logo-container img{width:60px;height:60px;object-fit:contain;border-radius:10px}
-    .logo-container{flex-shrink:0}
-    .details-page, .auth-page, .admin-page, .upcoming-page{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-dark);z-index:200;overflow-y:auto;display:none;padding-bottom:80px}
-    
-    .auth-page {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 20px;
-    }
-    .auth-card {
-        background: var(--card-bg);
-        border-radius: var(--rounded);
-        padding: 30px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        max-width: 400px;
-        width: 90%;
-    }
-    .auth-card h1{font-size: 28px; margin-bottom: 12px;}
-    .auth-card p {color: var(--text-secondary); margin-bottom: 24px;}
-    
-    .details-page .header{position:relative;height:300px;overflow:hidden;background:var(--card-bg)}
-    .details-page .header iframe{width:100%;height:100%;}
-    .details-page .back-btn, .auth-page .back-btn, .admin-page .back-btn, .upcoming-page .back-btn{position:absolute;top:20px;left:20px;background:rgba(0,0,0,0.5);color:white;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:24px}
-    .details-page .body, .auth-page .body, .admin-page .body, .upcoming-page .body{padding:20px}
-    .details-page h1, .auth-page h1, .admin-page h1, .upcoming-page h1{font-size:24px;margin:0;font-weight:800}
-    .details-page .meta-info{display:flex;gap:10px;margin-top:8px;color:var(--text-secondary);font-size:14px}
-    .details-page .btn-group{margin-top:15px;display:flex;gap:10px;justify-content:center}
-    .details-page .overview{margin-top:20px;line-height:1.6}
-    .episode-list{margin-top:20px}
-    .episode-item{display:flex;gap:15px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-color);cursor: pointer;}
-    .episode-item img{width:80px;height:50px;object-fit:cover;border-radius:6px}
-    .episode-item .info{flex:1}
-    .episode-item .title{font-weight:600}
-    .more-options .card{margin-bottom: 12px; cursor: pointer;}
-    .more-options .card-body{padding: 18px;}
-    .more-options h2{margin-top:0;font-size:20px;font-weight:700;}
-    @media (max-width:800px){ .grid.cols-2{grid-template-columns:1fr} .row{flex-direction:column;align-items:stretch} .details-page .header{height:200px} }
-    .hidden { display: none !important; }
-    
-    /* Music player styles */
-    .music-player-bar {
-        position: fixed;
-        bottom: 60px; /* Above the nav bar */
-        left: 0;
-        width: 100%;
-        background: #181818;
-        border-top: 1px solid var(--border-color);
-        padding: 8px 15px;
-        display: none;
-        align-items: center;
-        gap: 15px;
-        z-index: 101;
-        transform: translateY(100%);
-        transition: transform 0.3s ease-in-out;
-    }
-    .music-player-bar.active {
-        display: flex;
-        transform: translateY(0);
-    }
-    .music-player-bar img {
-        width: 45px;
-        height: 45px;
-        object-fit: cover;
-        border-radius: 6px;
-    }
-    .music-player-info {
-        flex: 1;
-        overflow: hidden;
-    }
-    .music-player-title {
-        font-weight: 600;
-        font-size: 14px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .music-player-artist {
-        font-size: 12px;
-        color: var(--text-secondary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .music-player-controls {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-    .music-player-controls button {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-        padding: 5px;
-    }
-    
-    nav{
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: var(--bg-dark);
-        border-top: 1px solid var(--border-color);
-        z-index: 100;
-        display: none; /* Hide by default */
-        justify-content: space-around;
-        padding: 10px 0;
-    }
-    .tab{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 6px 14px;
-        border-radius: 999px;
-        background: none;
-        font-weight: 600;
-        cursor: pointer;
-        color: var(--text-secondary);
-        border: none;
-        font-size: 12px;
-    }
-    .tab span.icon { font-size: 24px; }
-    .tab.active{ color: var(--text-primary); }
-    .tab.active .icon { color: var(--accent); }
-    .profile-info {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-    .profile-info img {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-    }
-    .profile-info .name {
-        font-weight: bold;
-        font-size: 18px;
-    }
-
-    .admin-nav{
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    .admin-nav .btn{
-        padding: 8px 16px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        background: var(--card-bg);
-        color: var(--text-secondary);
-        cursor: pointer;
-    }
-    .admin-nav .btn.active{
-        background: var(--accent);
-        color: white;
-        border-color: var(--accent);
-    }
-    .admin-option-list .item{
-        padding: 12px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-    }
-    .admin-option-list .item:last-child{
-        border-bottom: none;
-    }
-    .toggle-link {
-        font-size: 14px;
-        color: var(--accent);
-        text-decoration: underline;
-        cursor: pointer;
-        margin-top: 15px;
-        display: block;
-    }
-    
-    .upcoming-list .item {
-        background: var(--card-bg);
-        border-radius: var(--rounded);
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-    .upcoming-list .item h3 {
-        margin: 0 0 5px 0;
-        font-size: 18px;
-    }
-    .upcoming-list .item p {
-        margin: 0;
-        color: var(--text-secondary);
-        font-size: 14px;
-    }
-    .song-list .song-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 12px;
-        cursor: pointer;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .song-list .song-item:last-child {
-        border-bottom: none;
-    }
-    .song-list .song-item img {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-    .song-list .song-info {
-        flex: 1;
-        overflow: hidden;
-    }
-    .song-list .song-title {
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .song-list .song-artist {
-        font-size: 14px;
-        color: var(--text-secondary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>video Hub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding-bottom: 70px; /* Space for the fixed bottom bar */
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #f0f0f0;
+        }
+        .content {
+            padding-bottom: 20px;
+        }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #fff;
+        }
+        .tab-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #2a2a2a;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            font-size: 12px;
+            color: #fff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+        .nav-button:hover {
+            transform: scale(1.1);
+        }
+        .nav-button.active {
+            color: #ff0000;
+        }
+        .nav-button .emoji {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .video-card {
+            background-color: #3a3a3a;
+            border-radius: 8px;
+            overflow: hidden;
+            text-align: center;
+            padding: 10px;
+        }
+        .video-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .video-title {
+            font-size: 14px;
+            margin: 10px 0 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .video-meta {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        .watch-btn {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            text-align: center;
+        }
+        .watch-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-  <div id="app">
-    <div id="mainContent" class="hidden">
-      <header class="container">
-        <div class="hdr">
-          <div class="logo">🎬</div>
-          <div>
-            <div class="site-title" id="siteName">Video Hub</div>
-            <div class="site-sub" id="siteAbout">Movie & Series Library</div>
-          </div>
-          <div style="flex:1"></div>
-          <a href="javascript:void(0)" onclick="logout()" style="
-            display: inline-block;
-            padding: 8px 14px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #ef4444, #dc2626);
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            margin-right: 8px;
-            font-size: 12px;
-          ">
-            Logout
-          </a>
-          <a href="https://drive.google.com/file/d/1HKWsccAM0YIlUF5tw6YJHeBsQ-bqI0Nw/view?usp=drivesdk" style="
-            display: inline-block;
-            padding: 8px 14px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #34d399, #10b981);
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 12px;
-          ">
-            Download APK
-          </a>
-        </div>
-      </header>
-      <main class="container">
-        <div id="paneHome" class="pane">
-          <div class="col" style="margin-bottom:12px">
-            <input id="youtubeSearchInput" type="text" placeholder="🔎 Search YouTube..." />
-          </div>
-          <div class="section-title">Trending Videos</div>
-          <div class="grid cols-2" id="trendingVideos"></div>
-          <div class="section-title">Categories</div>
-          <div class="scroll-x" id="categoryChips"></div>
-        </div>
-        <div id="paneSearch" class="pane" style="display:none">
-          <div class="col" style="margin-bottom:12px">
-            <div style="font-weight:800;font-size:24px">Search Results</div>
-          </div>
-          <div id="searchResults" class="grid cols-2"></div>
-        </div>
-        <div id="paneMovies" class="pane" style="display:none">
-          <div style="font-weight:800;font-size:24px">Movies</div>
-          <div id="moviesGrid" class="grid cols-2"></div>
-        </div>
-        <div id="paneSeries" class="pane" style="display:none">
-          <div style="font-weight:800;font-size:24px">Series</div>
-          <div id="seriesGrid" class="grid cols-2"></div>
-        </div>
-        <div id="paneSongs" class="pane" style="display:none">
-          <div class="col" style="margin-bottom:12px">
-            <div style="font-weight:800;font-size:24px">Songs</div>
-            <input id="songSearchInput" type="text" placeholder="🔎 Search songs..." />
-          </div>
-          <div id="songSearchResults" class="song-list">
-             <div style="text-align:center;color:var(--text-secondary);padding:20px;">Search for a song to get started.</div>
-          </div>
-        </div>
-        <div id="paneMore" class="pane" style="display:none">
-          <div style="font-weight:800;font-size:24px; margin-bottom: 20px;">More</div>
-          <div class="more-options">
-            <div class="card" onclick="openPage('settings')">
-              <div class="card-body">Settings</div>
-            </div>
-            <div class="card" onclick="openUpcomingPage()">
-              <div class="card-body">Upcoming</div>
-            </div>
-            <div class="card" onclick="showComingSoonAlert('Shuffle Play')">
-              <div class="card-body">Shuffle Play</div>
-            </div>
-            <div class="card" onclick="showFavorites()">
-              <div class="card-body">Favorites</div>
-            </div>
-            <div class="card" onclick="showDownloads()">
-              <div class="card-body">Downloads</div>
-            </div>
-            <div class="card" onclick="showGenrePage()">
-              <div class="card-body">Genre</div>
-            </div>
-            <div class="card" onclick="promptRequest()">
-              <div class="card-body">Request</div>
-            </div>
-            <div class="card" onclick="promptReport()">
-              <div class="card-body">Report</div>
-            </div>
-            <div class="card" onclick="openPage('terms')">
-              <div class="card-body">Terms & Conditions</div>
-            </div>
-            <div class="card" onclick="openPage('privacy')">
-              <div class="card-body">Privacy policy</div>
-            </div>
-          </div>
-        </div>
-      </main>
-      <div id="musicPlayerBar" class="music-player-bar">
-        <img id="musicPlayerArt" src="https://via.placeholder.com/45" alt="Album Art">
-        <div class="music-player-info">
-          <div id="musicPlayerTitle" class="music-player-title">No song playing</div>
-          <div id="musicPlayerArtist" class="music-player-artist"></div>
-        </div>
-        <div class="music-player-controls">
-          <button id="prevBtn">⏮️</button>
-          <button id="playPauseBtn">▶️</button>
-          <button id="nextBtn">⏭️</button>
-        </div>
-      </div>
-      <audio id="audioPlayer"></audio>
-      <nav id="bottomNav">
-        <button class="tab active" data-pane="home">
-          <span class="icon">🏠</span>
-          <span>Home</span>
-        </button>
-        <button class="tab" data-pane="search">
-          <span class="icon">🔍</span>
-          <span>Search</span>
-        </button>
-        <button class="tab" data-pane="movies">
-          <span class="icon">🎞️</span>
-          <span>Movies</span>
-        </button>
-        <button class="tab" data-pane="series">
-          <span class="icon">📺</span>
-          <span>Series</span>
-        </button>
-        <button class="tab" data-pane="songs">
-          <span class="icon">🎶</span>
-          <span>Songs</span>
-        </button>
-        <button class="tab" data-pane="more">
-          <span class="icon">☰</span>
-          <span>More</span>
-        </button>
-        <button id="adminDashboardTab" class="tab hidden" onclick="openPage('adminDashboard')">
-          <span class="icon">⚙️</span>
-          <span>Admin</span>
-        </button>
-      </nav>
-    </div>
 
-    <div id="authPage" class="auth-page">
-        <div class="auth-card">
-            <div id="authLogo" style="font-size: 60px; margin-bottom: 20px;">🎬</div>
-            <h1 id="authTitle">Welcome to Video Hub!</h1>
-            <p id="authSubtitle">Please sign up or log in to continue.</p>
-            
-            <div id="signupForm" style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px;">
-                <input id="signupName" type="text" placeholder="Full Name" />
-                <input id="signupEmail" type="text" placeholder="Email Address" />
-                <input id="signupPassword" type="password" placeholder="Password" />
-                <button id="btnSignUp" class="btn-primary" style="padding: 12px;">Create Account</button>
-                <a class="toggle-link" onclick="toggleAuthForm('login')">Already have an account? Log In</a>
-            </div>
-
-            <div id="loginForm" class="hidden" style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px;">
-                <input id="loginEmail" type="text" placeholder="Email Address" />
-                <input id="loginPassword" type="password" placeholder="Password" />
-                <button id="btnLogin" class="btn-emerald" style="padding: 12px;">Log In</button>
-                <a class="toggle-link" onclick="toggleAuthForm('signup')">Don't have an account? Create one!</a>
-            </div>
-        </div>
+<div class="container">
+    <h1>YouTube Downloader</h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for video...">
+        <button class="tab-button" id="searchBtn">🔍 Search</button>
     </div>
     
-    <div id="adminDashboardPage" class="admin-page hidden">
-        <div class="container">
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1 style="margin: 0;">Admin Dashboard</h1>
-                <button onclick="adminLogout()" class="btn-red">Logout</button>
-            </div>
-            <div class="admin-nav">
-                <button class="btn active" data-admin-pane="upcoming">Upcoming</button>
-                <button class="btn" data-admin-pane="users">Users</button>
-                <button class="btn" data-admin-pane="reports">Reports</button>
-                <button class="btn" data-admin-pane="requests">Requests</button>
-            </div>
-            <div id="admin-upcoming-pane" class="admin-pane">
-                <div class="card">
-                    <div class="card-body">
-                        <div style="font-weight:700">Add Upcoming Content</div>
-                        <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px">
-                            <input id="upcomingTitle" type="text" placeholder="Title" />
-                            <input id="upcomingReleaseDate" type="date" placeholder="Release Date" />
-                            <textarea id="upcomingDescription" rows="3" placeholder="Description"></textarea>
-                            <button id="btnAddUpcoming" class="btn-primary">Add Upcoming</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="admin-users-pane" class="admin-pane hidden">
-                <div class="card">
-                    <div class="card-body">
-                        <div style="font-weight:700;margin-bottom:8px">Registered Users</div>
-                        <div id="userList" class="admin-option-list"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="admin-reports-pane" class="admin-pane hidden">
-                <div class="card">
-                    <div class="card-body">
-                        <div style="font-weight:700;margin-bottom:8px">User Reports</div>
-                        <div id="reportList" class="admin-option-list"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="admin-requests-pane" class="admin-pane hidden">
-                <div class="card">
-                    <div class="card-body">
-                        <div style="font-weight:700;margin-bottom:8px">User Requests</div>
-                        <div id="requestList" class="admin-option-list"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="results">
+        <p style="text-align: center; color: #aaa;">Loading trending videos...</p>
     </div>
+</div>
 
-    <div id="videoDetailsPage" class="details-page"></div>
-    <div id="settingsPage" class="details-page hidden">
-        <div class="body">
-            <div class="back-btn" onclick="hidePage('settings')">←</div>
-            <h1 style="margin-top: 50px;">Settings</h1>
-            <div class="profile-info">
-                <img src="https://via.placeholder.com/60" alt="Profile Picture" />
-                <div>
-                    <div class="name">Maruf</div>
-                    <div class="email small-muted">mymaruf94@gmail.com</div>
-                    <a href="javascript:void(0)" onclick="toast('Edit Profile under development')">Edit</a>
-                </div>
-            </div>
-            <div class="more-options">
-                <div class="card" onclick="toast('My Profile under development')">
-                    <div class="card-body">My Profile</div>
-                </div>
-                <div class="card" onclick="toast('Subscription under development')">
-                    <div class="card-body">Subscription</div>
-                </div>
-                <div class="card" onclick="logout()">
-                    <div class="card-body">Logout</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="upcomingPage" class="upcoming-page hidden">
-        <div class="body">
-            <div class="back-btn" onclick="hidePage('upcoming')">←</div>
-            <h1 style="margin-top: 50px;">Upcoming</h1>
-            <div id="upcomingList" class="upcoming-list"></div>
-        </div>
-    </div>
-    <div id="termsPage" class="details-page hidden">
-        <div class="body">
-            <div class="back-btn" onclick="hidePage('terms')">←</div>
-            <h1 style="margin-top: 50px;">Terms and Conditions</h1>
-            <p>Welcome to our video streaming platform. By accessing or using our services, you agree to comply with and be bound by the following terms and conditions of use. Please review these terms carefully. If you do not agree to these terms, you should not use this website.</p>
-            <p>The term 'Video Hub' or 'us' or 'we' refers to the owner of the website whose registered office is [Your Company Address]. The term 'you' refers to the user or viewer of our website. The use of this website is subject to the following terms of use:</p>
-            <ol>
-                <li>The content of the pages of this website is for your general information and use only. It is subject to change without notice.</li>
-                <li>This website uses cookies to monitor browsing preferences. If you do allow cookies to be used, the following personal information may be stored by us for use by third parties.</li>
-                <li>Neither we nor any third parties provide any warranty or guarantee as to the accuracy, timeliness, performance, completeness or suitability of the information and materials found or offered on this website for any particular purpose. You acknowledge that such information and materials may contain inaccuracies or errors and we expressly exclude liability for any such inaccuracies or errors to the fullest extent permitted by law.</li>
-                <li>Your use of any information or materials on this website is entirely at your own risk, for which we shall not be liable. It shall be your own responsibility to ensure that any products, services or information available through this website meet your specific requirements.</li>
-                <li>This website contains material which is owned by or licensed to us. This material includes, but is not limited to, the design, layout, look, appearance and graphics. Reproduction is prohibited other than in accordance with the copyright notice, which forms part of these terms and conditions.</li>
-                <li>All trademarks reproduced in this website which are not the property of, or licensed to, the operator are acknowledged on the website.</li>
-                <li>Unauthorized use of this website may give rise to a claim for damages and/or be a criminal offense.</li>
-                <li>From time to time this website may also include links to other websites. These links are provided for your convenience to provide further information. They do not signify that we endorse the website(s). We have no responsibility for the content of the linked website(s).</li>
-                <li>Your use of this website and any dispute arising out of such use of the website is subject to the laws of [Your Country].</li>
-            </ol>
-        </div>
-    </div>
+<div class="nav-bar">
+    <button class="nav-button active" id="homeBtn">
+        <span class="emoji">🏠</span>
+        <span>Home</span>
+    </button>
+    <button class="nav-button" id="historyBtn">
+        <span class="emoji">⏱️</span>
+        <span>History</span>
+    </button>
+</div>
 
-    <div id="privacyPage" class="details-page hidden">
-        <div class="body">
-            <div class="back-btn" onclick="hidePage('privacy')">←</div>
-            <h1 style="margin-top: 50px;">Privacy Policy</h1>
-            <p>This privacy policy sets out how we use and protect any information that you give us when you use this website. We are committed to ensuring that your privacy is protected. Should we ask you to provide certain information by which you can be identified when using this website, then you can be assured that it will only be used in accordance with this privacy statement.</p>
-            <p>We may change this policy from time to time by updating this page. You should check this page from time to time to ensure that you are happy with any changes.</p>
-            <h3>What we collect</h3>
-            <p>We may collect the following information:</p>
-            <ul>
-                <li>name and contact information including email address</li>
-                <li>demographic information such as postcode, preferences and interests</li>
-                <li>other information relevant to customer surveys and/or offers</li>
-            </ul>
-            <h3>What we do with the information we gather</h3>
-            <p>We require this information to understand your needs and provide you with a better service, and in particular for the following reasons:</p>
-            <ul>
-                <li>Internal record keeping.</li>
-                <li>We may use the information to improve our products and services.</li>
-                <li>We may periodically send promotional emails about new products, special offers or other information which we think you may find interesting using the email address which you have provided.</li>
-                <li>From time to time, we may also use your information to contact you for market research purposes. We may contact you by email, phone, fax or mail. We may use the information to customize the website according to your interests.</li>
-            </ul>
-        </div>
-    </div>
+<script>
+    const homeBtn = document.getElementById('homeBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsContainer = document.getElementById('results');
     
-    <div id="favoritesPage" class="details-page hidden">
-        <div class="body">
-            <div class="back-btn" onclick="hidePage('favorites')">←</div>
-            <h1 style="margin-top: 50px;">Your Favorites</h1>
-            <div id="favoritesGrid" class="grid cols-2"></div>
-        </div>
-    </div>
+    const API_URL = 'https://video-hub-6e40.onrender.com';
+    const HISTORY_KEY = 'ytbHistory';
 
-    <div id="downloadsPage" class="details-page hidden">
-        <div class="body">
-            <div class="back-btn" onclick="hidePage('downloads')">←</div>
-            <h1 style="margin-top: 50px;">Your Downloads</h1>
-            <div id="downloadsGrid" class="grid cols-2"></div>
-        </div>
-    </div>
-    <div id="genrePage" class="details-page hidden">
-        <div class="body">
-            <div class="back-btn" onclick="hidePage('genre')">←</div>
-            <h1 style="margin-top: 50px;">All Genres</h1>
-            <div style="font-size: 14px; margin-bottom: 20px; color: var(--text-secondary);">Search Your Favourite Genre</div>
-            <div id="genreGrid" class="grid cols-2"></div>
-        </div>
-    </div>
-  </div>
-  <script>
-    const CONFIG = {
-      ADMIN_EMAIL: "mymaruf94@gmail.com",
-      ADMIN_PASS: "123450",
-      SHEETDB_API: "https://sheetdb.io/api/v1/vitcn9bcwl84i", 
-      YOUTUBE_API: "https://video-hub-9ysg.onrender.com/youtube-search", // New YouTube Search API
-      MUSIC_API: {
-          SEARCH: "https://video-hub-9ysg.onrender.com/search",
-          DOWNLOAD: "https://video-hub-9ysg.onrender.com/play"
-      },
-    };
+    let currentView = 'home';
 
-    const OWNER_INFO = {
-        name: "Video Hub",
-        about: "Your home for videos & music."
-    };
+    // Event listeners for navigation
+    homeBtn.addEventListener('click', () => {
+        currentView = 'home';
+        setActiveButton(homeBtn);
+        fetchTrendingVideos();
+    });
 
-    const qs = sel => document.querySelector(sel);
-    const qsa = sel => Array.from(document.querySelectorAll(sel));
-    const api = CONFIG.SHEETDB_API;
+    historyBtn.addEventListener('click', () => {
+        currentView = 'history';
+        setActiveButton(historyBtn);
+        displayHistory();
+    });
 
-    function toast(msg){
-      console.log('TOAST:', msg);
-      alert(msg);
-    }
-
-    function apiGet(sheet){
-      return fetch(`${api}?sheet=${encodeURIComponent(sheet)}`).then(r=>r.json());
-    }
-    function apiPost(sheet, rowObj){
-      return fetch(`${api}?sheet=${encodeURIComponent(sheet)}`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ data: rowObj })
-      }).then(r=>r.json());
-    }
-    function apiUpdateUserStatus(id, status){
-      return fetch(`${api}/id/${encodeURIComponent(id)}?sheet=users`, {
-        method: 'PATCH',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ data: { status: status } })
-      }).then(r => r.json());
-    }
-
-    function rid(prefix='id'){ return `${prefix}_${Math.random().toString(36).slice(2,9)}${Date.now().toString().slice(-4)}` }
-
-    let STATE = {
-      users: [], 
-      reports: [],
-      requests: [],
-      upcoming: [],
-      isAdmin: false,
-      favorites: JSON.parse(localStorage.getItem('bv_favorites') || '[]'),
-      downloads: JSON.parse(localStorage.getItem('bv_downloads') || '[]'),
-      owner: OWNER_INFO,
-      songs: [],
-      currentSong: null,
-      currentSongIndex: 0,
-    };
-    
-    // YouTube specific video data structure
-    function createYouTubeVideoObject(item) {
-        if (!item.id || !item.id.videoId) return null;
-        return {
-            id: item.id.videoId,
-            title: item.snippet.title,
-            description: item.snippet.description,
-            thumbnail: item.snippet.thumbnails.high.url,
-            channel: item.snippet.channelTitle,
-            publishedAt: item.snippet.publishedAt,
-        };
-    }
-    
-    function getYouTubeEmbedLink(videoId) {
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-    }
-
-    const parseDuration = (timestamp) => {
-        const parts = timestamp.split(':').map(part => parseInt(part));
-        let seconds = 0;
-
-        if (parts.length === 3) {
-          seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
-        } else if (parts.length === 2) {
-          seconds = parts[0] * 60 + parts[1];
+    searchBtn.addEventListener('click', () => {
+        const query = searchInput.value.trim();
+        if (query) {
+            currentView = 'search';
+            // Search button doesn't have an active state in the nav bar
+            performSearch(query);
         }
+    });
 
-        return seconds;
-    };
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchBtn.click();
+        }
+    });
 
-    async function loadInitial(){
-      try{
-        const [usersRaw, reportsRaw, requestsRaw, upcomingRaw] = await Promise.all([
-          apiGet('users').catch(()=>[]),
-          apiGet('reports').catch(()=>[]),
-          apiGet('requests').catch(()=>[]),
-          apiGet('upcoming_videos').catch(()=>[])
-        ]);
-        
-        STATE.users = (Array.isArray(usersRaw) ? usersRaw.map(r => ({
-            id: r.id || r.ID,
-            name: r.name || r.Name || 'Unknown',
-            email: r.email || r.Email || 'No email',
-            password: r.password || '',
-            status: r.status || 'active',
-            createdAt: r.createdAt || ''
-        })) : []);
-        
-        STATE.reports = Array.isArray(reportsRaw) ? reportsRaw.map(r => ({
-            id: r.id, name: r.name, email: r.email, report: r.report, createdAt: r.createdAt
-        })) : [];
+    // Initial load: show trending videos
+    fetchTrendingVideos();
 
-        STATE.requests = Array.isArray(requestsRaw) ? requestsRaw.map(r => ({
-            id: r.id, name: r.name, email: r.email, request: r.request, createdAt: r.createdAt
-        })) : [];
-
-        STATE.upcoming = Array.isArray(upcomingRaw) ? upcomingRaw.map(r => ({
-            id: r.id, title: r.title, release_date: r.release_date, description: r.description
-        })) : [];
-
-        // Load trending videos from YouTube on initial load
-        await fetchTrendingVideos();
-      }catch(e){
-        console.error(e);
-      }
+    // Helper function to set the active button
+    function setActiveButton(activeButton) {
+        const navButtons = [homeBtn, historyBtn];
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        activeButton.classList.add('active');
     }
 
+    // Function to fetch and display trending videos
     async function fetchTrendingVideos() {
+        resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Loading trending videos...</p>';
         try {
-            const response = await fetch(`${CONFIG.YOUTUBE_API}?q=trending&maxResults=20`);
+            const response = await fetch(`${API_URL}/ytb/trending`); 
             const data = await response.json();
-            const videos = data.map(createYouTubeVideoObject).filter(v => v);
-            renderVideoSection(qs('#trendingVideos'), videos);
+            
+            if (data.error) {
+                resultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">${data.error}</p>`;
+                return;
+            }
+            displayResults(data);
         } catch (error) {
-            console.error('Failed to fetch trending videos:', error);
-            qs('#trendingVideos').innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Failed to load trending videos.</div>';
+            resultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">Failed to load trending videos.</p>`;
         }
     }
 
-    function renderVideoSection(container, videos){
-      container.innerHTML = '';
-      if(!videos.length){
-        container.innerHTML = '<div style="color:var(--text-secondary)">No videos found.</div>';
-        return;
-      }
-      videos.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'content-card';
-        card.style.width = '100%';
-        card.innerHTML = `<img src="${v.thumbnail}" onerror="this.src='https://via.placeholder.com/150x90.png?text=No+Image'" alt="${v.title}">
-                          <div class="content-card-title">${escapeHtml(v.title)}</div>`;
-        card.onclick = () => showVideoDetails(v);
-        container.appendChild(card);
-      });
-    }
-
-    function renderCategories(container, categories){
-      container.innerHTML = '';
-      categories.forEach(cat => {
-        const chip = document.createElement('div');
-        chip.className = 'chip';
-        chip.textContent = cat;
-        chip.onclick = () => {
-          searchYouTube(cat, true);
-        };
-        container.appendChild(chip);
-      });
-    }
-
-    function showVideoDetails(video) {
-      const page = qs('#videoDetailsPage');
-      
-      const isFavorite = STATE.favorites.includes(video.id);
-      const favoriteBtnClass = isFavorite ? 'btn-emerald' : 'btn-primary';
-      const favoriteBtnText = isFavorite ? '⭐ Favorited' : '⭐ Favorite';
-      
-      // Stop any playing music
-      const audioPlayer = qs('#audioPlayer');
-      audioPlayer.pause();
-      qs('#playPauseBtn').textContent = '▶️';
-      qs('#musicPlayerBar').classList.remove('active');
-
-      page.innerHTML = `
-          <div class="header">
-              <iframe id="video-player" src="${getYouTubeEmbedLink(video.id)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-              <div class="back-btn" onclick="hidePage('videoDetails')">←</div>
-          </div>
-          <div class="body">
-              <h1>${escapeHtml(video.title)}</h1>
-              <div class="meta-info">
-                  <div>${escapeHtml(video.channel)}</div>
-                  <div>·</div>
-                  <div>${new Date(video.publishedAt).toLocaleDateString()}</div>
-              </div>
-              <div class="btn-group">
-                  <button class="btn-primary" onclick="playCurrentVideo()">▶️ Watch Now</button>
-                  <button id="favoriteBtn" class="${favoriteBtnClass}" data-id="${video.id}">${favoriteBtnText}</button>
-                  <button id="downloadBtn" class="btn-primary" onclick="showComingSoonAlert('Download Video')">⬇️ Download</button>
-              </div>
-              <div class="overview">${escapeHtml(video.description)}</div>
-          </div>
-      `;
-      page.style.display = 'block';
-
-      window.playCurrentVideo = function() {
-          const iframe = qs('#video-player');
-          iframe.src = getYouTubeEmbedLink(video.id);
-      }
-      
-      qs('#favoriteBtn').addEventListener('click', () => {
-          const videoId = video.id;
-          if (STATE.favorites.includes(videoId)) {
-              STATE.favorites = STATE.favorites.filter(id => id !== videoId);
-              toast('Removed from favorites.');
-          } else {
-              STATE.favorites.push(videoId);
-              toast('Added to favorites!');
-          }
-          localStorage.setItem('bv_favorites', JSON.stringify(STATE.favorites));
-          const favoriteBtn = qs('#favoriteBtn');
-          const isFavorited = STATE.favorites.includes(videoId);
-          favoriteBtn.className = isFavorited ? 'btn-emerald' : 'btn-primary';
-          favoriteBtn.textContent = isFavorited ? '⭐ Favorited' : '⭐ Favorite';
-      });
-    }
-
-    function setPane(paneId){
-        qsa('.pane').forEach(p => p.style.display = 'none');
-        const activePane = qs(`#pane${paneId.charAt(0).toUpperCase() + paneId.slice(1)}`);
-        if(activePane) activePane.style.display = 'block';
-        
-        qsa('#bottomNav .tab').forEach(t => t.classList.remove('active'));
-        qs(`#bottomNav [data-pane="${paneId}"]`).classList.add('active');
-    }
-    
-    qsa('#bottomNav .tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const paneId = btn.dataset.pane;
-            setPane(paneId);
-        });
-    });
-
-    function showComingSoonAlert(featureName) {
-        alert(`${featureName} feature is under development. Coming soon!`);
-    }
-
-    async function promptRequest() {
-        const request = prompt("What movie or series would you like to request?");
-        if (request) {
-            const userId = localStorage.getItem('isUserLoggedIn');
-            const user = STATE.users.find(u => u.id === userId);
-            const reqData = {
-                id: rid('req'),
-                name: user ? user.name : 'Unknown User',
-                email: user ? user.email : 'Unknown Email',
-                request: request,
-                createdAt: new Date().toISOString()
-            };
-            await apiPost('requests', reqData);
-            toast(`Thank you for your request for "${request}". We will review it.`);
-        }
-    }
-
-    async function promptReport() {
-        const report = prompt("Please describe the issue you would like to report:");
-        if (report) {
-            const userId = localStorage.getItem('isUserLoggedIn');
-            const user = STATE.users.find(u => u.id === userId);
-            const reportData = {
-                id: rid('rep'),
-                name: user ? user.name : 'Unknown User',
-                email: user ? user.email : 'Unknown Email',
-                report: report,
-                createdAt: new Date().toISOString()
-            };
-            await apiPost('reports', reportData);
-            toast("Thank you for your report. We will look into it shortly.");
-        }
-    }
-
-    function openPage(pageId) {
-        const page = qs(`#${pageId}Page`);
-        if (page) {
-            page.classList.remove('hidden');
-            page.style.display = 'block';
-        }
-    }
-
-    function hidePage(pageId) {
-        const page = qs(`#${pageId}Page`);
-        if (page) {
-            page.classList.add('hidden');
-            page.style.display = 'none';
-        }
-    }
-
-    function showGenrePage() {
-        const page = qs('#genrePage');
-        const genres = [
-            "Horror", "Music", "Western", "Kids", "Super Power", 
-            "Shounen", "School", "Adventure", "War & Politics", "Mystery", 
-            "Thriller", "Family", "Romance", "Science Fiction", "Comedy", "Fantasy", 
-            "Drama", "Crime", "Action & Adventure", "Animation"
-        ];
-        const genreGrid = qs('#genreGrid');
-        genreGrid.innerHTML = '';
-        genres.forEach(genre => {
-            const genreCard = document.createElement('div');
-            genreCard.className = 'card';
-            genreCard.innerHTML = `<div class="card-body" style="text-align: center;">
-                <h3 style="margin-top:0;">${genre}</h3>
-            </div>`;
-            genreCard.onclick = () => {
-                searchYouTube(genre, true);
-            };
-            genreGrid.appendChild(genreCard);
-        });
-        openPage('genre');
-    }
-
-    function openUpcomingPage() {
-        const upcomingList = qs('#upcomingList');
-        upcomingList.innerHTML = '';
-        if (STATE.upcoming.length === 0) {
-            upcomingList.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">No upcoming videos announced yet.</div>';
-        } else {
-            STATE.upcoming.forEach(item => {
-                const upcomingItem = document.createElement('div');
-                upcomingItem.className = 'item';
-                upcomingItem.innerHTML = `
-                    <h3>${escapeHtml(item.title)}</h3>
-                    <p>Release Date: ${new Date(item.release_date).toLocaleDateString()}</p>
-                    <p>${escapeHtml(item.description)}</p>
-                `;
-                upcomingList.appendChild(upcomingItem);
-            });
-        }
-        openPage('upcoming');
-    }
-
-    function toggleAuthForm(form) {
-        if (form === 'login') {
-            qs('#signupForm').classList.add('hidden');
-            qs('#loginForm').classList.remove('hidden');
-            qs('#authTitle').textContent = 'Welcome Back!';
-            qs('#authSubtitle').textContent = 'Please log in to your account.';
-        } else {
-            qs('#loginForm').classList.add('hidden');
-            qs('#signupForm').classList.remove('hidden');
-            qs('#authTitle').textContent = 'Welcome to Video Hub!';
-            qs('#authSubtitle').textContent = 'Please sign up or log in to continue.';
-        }
-    }
-
-    qs('#btnSignUp').addEventListener('click', async () => {
-        const name = qs('#signupName').value.trim();
-        const email = qs('#signupEmail').value.trim();
-        const password = qs('#signupPassword').value.trim();
-
-        if (!name || !email || !password) {
-            toast('Name, Email and Password are required.');
-            return;
-        }
-
+    // Function to perform a search
+    async function performSearch(query) {
+        resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Searching...</p>';
         try {
-            await loadInitial();
-            const existingUser = STATE.users.find(u => u.email === email);
-            if (existingUser) {
-                toast('This email is already registered. Please log in.');
-                return;
-            }
-
-            const newUser = {
-                id: rid('usr'),
-                name: name,
-                email: email,
-                password: password,
-                status: 'active',
-                createdAt: new Date().toISOString()
-            };
-            
-            await apiPost('users', newUser);
-            STATE.users.push(newUser);
-            localStorage.setItem('isUserLoggedIn', newUser.id);
-            toast('Account created successfully! Redirecting...');
-            window.location.reload();
-        } catch (e) {
-            console.error(e);
-            toast('Failed to create account. Please try again.');
-        }
-    });
-
-    qs('#btnLogin').addEventListener('click', async () => {
-        const email = qs('#loginEmail').value.trim();
-        const password = qs('#loginPassword').value.trim();
-        
-        if (!email || !password) {
-            toast('Email and Password are required.');
-            return;
-        }
-
-        try {
-            await loadInitial();
-            
-            if (email === CONFIG.ADMIN_EMAIL && password === CONFIG.ADMIN_PASS) {
-                localStorage.setItem('isAdminLoggedIn', 'true');
-                toast("Admin login successful!");
-                window.location.reload();
-                return;
-            }
-
-            const user = STATE.users.find(u => u.email === email);
-            
-            if (!user) {
-                toast('User not found. Please sign up.');
-                return;
-            }
-
-            if (user.password !== password) {
-                toast('Incorrect password.');
-                return;
-            }
-            
-            if (user.status === 'blocked') {
-                toast('Your account has been blocked by the admin.');
-                return;
-            }
-
-            localStorage.setItem('isUserLoggedIn', user.id);
-            toast('Login successful! Redirecting...');
-            window.location.reload();
-        } catch (e) {
-            console.error(e);
-            toast('Login failed. Please try again.');
-        }
-    });
-
-    function logout() {
-        localStorage.removeItem('isUserLoggedIn');
-        localStorage.removeItem('isAdminLoggedIn');
-        window.location.reload();
-    }
-
-    function adminLogout() {
-        localStorage.removeItem('isAdminLoggedIn');
-        window.location.reload();
-    }
-
-    function renderAdminDashboard() {
-        qsa('.admin-nav .btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                qsa('.admin-nav .btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                qsa('.admin-pane').forEach(p => p.classList.add('hidden'));
-                qs(`#admin-${btn.dataset.adminPane}-pane`).classList.remove('hidden');
-                
-                if (btn.dataset.adminPane === 'users') {
-                    renderUserList();
-                } else if (btn.dataset.adminPane === 'reports') {
-                    renderReportsList();
-                } else if (btn.dataset.adminPane === 'requests') {
-                    renderRequestsList();
-                }
-            });
-        });
-        qs('#admin-upcoming-pane').classList.remove('hidden');
-        qs('#btnAddUpcoming').addEventListener('click', addUpcomingVideo);
-    }
-
-    async function addUpcomingVideo() {
-        const title = qs('#upcomingTitle').value.trim();
-        const release_date = qs('#upcomingReleaseDate').value.trim();
-        const description = qs('#upcomingDescription').value.trim();
-
-        if (!title || !release_date) {
-            toast('Title and Release Date are required.');
-            return;
-        }
-
-        try {
-            const newUpcoming = {
-                id: rid('upc'),
-                title: title,
-                release_date: release_date,
-                description: description
-            };
-            await apiPost('upcoming_videos', newUpcoming);
-            toast('Upcoming video added successfully!');
-            qs('#upcomingTitle').value = '';
-            qs('#upcomingReleaseDate').value = '';
-            qs('#upcomingDescription').value = '';
-        } catch (e) {
-            console.error(e);
-            toast('Failed to add upcoming video.');
-        }
-    }
-    
-    async function renderUserList() {
-        const userListContainer = qs('#userList');
-        userListContainer.innerHTML = '';
-        await loadInitial();
-        if (STATE.users.length === 0) {
-            userListContainer.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-secondary)">No users registered yet.</div>';
-            return;
-        }
-        STATE.users.forEach(user => {
-            const statusText = user.status === 'blocked' ? 'Unblock' : 'Block';
-            const statusClass = user.status === 'blocked' ? 'btn-emerald' : 'btn-red';
-            const userItem = document.createElement('div');
-            userItem.className = 'item';
-            userItem.innerHTML = `
-                <div style="flex:1;">
-                    <div style="font-weight:700">${escapeHtml(user.name)}</div>
-                    <div class="small-muted">${escapeHtml(user.email)}</div>
-                    <div class="tiny muted">ID: ${escapeHtml(user.id)}</div>
-                </div>
-                <button data-id="${user.id}" data-status="${user.status}" class="btn ${statusClass}">${statusText}</button>
-            `;
-            userListContainer.appendChild(userItem);
-            userItem.querySelector('button').addEventListener('click', async (e) => {
-                const userId = e.target.dataset.id;
-                const currentStatus = e.target.dataset.status;
-                const newStatus = currentStatus === 'active' ? 'blocked' : 'active';
-                try {
-                    await apiUpdateUserStatus(userId, newStatus);
-                    toast(`User ${user.name} has been ${newStatus}d.`);
-                    renderUserList();
-                } catch (err) {
-                    toast('Failed to update user status.');
-                }
-            });
-        });
-    }
-
-    async function renderReportsList() {
-        const reportListContainer = qs('#reportList');
-        reportListContainer.innerHTML = '';
-        await loadInitial();
-        if (STATE.reports.length === 0) {
-            reportListContainer.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-secondary)">No new reports.</div>';
-            return;
-        }
-        STATE.reports.forEach(report => {
-            const item = document.createElement('div');
-            item.className = 'item';
-            item.innerHTML = `
-                <div style="flex:1;">
-                    <div style="font-weight:700">Report from: ${escapeHtml(report.name)}</div>
-                    <div class="small-muted">${escapeHtml(report.email)}</div>
-                    <div class="tiny muted" style="margin-top: 5px;">Report: ${escapeHtml(report.report)}</div>
-                </div>
-            `;
-            reportListContainer.appendChild(item);
-        });
-    }
-
-    async function renderRequestsList() {
-        const requestListContainer = qs('#requestList');
-        requestListContainer.innerHTML = '';
-        await loadInitial();
-        if (STATE.requests.length === 0) {
-            requestListContainer.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-secondary)">No new requests.</div>';
-            return;
-        }
-        STATE.requests.forEach(request => {
-            const item = document.createElement('div');
-            item.className = 'item';
-            item.innerHTML = `
-                <div style="flex:1;">
-                    <div style="font-weight:700">Request from: ${escapeHtml(request.name)}</div>
-                    <div class="small-muted">${escapeHtml(request.email)}</div>
-                    <div class="tiny muted" style="margin-top: 5px;">Request: ${escapeHtml(request.request)}</div>
-                </div>
-            `;
-            requestListContainer.appendChild(item);
-        });
-    }
-    
-    function showFavorites() {
-        const favoritesContainer = qs('#favoritesGrid');
-        favoritesContainer.innerHTML = '';
-        const favoritedVideos = STATE.favorites; // Assuming favorites stores YouTube video IDs
-
-        if (favoritedVideos.length === 0) {
-            favoritesContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">You have no favorites yet.</div>';
-        } else {
-            // Here you would need to fetch video details for each ID.
-            // For a simple demo, we'll just show placeholders.
-            favoritesContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">Favorite videos will appear here. Feature under development.</div>';
-        }
-        openPage('favorites');
-    }
-    
-    function showDownloads() {
-        const downloadsContainer = qs('#downloadsGrid');
-        downloadsContainer.innerHTML = '';
-        downloadsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">Video downloads are not supported.</div>';
-        openPage('downloads');
-    }
-    
-    // YouTube Search Logic
-    async function searchYouTube(query, showPane = false) {
-        const resultsContainer = qs('#searchResults');
-        resultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Searching...</div>';
-        if (showPane) setPane('search');
-
-        try {
-            const response = await fetch(`${CONFIG.YOUTUBE_API}?q=${encodeURIComponent(query)}`);
+            const response = await fetch(`${API_URL}/ytb/search?q=${encodeURIComponent(query)}`);
             const data = await response.json();
-            const videos = data.map(createYouTubeVideoObject).filter(v => v);
-            renderVideoSection(resultsContainer, videos);
-        } catch (error) {
-            console.error('YouTube Search API error:', error);
-            resultsContainer.innerHTML = '<div style="text-align:center;color:var(--accent);padding:20px;">An error occurred while searching. Please try again.</div>';
-        }
-    }
-
-    qs('#youtubeSearchInput').addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        if (query.length > 2) {
-            searchYouTube(query, true);
-        }
-    });
-
-    // Dedicated song search logic
-    qs('#songSearchInput').addEventListener('input', async (e) => {
-        const query = e.target.value.trim();
-        const searchResultsContainer = qs('#songSearchResults');
-        
-        if (query.length > 0) {
-            searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Searching...</div>';
             
-            try {
-                const searchResponse = await fetch(`${CONFIG.MUSIC_API.SEARCH}?q=${encodeURIComponent(query)}`);
-                const searchData = await searchResponse.json();
-                
-                if (searchData && Array.isArray(searchData)) {
-                    const filteredSongs = searchData.filter(video => {
-                        try {
-                            const totalSeconds = parseDuration(video.timestamp);
-                            return totalSeconds < 600;
-                        } catch {
-                            return false;
-                        }
-                    });
-
-                    STATE.songs = filteredSongs;
-                    renderFilteredSongs(filteredSongs, searchResultsContainer);
-                } else {
-                    searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No results found. Please try a different query.</div>';
-                }
-
-            } catch (error) {
-                console.error('Search API error:', error);
-                searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--accent);padding:20px;">An error occurred while searching. Please try again.</div>';
+            if (data.error) {
+                resultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">${data.error}</p>`;
+                return;
             }
-
-        } else {
-            searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Search for a song to get started.</div>';
-            STATE.songs = [];
-        }
-    });
-    
-    function renderFilteredSongs(songsToRender, container) {
-        container.innerHTML = '';
-        if (songsToRender.length === 0) {
-            container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No matching songs found.</div>';
-        } else {
-            songsToRender.forEach(song => {
-                const songItem = document.createElement('div');
-                songItem.className = 'song-item';
-                songItem.innerHTML = `
-                    <img src="${song.thumbnail}" onerror="this.src='https://via.placeholder.com/60.png?text=No+Art'" alt="${song.title}">
-                    <div class="song-info">
-                        <div class="song-title">${escapeHtml(song.title)}</div>
-                        <div class="song-artist">${escapeHtml(song.channelTitle || 'Unknown Artist')}</div>
-                        <div class="song-artist" style="font-size:12px;color:var(--accent)">Duration: ${escapeHtml(song.timestamp)}</div>
-                    </div>
-                `;
-                songItem.onclick = () => playSong(song);
-                container.appendChild(songItem);
-            });
+            displayResults(data);
+            addToHistory(query, data);
+        } catch (error) {
+            resultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">Failed to fetch search results.</p>`;
         }
     }
     
-    function renderSiteHeader(){
-      qs('#siteName').textContent = OWNER_INFO.name;
-      qs('#siteAbout').textContent = OWNER_INFO.about;
-    }
-
-    function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>'
-,'&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
-
-    function checkAuthStatus() {
-        const isUserLoggedIn = localStorage.getItem('isUserLoggedIn');
-        const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
-        const adminDashboardTab = qs('#adminDashboardTab');
-        
-        if (isUserLoggedIn) {
-            qs('#authPage').classList.add('hidden');
-            qs('#mainContent').classList.remove('hidden');
-            qs('#bottomNav').style.display = 'flex';
-            adminDashboardTab.classList.add('hidden');
-            loadInitial();
-        } else if (isAdminLoggedIn) {
-            STATE.isAdmin = true;
-            qs('#authPage').classList.add('hidden');
-            qs('#mainContent').classList.remove('hidden');
-            qs('#bottomNav').style.display = 'flex';
-            qs('#mainContent').classList.add('hidden');
-            openPage('adminDashboard');
-            adminDashboardTab.classList.remove('hidden');
-            renderAdminDashboard();
-            loadInitial();
-        } else {
-            qs('#authPage').classList.remove('hidden');
-            qs('#mainContent').classList.add('hidden');
-            qs('#bottomNav').style.display = 'none';
-            adminDashboardTab.classList.add('hidden');
-            loadInitial();
-        }
-    }
-    
-    // Music Player Logic
-    const audioPlayer = qs('#audioPlayer');
-    const musicPlayerBar = qs('#musicPlayerBar');
-    const musicPlayerTitle = qs('#musicPlayerTitle');
-    const musicPlayerArtist = qs('#musicPlayerArtist');
-    const musicPlayerArt = qs('#musicPlayerArt');
-    const playPauseBtn = qs('#playPauseBtn');
-    const nextBtn = qs('#nextBtn');
-    const prevBtn = qs('#prevBtn');
-
-    async function playSong(song) {
-        if (!song || !song.url) {
-            toast('No valid song link found.');
+    // Function to display video cards
+    function displayResults(videos) {
+        resultsContainer.innerHTML = '';
+        if (videos.length === 0) {
+            resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">No videos found.</p>';
             return;
         }
 
-        musicPlayerTitle.textContent = 'Loading...';
-        musicPlayerArtist.textContent = '';
-        musicPlayerArt.src = 'https://via.placeholder.com/45.png';
-        musicPlayerBar.classList.add('active');
-        playPauseBtn.textContent = '⏳';
-        
-        try {
-            const apiResponse = await fetch(`${CONFIG.MUSIC_API.DOWNLOAD}?url=${encodeURIComponent(song.url)}`);
-            const apiData = await apiResponse.json();
+        videos.forEach(video => {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            card.innerHTML = `
+                <img src="${video.thumbnail}" alt="${video.title}">
+                <div class="video-title">${video.title}</div>
+                <div class="video-meta">Duration: ${video.time}</div>
+                <div class="video-meta">Channel: ${video.channel.name}</div>
+                <a class="watch-btn" href="watch.html?id=${video.id}&format=mp4&title=${encodeURIComponent(video.title)}">Watch</a>
+            `;
             
-            if (apiData && apiData.url) {
-                audioPlayer.src = apiData.url;
-                await audioPlayer.play();
-                musicPlayerTitle.textContent = song.title;
-                musicPlayerArtist.textContent = song.channelTitle || 'Unknown Artist';
-                musicPlayerArt.src = song.thumbnail || 'https://via.placeholder.com/45.png';
-                playPauseBtn.textContent = '⏸️';
-
-                const index = STATE.songs.findIndex(s => s.url === song.url);
-                STATE.currentSongIndex = index;
-            } else {
-                audioPlayer.src = `${CONFIG.MUSIC_API.DOWNLOAD}?url=${encodeURIComponent(song.url)}`;
-                await audioPlayer.play();
-                musicPlayerTitle.textContent = song.title;
-                musicPlayerArtist.textContent = song.channelTitle || 'Unknown Artist';
-                musicPlayerArt.src = song.thumbnail || 'https://via.placeholder.com/45.png';
-                playPauseBtn.textContent = '⏸️';
-            }
-        } catch (error) {
-            console.error('Play API error:', error);
-            toast('Error playing song. Please try again.');
-            playPauseBtn.textContent = '▶️';
-            musicPlayerTitle.textContent = 'Playback Failed';
-            musicPlayerArtist.textContent = 'Try another song.';
-        }
+            resultsContainer.appendChild(card);
+        });
     }
 
-    playPauseBtn.addEventListener('click', () => {
-        if (audioPlayer.paused) {
-            audioPlayer.play();
-            playPauseBtn.textContent = '⏸️';
-        } else {
-            audioPlayer.pause();
-            playPauseBtn.textContent = '▶️';
+    // Function to add a search query to history
+    function addToHistory(query, results) {
+        let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+        const newEntry = { query, results, timestamp: new Date().toISOString() };
+        
+        history.unshift(newEntry);
+
+        if (history.length > 20) {
+            history = history.slice(0, 20);
         }
-    });
+        
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
 
-    nextBtn.addEventListener('click', () => {
-        if (STATE.songs.length === 0) return;
-        STATE.currentSongIndex = (STATE.currentSongIndex + 1) % STATE.songs.length;
-        playSong(STATE.songs[STATE.currentSongIndex]);
-    });
+    // Function to display the search history
+    function displayHistory() {
+        const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+        resultsContainer.innerHTML = '';
+        
+        if (history.length === 0) {
+            resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Your search history is empty.</p>';
+            return;
+        }
 
-    prevBtn.addEventListener('click', () => {
-        if (STATE.songs.length === 0) return;
-        STATE.currentSongIndex = (STATE.currentSongIndex - 1 + STATE.songs.length) % STATE.songs.length;
-        playSong(STATE.songs[STATE.currentSongIndex]);
-    });
+        history.forEach(entry => {
+            const historyCard = document.createElement('div');
+            historyCard.className = 'video-card'; 
+            historyCard.innerHTML = `
+                <div class="video-title">Search: "${entry.query}"</div>
+                <div class="video-meta">${new Date(entry.timestamp).toLocaleString()}</div>
+                <button class="watch-btn" onclick="performSearch('${entry.query.replace(/'/g, "\\'")}')">View Results</button>
+            `;
+            resultsContainer.appendChild(historyCard);
+        });
+    }
+</script>
 
-    audioPlayer.addEventListener('ended', () => {
-        nextBtn.click();
-    });
-
-    (function init(){
-      renderSiteHeader();
-      checkAuthStatus();
-      setPane('home');
-      
-      // Render some default categories for the home page
-      const defaultCategories = ["Music", "Trailers", "Comedy", "Gaming", "News", "Sports"];
-      renderCategories(qs('#categoryChips'), defaultCategories);
-
-      // Remove Movies and Series panes from the nav bar as per your request
-      qs('[data-pane="movies"]').remove();
-      qs('[data-pane="series"]').remove();
-
-      // Adjust grid columns for home and search pages
-      const homeVideoGrid = qs('#trendingVideos');
-      homeVideoGrid.classList.remove('scroll-x');
-      homeVideoGrid.classList.add('grid', 'cols-2');
-
-      const searchResultsGrid = qs('#searchResults');
-      searchResultsGrid.classList.remove('grid', 'cols-2');
-      searchResultsGrid.classList.add('grid', 'cols-2');
-
-    })();
-  </script>
 </body>
 </html>
