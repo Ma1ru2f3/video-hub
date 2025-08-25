@@ -137,6 +137,7 @@
         .playing-bar .song-info {
             display: flex;
             align-items: center;
+            cursor: pointer;
         }
         .playing-bar .song-info img {
             width: 48px;
@@ -152,6 +153,7 @@
             font-size: 12px;
             color: #b3b3b3;
         }
+
         .full-player-view {
             display: none;
             position: fixed;
@@ -161,7 +163,6 @@
             height: 100%;
             background-color: #121212;
             z-index: 2000;
-            display: flex;
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
@@ -171,7 +172,7 @@
             width: 100%;
             max-width: 400px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
         }
         .full-player-view .controls button {
@@ -183,6 +184,41 @@
         }
         .full-player-view .controls .play-pause {
             font-size: 70px;
+        }
+        .full-player-view .controls .main-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .full-player-view .controls .main-buttons .play-button {
+            font-size: 80px;
+        }
+        .full-player-view .progress-bar-container {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 40px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #535353;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background-color: #1db954;
+            border-radius: 2px;
+        }
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #b3b3b3;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -209,7 +245,7 @@
         </div>
     </div>
 
-    <div id="fullPlayer" class="full-player-view" style="display: none;">
+    <div id="fullPlayer" class="full-player-view">
         <div style="position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer;" onclick="hideFullPlayer()">
             &#x276E;
         </div>
@@ -222,6 +258,26 @@
             <h2 id="fullPlayerTitle" style="margin-top: 20px; font-size: 24px;"></h2>
             <h3 id="fullPlayerArtist" style="color: #b3b3b3; font-size: 18px;"></h3>
         </div>
+        
+        <div class="controls">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+                <div class="time-labels">
+                    <span id="currentTime">0:00</span>
+                    <span id="durationTime">0:00</span>
+                </div>
+            </div>
+            
+            <div class="main-buttons">
+                <button>&#x21BA;</button>
+                <button>&#x23EE;</button>
+                <button class="play-pause" id="playPauseButton">&#x23F8;</button>
+                <button>&#x23ED;</button>
+                <button>&#x21BB;</button>
+            </div>
+        </div>
     </div>
 
     <div id="playingBar" class="playing-bar" onclick="showFullPlayer()">
@@ -232,7 +288,7 @@
                 <div id="playingArtist" class="artist"></div>
             </div>
         </div>
-        <audio id="audioPlayer" controls></audio>
+        <audio id="audioPlayer"></audio>
     </div>
 
     <div class="nav-bar">
@@ -264,6 +320,12 @@
             { id: "98m3Fh1yD4s", title: "Tumi Naki", channel: "Fuad Al Muqtadir", thumbnail: "https://i.ytimg.com/vi/98m3Fh1yD4s/mqdefault.jpg" }
         ];
 
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playPauseButton = document.getElementById('playPauseButton');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationTimeEl = document.getElementById('durationTime');
+
         document.addEventListener('DOMContentLoaded', () => {
             populateSongs(popularSongs, document.getElementById('popularSongsGrid'));
             document.getElementById('searchButton').addEventListener('click', search);
@@ -272,6 +334,11 @@
                     search();
                 }
             });
+            document.getElementById('playPauseButton').addEventListener('click', togglePlayPause);
+            document.getElementById('progressBar').addEventListener('click', seek);
+            
+            audioPlayer.addEventListener('timeupdate', updateProgressBar);
+            audioPlayer.addEventListener('loadedmetadata', setDuration);
         });
 
         async function search() {
@@ -315,7 +382,6 @@
             const videoArtist = event.target.dataset.artist;
             const videoThumbnail = event.target.dataset.thumbnail;
 
-            const audioPlayer = document.getElementById('audioPlayer');
             const playingBar = document.getElementById('playingBar');
             const playingTitle = document.getElementById('playingTitle');
             const playingArtist = document.getElementById('playingArtist');
@@ -337,6 +403,7 @@
             
             audioPlayer.src = `/api/download?id=${videoId}&format=mp3`;
             audioPlayer.play();
+            playPauseButton.textContent = '⏸';
         }
 
         function showFullPlayer() {
@@ -346,7 +413,7 @@
         function hideFullPlayer() {
             document.getElementById('fullPlayer').style.display = 'none';
         }
-
+        
         function populateSongs(songs, targetElement) {
             targetElement.innerHTML = '';
             songs.forEach(item => {
@@ -364,6 +431,43 @@
             targetElement.querySelectorAll('.play-button').forEach(button => {
                 button.addEventListener('click', playSong);
             });
+        }
+
+        function togglePlayPause() {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playPauseButton.textContent = '⏸';
+            } else {
+                audioPlayer.pause();
+                playPauseButton.textContent = '▶';
+            }
+        }
+
+        function updateProgressBar() {
+            const duration = audioPlayer.duration;
+            const currentTime = audioPlayer.currentTime;
+            const progress = (currentTime / duration) * 100;
+            progressBarFill.style.width = `${progress}%`;
+            
+            currentTimeEl.textContent = formatTime(currentTime);
+        }
+
+        function setDuration() {
+            durationTimeEl.textContent = formatTime(audioPlayer.duration);
+        }
+
+        function seek(e) {
+            const progressBar = document.getElementById('progressBar');
+            const clickX = e.clientX - progressBar.getBoundingClientRect().left;
+            const width = progressBar.offsetWidth;
+            const seekTime = (clickX / width) * audioPlayer.duration;
+            audioPlayer.currentTime = seekTime;
+        }
+
+        function formatTime(time) {
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
     </script>
 </body>
