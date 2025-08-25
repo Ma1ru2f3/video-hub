@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watch Video</title>
     <style>
+        /* (Style unchanged, same as before) */
         body {
             background-color: #1a1a1a;
             color: #ffffff;
@@ -212,39 +213,35 @@
         loadRelatedVideos(currentVideoId);
     });
 
-    function loadRelatedVideos(videoId) {
+    async function loadRelatedVideos(videoId) {
         const relatedListContainer = document.getElementById('relatedVideosList');
         relatedListContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Loading related videos...</p>';
 
-        // NOTE: This is a placeholder. You need a backend API endpoint for related videos.
-        // It would look something like: `/ytb/related?id=${videoId}`
-        // This example shows static data for demonstration purposes.
-        const staticRelatedVideos = [
-            { id: 'video1', title: 'Code Geass', thumbnail: 'https://via.placeholder.com/150' },
-            { id: 'video2', title: 'Attack on Titan', thumbnail: 'https://via.placeholder.com/150' },
-            { id: 'video3', title: 'One Punch Man', thumbnail: 'https://via.placeholder.com/150' },
-            { id: 'video4', title: 'Naruto', thumbnail: 'https://via.placeholder.com/150' },
-            { id: 'video5', title: 'Bleach', thumbnail: 'https://via.placeholder.com/150' },
-            { id: 'video6', title: 'Demon Slayer', thumbnail: 'https://via.placeholder.com/150' },
-        ];
+        try {
+            const response = await fetch(`${API_URL}/ytb/related?id=${videoId}`);
+            const data = await response.json();
 
-        setTimeout(() => {
+            if (data.error) {
+                relatedListContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">${data.error}</p>`;
+                return;
+            }
+            
             relatedListContainer.innerHTML = '';
-            staticRelatedVideos.forEach(video => {
+            data.forEach(video => {
                 const videoCard = document.createElement('div');
                 videoCard.className = 'video-card';
                 videoCard.innerHTML = `
                     <img src="${video.thumbnail}" alt="${video.title}">
                     <div class="title">${video.title}</div>
                 `;
-                // Add a click event to load the new video
                 videoCard.addEventListener('click', () => {
-                    // This reloads the page with the new video ID
                     window.location.href = `watch.html?id=${video.id}&format=mp4&title=${encodeURIComponent(video.title)}`;
                 });
                 relatedListContainer.appendChild(videoCard);
             });
-        }, 1000); // Simulate network delay
+        } catch (error) {
+            relatedListContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">Failed to load related videos.</p>`;
+        }
     }
 </script>
 
