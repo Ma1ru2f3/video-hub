@@ -278,6 +278,7 @@
                 <button>&#x21BB;</button>
             </div>
         </div>
+        <button onclick="downloadSong()" style="background-color: #1db954; color: white; padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer; margin-top: 20px;">Download Song</button>
     </div>
 
     <div id="playingBar" class="playing-bar" onclick="showFullPlayer()">
@@ -325,6 +326,8 @@
         const progressBarFill = document.getElementById('progressBarFill');
         const currentTimeEl = document.getElementById('currentTime');
         const durationTimeEl = document.getElementById('durationTime');
+        
+        let currentSongId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             populateSongs(popularSongs, document.getElementById('popularSongsGrid'));
@@ -343,13 +346,15 @@
 
         async function search() {
             const query = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('results');
+            const popularSongsSection = document.getElementById('popularSongsSection');
+
             if (!query) {
-                populateSongs(popularSongs, document.getElementById('popularSongsGrid'));
+                popularSongsSection.style.display = 'block';
+                resultsDiv.innerHTML = '';
                 return;
             }
 
-            const resultsDiv = document.getElementById('results');
-            const popularSongsSection = document.getElementById('popularSongsSection');
             popularSongsSection.style.display = 'none';
             resultsDiv.innerHTML = '<p style="text-align:center;color:#b3b3b3;">খোঁজা হচ্ছে...</p>';
 
@@ -382,12 +387,13 @@
             const videoArtist = event.target.dataset.artist;
             const videoThumbnail = event.target.dataset.thumbnail;
 
+            currentSongId = videoId;
+
             const playingBar = document.getElementById('playingBar');
             const playingTitle = document.getElementById('playingTitle');
             const playingArtist = document.getElementById('playingArtist');
             const playingThumbnail = document.getElementById('playingThumbnail');
 
-            const fullPlayer = document.getElementById('fullPlayer');
             const fullPlayerTitle = document.getElementById('fullPlayerTitle');
             const fullPlayerArtist = document.getElementById('fullPlayerArtist');
             const fullPlayerThumbnail = document.getElementById('fullPlayerThumbnail');
@@ -446,10 +452,11 @@
         function updateProgressBar() {
             const duration = audioPlayer.duration;
             const currentTime = audioPlayer.currentTime;
-            const progress = (currentTime / duration) * 100;
-            progressBarFill.style.width = `${progress}%`;
-            
-            currentTimeEl.textContent = formatTime(currentTime);
+            if (duration && currentTime) {
+                const progress = (currentTime / duration) * 100;
+                progressBarFill.style.width = `${progress}%`;
+                currentTimeEl.textContent = formatTime(currentTime);
+            }
         }
 
         function setDuration() {
@@ -465,9 +472,19 @@
         }
 
         function formatTime(time) {
+            if (isNaN(time)) return '0:00';
             const minutes = Math.floor(time / 60);
             const seconds = Math.floor(time % 60);
             return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+        
+        function downloadSong() {
+            if (currentSongId) {
+                const downloadLink = `/api/download?id=${currentSongId}&format=mp3`;
+                window.open(downloadLink, '_blank');
+            } else {
+                alert('No song is currently playing.');
+            }
         }
     </script>
 </body>
