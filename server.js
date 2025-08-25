@@ -70,38 +70,48 @@ app.get('/ytb/stream', async (req, res) => {
     }
 });
 
-// Get trending videos (Placeholder)
+// Get real trending videos
 app.get('/ytb/trending', async (req, res) => {
     try {
-        // This is a placeholder for fetching trending videos.
-        // A real implementation would use a service like YouTube's official API.
-        const trendingVideos = [
-            {
-                id: 'dQw4w9WgXcQ',
-                title: 'Never Gonna Give You Up',
-                thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
-                channel: { name: 'Rick Astley' },
-                time: '3:33'
-            },
-            {
-                id: 'mCdq_B_z1dM',
-                title: 'PSY - GANGNAM STYLE',
-                thumbnail: 'https://i.ytimg.com/vi/mCdq_B_z1dM/hqdefault.jpg',
-                channel: { name: 'officialpsy' },
-                time: '4:12'
-            },
-            {
-                id: 'v_zL29c5L3o',
-                title: 'Baby Shark Dance',
-                thumbnail: 'https://i.ytimg.com/vi/v_zL29c5L3o/hqdefault.jpg',
-                channel: { name: 'Pinkfong Baby Shark' },
-                time: '2:16'
-            },
-        ];
-        res.json(trendingVideos);
+        const filters = await ytsr.getFilters('trending');
+        const filter = filters.get('Type').get('Video');
+        const searchResults = await ytsr(filter.url, { limit: 20 });
+
+        const videos = searchResults.items.map(item => ({
+            id: item.id,
+            title: item.title,
+            thumbnail: item.thumbnails[0].url,
+            channel: { name: item.author.name },
+            time: item.duration
+        }));
+
+        res.json(videos);
     } catch (error) {
         console.error('Trending error:', error);
         res.status(500).json({ error: 'Failed to fetch trending videos.' });
+    }
+});
+
+// Get related videos based on video ID
+app.get('/ytb/related', async (req, res) => {
+    const videoId = req.query.id;
+    if (!videoId) {
+        return res.status(400).json({ error: 'Video ID is required.' });
+    }
+
+    try {
+        const info = await ytdl.getInfo(videoId);
+        const relatedVideos = info.related_videos.slice(0, 6).map(video => ({
+            id: video.id,
+            title: video.title,
+            thumbnail: video.thumbnails[0].url,
+            channel: { name: video.author.name }
+        }));
+
+        res.json(relatedVideos);
+    } catch (error) {
+        console.error('Related videos error:', error);
+        res.status(500).json({ error: 'Failed to fetch related videos.' });
     }
 });
 
