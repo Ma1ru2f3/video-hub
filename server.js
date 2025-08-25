@@ -3,7 +3,7 @@ const axios = require('axios');
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const baseApiUrl = async () => {
     try {
@@ -49,33 +49,6 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
-app.get('/api/info', async (req, res) => {
-    const { id } = req.query;
-    if (!id) {
-        return res.status(400).json({ error: 'Video ID is required.' });
-    }
-
-    try {
-        const apiUrl = await baseApiUrl();
-        const { data } = await axios.get(`${apiUrl}/ytfullinfo?videoID=${id}`);
-        
-        const formattedInfo = {
-            title: data.title,
-            duration: data.duration,
-            viewCount: data.view_count,
-            likes: data.like_count,
-            channel: data.channel,
-            subscribers: data.channel_follower_count,
-            thumbnail: data.thumbnail
-        };
-
-        res.json(formattedInfo);
-    } catch (error) {
-        console.error('Info error:', error.message);
-        res.status(500).json({ error: 'Failed to retrieve video info.' });
-    }
-});
-
 app.get('/api/download', async (req, res) => {
     const { id, format } = req.query;
     if (!id || !format || !['mp4', 'mp3'].includes(format)) {
@@ -92,7 +65,7 @@ app.get('/api/download', async (req, res) => {
             responseType: 'stream'
         });
         
-        res.setHeader('Content-Type', 'audio/mpeg'); // Set content type for streaming
+        res.setHeader('Content-Type', 'audio/mpeg');
         response.data.pipe(res);
 
     } catch (error) {
@@ -102,5 +75,5 @@ app.get('/api/download', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+    console.log(`Server is running on port ${port}`);
 });
