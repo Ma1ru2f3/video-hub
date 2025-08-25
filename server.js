@@ -62,7 +62,7 @@ app.get('/ytb/stream', async (req, res) => {
         stream = ytdl(videoId, options);
         stream.pipe(res);
     } catch (error) {
-        console.error('Stream error:', error);
+error('Stream error:', error);
         res.status(500).send('Failed to stream video.');
     }
 });
