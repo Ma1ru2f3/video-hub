@@ -47,8 +47,8 @@
     .scroll-x{overflow-x:auto;display:flex;gap:12px;padding:8px 0;scrollbar-width:none}
     .scroll-x::-webkit-scrollbar{display:none}
     .section-title{font-weight:800;font-size:18px;margin-top:20px;margin-bottom:12px}
-    .content-card{width:120px;flex-shrink:0; cursor:pointer;}
-    .content-card img{width:100%;height:180px;object-fit:cover;border-radius:8px}
+    .content-card{width:160px;flex-shrink:0; cursor:pointer;}
+    .content-card img{width:100%;height:90px;object-fit:cover;border-radius:8px}
     .content-card-title{font-size:14px;font-weight:600;margin-top:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
     .logo-container img{width:60px;height:60px;object-fit:contain;border-radius:10px}
     .logo-container{flex-shrink:0}
@@ -91,6 +91,64 @@
     .more-options h2{margin-top:0;font-size:20px;font-weight:700;}
     @media (max-width:800px){ .grid.cols-2{grid-template-columns:1fr} .row{flex-direction:column;align-items:stretch} .details-page .header{height:200px} }
     .hidden { display: none !important; }
+    
+    /* Music player styles */
+    .music-player-bar {
+        position: fixed;
+        bottom: 60px; /* Above the nav bar */
+        left: 0;
+        width: 100%;
+        background: #181818;
+        border-top: 1px solid var(--border-color);
+        padding: 8px 15px;
+        display: none;
+        align-items: center;
+        gap: 15px;
+        z-index: 101;
+        transform: translateY(100%);
+        transition: transform 0.3s ease-in-out;
+    }
+    .music-player-bar.active {
+        display: flex;
+        transform: translateY(0);
+    }
+    .music-player-bar img {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+    .music-player-info {
+        flex: 1;
+        overflow: hidden;
+    }
+    .music-player-title {
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .music-player-artist {
+        font-size: 12px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .music-player-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .music-player-controls button {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+    }
     
     nav{
         position: fixed;
@@ -263,17 +321,17 @@
       </header>
       <main class="container">
         <div id="paneHome" class="pane">
-          <div class="section-title">Trending</div>
-          <div class="scroll-x" id="trendingVideos"></div>
-          <div class="section-title">Most Popular</div>
-          <div class="scroll-x" id="popularVideos"></div>
+          <div class="col" style="margin-bottom:12px">
+            <input id="youtubeSearchInput" type="text" placeholder="🔎 Search YouTube..." />
+          </div>
+          <div class="section-title">Trending Videos</div>
+          <div class="grid cols-2" id="trendingVideos"></div>
           <div class="section-title">Categories</div>
           <div class="scroll-x" id="categoryChips"></div>
         </div>
         <div id="paneSearch" class="pane" style="display:none">
           <div class="col" style="margin-bottom:12px">
-            <div style="font-weight:800;font-size:24px">Search</div>
-            <input id="searchInput" type="text" placeholder="🔎 Search by title, artist..." />
+            <div style="font-weight:800;font-size:24px">Search Results</div>
           </div>
           <div id="searchResults" class="grid cols-2"></div>
         </div>
@@ -330,7 +388,19 @@
           </div>
         </div>
       </main>
-      
+      <div id="musicPlayerBar" class="music-player-bar">
+        <img id="musicPlayerArt" src="https://via.placeholder.com/45" alt="Album Art">
+        <div class="music-player-info">
+          <div id="musicPlayerTitle" class="music-player-title">No song playing</div>
+          <div id="musicPlayerArtist" class="music-player-artist"></div>
+        </div>
+        <div class="music-player-controls">
+          <button id="prevBtn">⏮️</button>
+          <button id="playPauseBtn">▶️</button>
+          <button id="nextBtn">⏭️</button>
+        </div>
+      </div>
+      <audio id="audioPlayer"></audio>
       <nav id="bottomNav">
         <button class="tab active" data-pane="home">
           <span class="icon">🏠</span>
@@ -393,32 +463,12 @@
                 <button onclick="adminLogout()" class="btn-red">Logout</button>
             </div>
             <div class="admin-nav">
-                <button class="btn active" data-admin-pane="upload">Upload</button>
-                <button class="btn" data-admin-pane="upcoming">Upcoming</button>
+                <button class="btn active" data-admin-pane="upcoming">Upcoming</button>
                 <button class="btn" data-admin-pane="users">Users</button>
                 <button class="btn" data-admin-pane="reports">Reports</button>
                 <button class="btn" data-admin-pane="requests">Requests</button>
             </div>
-            <div id="admin-upload-pane" class="admin-pane">
-                <div class="card">
-                    <div class="card-body">
-                        <div style="font-weight:700">Upload Video</div>
-                        <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px">
-                            <input id="uploadId" type="text" placeholder="Series/Movie ID (e.g., Naruto_Shippuden)" />
-                            <input id="uploadTitle" type="text" placeholder="Title (e.g., Naruto Shippuden)" />
-                            <input id="uploadLink" type="text" placeholder="Video link" />
-                            <input id="uploadCategory" type="text" placeholder="Category" />
-                            <input id="uploadSeason" type="text" placeholder="Season" />
-                            <input id="uploadEpisode" type="text" placeholder="Episode" />
-                            <textarea id="uploadDescription" rows="3" placeholder="Description"></textarea>
-                            <input id="uploadThumbnail" type="text" placeholder="Thumbnail link" />
-                            <button id="btnUpload" class="btn-emerald">Upload</button>
-                            <div class="progress-wrap"><div id="uploadProgress" class="progress-bar"></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="admin-upcoming-pane" class="admin-pane hidden">
+            <div id="admin-upcoming-pane" class="admin-pane">
                 <div class="card">
                     <div class="card-body">
                         <div style="font-weight:700">Add Upcoming Content</div>
@@ -561,16 +611,19 @@
   </div>
   <script>
     const CONFIG = {
-      ADMIN_PASSWORD: "112233445500",
       ADMIN_EMAIL: "mymaruf94@gmail.com",
       ADMIN_PASS: "123450",
       SHEETDB_API: "https://sheetdb.io/api/v1/vitcn9bcwl84i", 
-      APK_DOWNLOAD_LINK: "https://drive.google.com/file/d/1HKWsccAM0YIlUF5tw6YJHeBsQ-bqI0Nw/view?usp=drivesdk"
+      YOUTUBE_API: "https://video-hub-9ysg.onrender.com/youtube-search", // New YouTube Search API
+      MUSIC_API: {
+          SEARCH: "https://video-hub-9ysg.onrender.com/search",
+          DOWNLOAD: "https://video-hub-9ysg.onrender.com/play"
+      },
     };
 
     const OWNER_INFO = {
         name: "Video Hub",
-        about: "Your home for anime & series."
+        about: "Your home for videos & music."
     };
 
     const qs = sel => document.querySelector(sel);
@@ -592,18 +645,6 @@
         body: JSON.stringify({ data: rowObj })
       }).then(r=>r.json());
     }
-    function apiDelete(sheet, id){
-      return fetch(`${api}/id/${encodeURIComponent(id)}?sheet=${encodeURIComponent(sheet)}`, {
-        method: 'DELETE',
-        headers: {'Content-Type':'application/json'}
-      }).then(r=>r.json());
-    }
-    function apiDeleteBySeriesId(sheet, seriesId){
-      return fetch(`${api}/search?sheet=${encodeURIComponent(sheet)}&seriesId=${encodeURIComponent(seriesId)}`, {
-        method: 'DELETE',
-        headers: {'Content-Type':'application/json'}
-      }).then(r=>r.json());
-    }
     function apiUpdateUserStatus(id, status){
       return fetch(`${api}/id/${encodeURIComponent(id)}?sheet=users`, {
         method: 'PATCH',
@@ -615,7 +656,6 @@
     function rid(prefix='id'){ return `${prefix}_${Math.random().toString(36).slice(2,9)}${Date.now().toString().slice(-4)}` }
 
     let STATE = {
-      videos: [],
       users: [], 
       reports: [],
       requests: [],
@@ -624,52 +664,50 @@
       favorites: JSON.parse(localStorage.getItem('bv_favorites') || '[]'),
       downloads: JSON.parse(localStorage.getItem('bv_downloads') || '[]'),
       owner: OWNER_INFO,
+      songs: [],
+      currentSong: null,
+      currentSongIndex: 0,
     };
     
-    function getFileIdFromLink(link) {
-      if (!link) return null;
-      const regex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([\w-]{25,})/;
-      const match = link.match(regex);
-      return match ? match[1] : null;
+    // YouTube specific video data structure
+    function createYouTubeVideoObject(item) {
+        if (!item.id || !item.id.videoId) return null;
+        return {
+            id: item.id.videoId,
+            title: item.snippet.title,
+            description: item.snippet.description,
+            thumbnail: item.snippet.thumbnails.high.url,
+            channel: item.snippet.channelTitle,
+            publishedAt: item.snippet.publishedAt,
+        };
+    }
+    
+    function getYouTubeEmbedLink(videoId) {
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
     }
 
-    function getEmbedLink(link) {
-      const fileId = getFileIdFromLink(link);
-      return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : link;
-    }
-    
-    function getThumbnailLink(link) {
-        const fileId = getFileIdFromLink(link);
-        if (fileId) {
-            return `https://drive.google.com/uc?export=download&id=${fileId}`;
+    const parseDuration = (timestamp) => {
+        const parts = timestamp.split(':').map(part => parseInt(part));
+        let seconds = 0;
+
+        if (parts.length === 3) {
+          seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+        } else if (parts.length === 2) {
+          seconds = parts[0] * 60 + parts[1];
         }
-        return 'https://via.placeholder.com/150x225.png?text=No+Image';
-    }
-    
+
+        return seconds;
+    };
+
     async function loadInitial(){
       try{
-        const [videosRaw, usersRaw, reportsRaw, requestsRaw, upcomingRaw] = await Promise.all([
-          apiGet('videos').catch(()=>[]),
+        const [usersRaw, reportsRaw, requestsRaw, upcomingRaw] = await Promise.all([
           apiGet('users').catch(()=>[]),
           apiGet('reports').catch(()=>[]),
           apiGet('requests').catch(()=>[]),
           apiGet('upcoming_videos').catch(()=>[])
         ]);
         
-        STATE.videos = (Array.isArray(videosRaw) ? videosRaw.map(r => ({
-          seriesId: r.seriesId || r.SeriesID || rid('ser'),
-          id: r.id || r.ID || rid('vid'),
-          title: r.title || r.Title || r.name || 'Untitled',
-          link: r.link || r.Link || r.url || '',
-          category: r.category || r.Category || r.cat || '',
-          uploadedBy: r.uploadedBy || r.UploadedBy || '',
-          uploadDate: r.uploadDate || r.UploadDate || '',
-          season: r.season || '1',
-          episode: r.episode || '1',
-          description: r.description || '',
-          thumbnail: getThumbnailLink(r.thumbnail || r.link)
-        })).sort((a, b) => a.seriesId.localeCompare(b.seriesId) || a.season - b.season || a.episode - b.episode) : []);
-
         STATE.users = (Array.isArray(usersRaw) ? usersRaw.map(r => ({
             id: r.id || r.ID,
             name: r.name || r.Name || 'Unknown',
@@ -691,45 +729,25 @@
             id: r.id, title: r.title, release_date: r.release_date, description: r.description
         })) : [];
 
-        renderHomeContent();
+        // Load trending videos from YouTube on initial load
+        await fetchTrendingVideos();
       }catch(e){
         console.error(e);
       }
     }
 
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+    async function fetchTrendingVideos() {
+        try {
+            const response = await fetch(`${CONFIG.YOUTUBE_API}?q=trending&maxResults=20`);
+            const data = await response.json();
+            const videos = data.map(createYouTubeVideoObject).filter(v => v);
+            renderVideoSection(qs('#trendingVideos'), videos);
+        } catch (error) {
+            console.error('Failed to fetch trending videos:', error);
+            qs('#trendingVideos').innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Failed to load trending videos.</div>';
         }
-        return array;
     }
 
-    function getUniqueSeries() {
-      const uniqueSeries = new Map();
-      STATE.videos.forEach(video => {
-        if (!uniqueSeries.has(video.seriesId)) {
-          uniqueSeries.set(video.seriesId, video);
-        }
-      });
-      return Array.from(uniqueSeries.values());
-    }
-
-    function renderHomeContent(){
-      const allUniqueVideos = getUniqueSeries();
-      const shuffledVideos = shuffleArray([...allUniqueVideos]);
-      const categories = [...new Set(STATE.videos.map(v => v.category))];
-      
-      const trendingVideos = shuffledVideos.slice(0, 10);
-      const popularVideos = shuffledVideos.slice(10, 20);
-
-      renderVideoSection(qs('#trendingVideos'), trendingVideos);
-      renderVideoSection(qs('#popularVideos'), popularVideos);
-      renderCategories(qs('#categoryChips'), categories);
-      renderPaneMovies(getUniqueSeries().filter(v => v.category.toLowerCase().includes('movie')));
-      renderPaneSeries(getUniqueSeries().filter(v => v.category.toLowerCase().includes('series')));
-    }
-    
     function renderVideoSection(container, videos){
       container.innerHTML = '';
       if(!videos.length){
@@ -739,41 +757,14 @@
       videos.forEach(v => {
         const card = document.createElement('div');
         card.className = 'content-card';
-        card.innerHTML = `<img src="${v.thumbnail}" onerror="this.src='https://via.placeholder.com/150x225.png?text=No+Image'" alt="${v.title}">
+        card.style.width = '100%';
+        card.innerHTML = `<img src="${v.thumbnail}" onerror="this.src='https://via.placeholder.com/150x90.png?text=No+Image'" alt="${v.title}">
                           <div class="content-card-title">${escapeHtml(v.title)}</div>`;
         card.onclick = () => showVideoDetails(v);
         container.appendChild(card);
       });
     }
 
-    function renderPaneMovies(videos){
-      const container = qs('#moviesGrid');
-      container.innerHTML = '';
-      videos.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'content-card';
-        card.style.width = '100%';
-        card.innerHTML = `<img src="${v.thumbnail}" onerror="this.src='https://via.placeholder.com/150x225.png?text=No+Image'" alt="${v.title}">
-                          <div class="content-card-title">${escapeHtml(v.title)}</div>`;
-        card.onclick = () => showVideoDetails(v);
-        container.appendChild(card);
-      });
-    }
-
-    function renderPaneSeries(videos){
-      const container = qs('#seriesGrid');
-      container.innerHTML = '';
-      videos.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'content-card';
-        card.style.width = '100%';
-        card.innerHTML = `<img src="${v.thumbnail}" onerror="this.src='https://via.placeholder.com/150x225.png?text=No+Image'" alt="${v.title}">
-                          <div class="content-card-title">${escapeHtml(v.title)}</div>`;
-        card.onclick = () => showVideoDetails(v);
-        container.appendChild(card);
-      });
-    }
-    
     function renderCategories(container, categories){
       container.innerHTML = '';
       categories.forEach(cat => {
@@ -781,137 +772,66 @@
         chip.className = 'chip';
         chip.textContent = cat;
         chip.onclick = () => {
-          const filtered = getUniqueSeries().filter(v => v.category === cat);
-          const grid = qs('#searchResults');
-          grid.innerHTML = '';
-          filtered.forEach(v => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `<div class="card-body">
-                                <div style="font-weight:700">${escapeHtml(v.title)}</div>
-                                <div class="small-muted">${escapeHtml(v.category)}</div>
-                                <div class="small-muted">Season ${escapeHtml(v.season)}, Episode ${escapeHtml(v.episode)}</div>
-                              </div>`;
-            card.onclick = () => showVideoDetails(v);
-            grid.appendChild(card);
-          });
-          setPane('search');
+          searchYouTube(cat, true);
         };
         container.appendChild(chip);
       });
     }
 
-    function showVideoDetails(series) {
+    function showVideoDetails(video) {
       const page = qs('#videoDetailsPage');
-      const episodes = STATE.videos.filter(v => v.seriesId === series.seriesId)
-                                   .sort((a, b) => a.season - b.season || a.episode - b.episode);
-      const seasons = [...new Set(episodes.map(e => e.season))].sort((a,b) => a-b);
-      const firstEpisode = episodes[0];
       
-      const isFavorite = STATE.favorites.includes(series.seriesId);
-      const isDownloaded = STATE.downloads.includes(series.seriesId);
-      
+      const isFavorite = STATE.favorites.includes(video.id);
       const favoriteBtnClass = isFavorite ? 'btn-emerald' : 'btn-primary';
-      const downloadBtnClass = isDownloaded ? 'btn-emerald' : 'btn-primary';
-      
-      const downloadBtnText = isDownloaded ? '⬇️ Downloaded' : '⬇️ Download';
       const favoriteBtnText = isFavorite ? '⭐ Favorited' : '⭐ Favorite';
       
+      // Stop any playing music
+      const audioPlayer = qs('#audioPlayer');
+      audioPlayer.pause();
+      qs('#playPauseBtn').textContent = '▶️';
+      qs('#musicPlayerBar').classList.remove('active');
+
       page.innerHTML = `
           <div class="header">
-              <iframe id="video-player" src="${getEmbedLink(firstEpisode.link)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <iframe id="video-player" src="${getYouTubeEmbedLink(video.id)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
               <div class="back-btn" onclick="hidePage('videoDetails')">←</div>
           </div>
           <div class="body">
-              <h1>${escapeHtml(series.title)}</h1>
+              <h1>${escapeHtml(video.title)}</h1>
               <div class="meta-info">
-                  <div>${escapeHtml(series.category)}</div>
+                  <div>${escapeHtml(video.channel)}</div>
                   <div>·</div>
-                  <div>${escapeHtml(series.season ? `Season ${series.season}` : 'Movie')}</div>
-                  <div>·</div>
-                  <div>${series.uploadDate ? new Date(series.uploadDate).getFullYear() : ''}</div>
+                  <div>${new Date(video.publishedAt).toLocaleDateString()}</div>
               </div>
               <div class="btn-group">
                   <button class="btn-primary" onclick="playCurrentVideo()">▶️ Watch Now</button>
-                  <button id="favoriteBtn" class="${favoriteBtnClass}" data-id="${series.seriesId}">${favoriteBtnText}</button>
-                  <button id="downloadBtn" class="${downloadBtnClass}" data-id="${series.seriesId}">${downloadBtnText}</button>
+                  <button id="favoriteBtn" class="${favoriteBtnClass}" data-id="${video.id}">${favoriteBtnText}</button>
+                  <button id="downloadBtn" class="btn-primary" onclick="showComingSoonAlert('Download Video')">⬇️ Download</button>
               </div>
-              <div class="overview">${escapeHtml(series.description)}</div>
-              <div class="episode-list">
-                  <div style="font-weight:700;margin-bottom:10px">Episodes</div>
-                  ${seasons.length > 1 ? `
-                  <select id="seasonSelector" style="margin-bottom: 10px;">
-                      ${seasons.map(s => `<option value="${s}">Season ${s}</option>`).join('')}
-                  </select>` : ''}
-                  <div id="episodesContainer"></div>
-              </div>
+              <div class="overview">${escapeHtml(video.description)}</div>
           </div>
       `;
       page.style.display = 'block';
 
-      function renderEpisodes(selectedSeason) {
-        const episodesContainer = qs('#episodesContainer');
-        const seasonEpisodes = episodes.filter(ep => ep.season === selectedSeason).sort((a,b) => a.episode - b.episode);
-        episodesContainer.innerHTML = seasonEpisodes.map(ep => `
-          <div class="episode-item" data-videoid="${ep.id}" data-link="${ep.link}">
-              <img src="${getThumbnailLink(ep.thumbnail || ep.link)}" onerror="this.src='https://via.placeholder.com/80x50.png?text=No+Image'" alt="${ep.title}">
-              <div class="info">
-                  <div class="title">E${ep.episode}: ${ep.title}</div>
-                  <div class="small-muted">...</div>
-              </div>
-          </div>
-        `).join('');
-        qsa('#episodesContainer .episode-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const link = item.dataset.link;
-                const iframe = qs('#video-player');
-                iframe.src = getEmbedLink(link);
-            });
-        });
-      }
-
-      if (seasons.length > 0) {
-        renderEpisodes(seasons[0]);
-        if (seasons.length > 1) {
-            qs('#seasonSelector').addEventListener('change', (e) => {
-                renderEpisodes(e.target.value);
-            });
-        }
-      }
-      
       window.playCurrentVideo = function() {
           const iframe = qs('#video-player');
-          iframe.src = getEmbedLink(firstEpisode.link);
+          iframe.src = getYouTubeEmbedLink(video.id);
       }
       
       qs('#favoriteBtn').addEventListener('click', () => {
-          const seriesId = series.seriesId;
-          if (STATE.favorites.includes(seriesId)) {
-              STATE.favorites = STATE.favorites.filter(id => id !== seriesId);
+          const videoId = video.id;
+          if (STATE.favorites.includes(videoId)) {
+              STATE.favorites = STATE.favorites.filter(id => id !== videoId);
               toast('Removed from favorites.');
           } else {
-              STATE.favorites.push(seriesId);
+              STATE.favorites.push(videoId);
               toast('Added to favorites!');
           }
           localStorage.setItem('bv_favorites', JSON.stringify(STATE.favorites));
           const favoriteBtn = qs('#favoriteBtn');
-          const isFavorited = STATE.favorites.includes(seriesId);
+          const isFavorited = STATE.favorites.includes(videoId);
           favoriteBtn.className = isFavorited ? 'btn-emerald' : 'btn-primary';
           favoriteBtn.textContent = isFavorited ? '⭐ Favorited' : '⭐ Favorite';
-      });
-
-      qs('#downloadBtn').addEventListener('click', () => {
-          const seriesId = series.seriesId;
-          if (STATE.downloads.includes(seriesId)) {
-              toast('Already added to downloads.');
-          } else {
-              STATE.downloads.push(seriesId);
-              localStorage.setItem('bv_downloads', JSON.stringify(STATE.downloads));
-              toast('Series added to downloads!');
-              const downloadBtn = qs('#downloadBtn');
-              downloadBtn.className = 'btn-emerald';
-              downloadBtn.textContent = '⬇️ Downloaded';
-          }
       });
     }
 
@@ -933,10 +853,6 @@
 
     function showComingSoonAlert(featureName) {
         alert(`${featureName} feature is under development. Coming soon!`);
-    }
-
-    function showFeatureAlert(featureName) {
-        alert(`${featureName} feature is under development.`);
     }
 
     async function promptRequest() {
@@ -992,8 +908,8 @@
     function showGenrePage() {
         const page = qs('#genrePage');
         const genres = [
-            "Horror", "Music", "Western", "TV Movie", "Kids", "Super Power", 
-            "Shounen", "School", "Dub", "Adventure", "War & Politics", "Mystery", 
+            "Horror", "Music", "Western", "Kids", "Super Power", 
+            "Shounen", "School", "Adventure", "War & Politics", "Mystery", 
             "Thriller", "Family", "Romance", "Science Fiction", "Comedy", "Fantasy", 
             "Drama", "Crime", "Action & Adventure", "Animation"
         ];
@@ -1006,7 +922,7 @@
                 <h3 style="margin-top:0;">${genre}</h3>
             </div>`;
             genreCard.onclick = () => {
-                toast(`Showing content for ${genre}`);
+                searchYouTube(genre, true);
             };
             genreGrid.appendChild(genreCard);
         });
@@ -1141,7 +1057,6 @@
         window.location.reload();
     }
 
-    
     function renderAdminDashboard() {
         qsa('.admin-nav .btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1159,7 +1074,7 @@
                 }
             });
         });
-        qs('#admin-upload-pane').classList.remove('hidden');
+        qs('#admin-upcoming-pane').classList.remove('hidden');
         qs('#btnAddUpcoming').addEventListener('click', addUpcomingVideo);
     }
 
@@ -1275,20 +1190,14 @@
     function showFavorites() {
         const favoritesContainer = qs('#favoritesGrid');
         favoritesContainer.innerHTML = '';
-        const favoritedSeries = getUniqueSeries().filter(v => STATE.favorites.includes(v.seriesId));
+        const favoritedVideos = STATE.favorites; // Assuming favorites stores YouTube video IDs
 
-        if (favoritedSeries.length === 0) {
+        if (favoritedVideos.length === 0) {
             favoritesContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">You have no favorites yet.</div>';
         } else {
-            favoritedSeries.forEach(v => {
-                const card = document.createElement('div');
-                card.className = 'content-card';
-                card.style.width = '100%';
-                card.innerHTML = `<img src="${v.thumbnail}" onerror="this.src='https://via.placeholder.com/150x225.png?text=No+Image'" alt="${v.title}">
-                                  <div class="content-card-title">${escapeHtml(v.title)}</div>`;
-                card.onclick = () => showVideoDetails(v);
-                favoritesContainer.appendChild(card);
-            });
+            // Here you would need to fetch video details for each ID.
+            // For a simple demo, we'll just show placeholders.
+            favoritesContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">Favorite videos will appear here. Feature under development.</div>';
         }
         openPage('favorites');
     }
@@ -1296,87 +1205,94 @@
     function showDownloads() {
         const downloadsContainer = qs('#downloadsGrid');
         downloadsContainer.innerHTML = '';
-        const downloadedSeries = getUniqueSeries().filter(v => STATE.downloads.includes(v.seriesId));
-        
-        if (downloadedSeries.length === 0) {
-            downloadsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">You have not downloaded any series.</div>';
-        } else {
-            downloadedSeries.forEach(v => {
-                const card = document.createElement('div');
-                card.className = 'content-card';
-                card.style.width = '100%';
-                card.innerHTML = `<img src="${v.thumbnail}" onerror="this.src='https://via.placeholder.com/150x225.png?text=No+Image'" alt="${v.title}">
-                                  <div class="content-card-title">${escapeHtml(v.title)}</div>`;
-                card.onclick = () => showVideoDetails(v);
-                downloadsContainer.appendChild(card);
-            });
-        }
+        downloadsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">Video downloads are not supported.</div>';
         openPage('downloads');
     }
-
-    qs('#searchInput').addEventListener('input', (e) => {
-        const query = e.target.value.trim().toLowerCase();
+    
+    // YouTube Search Logic
+    async function searchYouTube(query, showPane = false) {
         const resultsContainer = qs('#searchResults');
-        resultsContainer.innerHTML = '';
-        if(query.length > 0){
-            const filteredVideos = getUniqueSeries().filter(v => 
-                v.title && v.title.toLowerCase().includes(query)
-            );
-            
-            if(filteredVideos.length === 0){
-                resultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">No results found.</div>';
-            } else {
-                if (filteredVideos.length > 0) {
-                    filteredVideos.forEach(v => {
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `<div class="card-body">
-                                            <div style="font-weight:700">${escapeHtml(v.title)}</div>
-                                            <div class="small-muted">${escapeHtml(v.category)}</div>
-                                            <div class="small-muted">Season ${escapeHtml(v.season)}, Episode ${escapeHtml(v.episode)}</div>
-                                          </div>`;
-                        card.onclick = () => showVideoDetails(v);
-                        resultsContainer.appendChild(card);
-                    });
-                }
-            }
+        resultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Searching...</div>';
+        if (showPane) setPane('search');
+
+        try {
+            const response = await fetch(`${CONFIG.YOUTUBE_API}?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            const videos = data.map(createYouTubeVideoObject).filter(v => v);
+            renderVideoSection(resultsContainer, videos);
+        } catch (error) {
+            console.error('YouTube Search API error:', error);
+            resultsContainer.innerHTML = '<div style="text-align:center;color:var(--accent);padding:20px;">An error occurred while searching. Please try again.</div>';
+        }
+    }
+
+    qs('#youtubeSearchInput').addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        if (query.length > 2) {
+            searchYouTube(query, true);
         }
     });
 
-    qs('#btnUpload').addEventListener('click', async ()=>{
-      if(!STATE.isAdmin){ toast('Only admin can upload.'); return; }
-      const seriesId = qs('#uploadId').value.trim();
-      const title = qs('#uploadTitle').value.trim();
-      const link = qs('#uploadLink').value.trim();
-      const category = qs('#uploadCategory').value.trim();
-      const season = qs('#uploadSeason').value.trim();
-      const episode = qs('#uploadEpisode').value.trim();
-      const description = qs('#uploadDescription').value.trim();
-      const thumbnail = qs('#uploadThumbnail').value.trim();
-      if(!seriesId || !title || !link){ toast('Series ID, Title and Link are required'); return; }
-      const pb = qs('#uploadProgress'); pb.style.width = '5%';
-      let p = 5; const iv = setInterval(()=>{ p = Math.min(95, p+8); pb.style.width = p+'%'; }, 180);
-      try{
-        const row = {
-          seriesId: seriesId,
-          id: rid('vid'),
-          title, link, category, season, episode, description, thumbnail: thumbnail || getThumbnailLink(link),
-          uploadedBy: "Admin",
-          uploadDate: new Date().toISOString()
-        };
-        await apiPost('videos', row);
-        clearInterval(iv); pb.style.width = '100%';
-        setTimeout(()=> pb.style.width = '0%', 500);
-        qs('#uploadId').value=''; qs('#uploadTitle').value=''; qs('#uploadLink').value='';
-        qs('#uploadCategory').value=''; qs('#uploadSeason').value=''; qs('#uploadEpisode').value='';
-        qs('#uploadDescription').value=''; qs('#uploadThumbnail').value='';
-        toast('Upload successful!');
-        await loadInitial();
-      }catch(e){
-        clearInterval(iv); pb.style.width = '0%';
-        console.error(e); toast('Upload failed');
-      }
+    // Dedicated song search logic
+    qs('#songSearchInput').addEventListener('input', async (e) => {
+        const query = e.target.value.trim();
+        const searchResultsContainer = qs('#songSearchResults');
+        
+        if (query.length > 0) {
+            searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Searching...</div>';
+            
+            try {
+                const searchResponse = await fetch(`${CONFIG.MUSIC_API.SEARCH}?q=${encodeURIComponent(query)}`);
+                const searchData = await searchResponse.json();
+                
+                if (searchData && Array.isArray(searchData)) {
+                    const filteredSongs = searchData.filter(video => {
+                        try {
+                            const totalSeconds = parseDuration(video.timestamp);
+                            return totalSeconds < 600;
+                        } catch {
+                            return false;
+                        }
+                    });
+
+                    STATE.songs = filteredSongs;
+                    renderFilteredSongs(filteredSongs, searchResultsContainer);
+                } else {
+                    searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No results found. Please try a different query.</div>';
+                }
+
+            } catch (error) {
+                console.error('Search API error:', error);
+                searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--accent);padding:20px;">An error occurred while searching. Please try again.</div>';
+            }
+
+        } else {
+            searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Search for a song to get started.</div>';
+            STATE.songs = [];
+        }
     });
+    
+    function renderFilteredSongs(songsToRender, container) {
+        container.innerHTML = '';
+        if (songsToRender.length === 0) {
+            container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No matching songs found.</div>';
+        } else {
+            songsToRender.forEach(song => {
+                const songItem = document.createElement('div');
+                songItem.className = 'song-item';
+                songItem.innerHTML = `
+                    <img src="${song.thumbnail}" onerror="this.src='https://via.placeholder.com/60.png?text=No+Art'" alt="${song.title}">
+                    <div class="song-info">
+                        <div class="song-title">${escapeHtml(song.title)}</div>
+                        <div class="song-artist">${escapeHtml(song.channelTitle || 'Unknown Artist')}</div>
+                        <div class="song-artist" style="font-size:12px;color:var(--accent)">Duration: ${escapeHtml(song.timestamp)}</div>
+                    </div>
+                `;
+                songItem.onclick = () => playSong(song);
+                container.appendChild(songItem);
+            });
+        }
+    }
     
     function renderSiteHeader(){
       qs('#siteName').textContent = OWNER_INFO.name;
@@ -1416,10 +1332,107 @@
         }
     }
     
+    // Music Player Logic
+    const audioPlayer = qs('#audioPlayer');
+    const musicPlayerBar = qs('#musicPlayerBar');
+    const musicPlayerTitle = qs('#musicPlayerTitle');
+    const musicPlayerArtist = qs('#musicPlayerArtist');
+    const musicPlayerArt = qs('#musicPlayerArt');
+    const playPauseBtn = qs('#playPauseBtn');
+    const nextBtn = qs('#nextBtn');
+    const prevBtn = qs('#prevBtn');
+
+    async function playSong(song) {
+        if (!song || !song.url) {
+            toast('No valid song link found.');
+            return;
+        }
+
+        musicPlayerTitle.textContent = 'Loading...';
+        musicPlayerArtist.textContent = '';
+        musicPlayerArt.src = 'https://via.placeholder.com/45.png';
+        musicPlayerBar.classList.add('active');
+        playPauseBtn.textContent = '⏳';
+        
+        try {
+            const apiResponse = await fetch(`${CONFIG.MUSIC_API.DOWNLOAD}?url=${encodeURIComponent(song.url)}`);
+            const apiData = await apiResponse.json();
+            
+            if (apiData && apiData.url) {
+                audioPlayer.src = apiData.url;
+                await audioPlayer.play();
+                musicPlayerTitle.textContent = song.title;
+                musicPlayerArtist.textContent = song.channelTitle || 'Unknown Artist';
+                musicPlayerArt.src = song.thumbnail || 'https://via.placeholder.com/45.png';
+                playPauseBtn.textContent = '⏸️';
+
+                const index = STATE.songs.findIndex(s => s.url === song.url);
+                STATE.currentSongIndex = index;
+            } else {
+                audioPlayer.src = `${CONFIG.MUSIC_API.DOWNLOAD}?url=${encodeURIComponent(song.url)}`;
+                await audioPlayer.play();
+                musicPlayerTitle.textContent = song.title;
+                musicPlayerArtist.textContent = song.channelTitle || 'Unknown Artist';
+                musicPlayerArt.src = song.thumbnail || 'https://via.placeholder.com/45.png';
+                playPauseBtn.textContent = '⏸️';
+            }
+        } catch (error) {
+            console.error('Play API error:', error);
+            toast('Error playing song. Please try again.');
+            playPauseBtn.textContent = '▶️';
+            musicPlayerTitle.textContent = 'Playback Failed';
+            musicPlayerArtist.textContent = 'Try another song.';
+        }
+    }
+
+    playPauseBtn.addEventListener('click', () => {
+        if (audioPlayer.paused) {
+            audioPlayer.play();
+            playPauseBtn.textContent = '⏸️';
+        } else {
+            audioPlayer.pause();
+            playPauseBtn.textContent = '▶️';
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (STATE.songs.length === 0) return;
+        STATE.currentSongIndex = (STATE.currentSongIndex + 1) % STATE.songs.length;
+        playSong(STATE.songs[STATE.currentSongIndex]);
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (STATE.songs.length === 0) return;
+        STATE.currentSongIndex = (STATE.currentSongIndex - 1 + STATE.songs.length) % STATE.songs.length;
+        playSong(STATE.songs[STATE.currentSongIndex]);
+    });
+
+    audioPlayer.addEventListener('ended', () => {
+        nextBtn.click();
+    });
+
     (function init(){
       renderSiteHeader();
       checkAuthStatus();
       setPane('home');
+      
+      // Render some default categories for the home page
+      const defaultCategories = ["Music", "Trailers", "Comedy", "Gaming", "News", "Sports"];
+      renderCategories(qs('#categoryChips'), defaultCategories);
+
+      // Remove Movies and Series panes from the nav bar as per your request
+      qs('[data-pane="movies"]').remove();
+      qs('[data-pane="series"]').remove();
+
+      // Adjust grid columns for home and search pages
+      const homeVideoGrid = qs('#trendingVideos');
+      homeVideoGrid.classList.remove('scroll-x');
+      homeVideoGrid.classList.add('grid', 'cols-2');
+
+      const searchResultsGrid = qs('#searchResults');
+      searchResultsGrid.classList.remove('grid', 'cols-2');
+      searchResultsGrid.classList.add('grid', 'cols-2');
+
     })();
   </script>
 </body>
