@@ -8,34 +8,181 @@
         body {
             background-color: #1a1a1a;
             color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        .video-container {
-            width: 90%;
-            max-width: 1280px;
-            text-align: center;
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        h1 {
-            color: #f0f0f0;
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
         }
-        video {
+
+        .top-bar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .top-bar-buttons button {
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .top-bar-buttons .download-apk {
+            background-color: #28a745;
+        }
+
+        /* Video Player Section */
+        .video-player-container {
+            width: 100%;
+            position: relative;
+            background-color: #000;
+            margin-top: 20px;
+        }
+
+        #videoPlayer {
             width: 100%;
             height: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .video-info {
+            padding: 15px 0;
+        }
+
+        .video-info h1 {
+            font-size: 24px;
+            margin: 0;
+            color: #f0f0f0;
+        }
+
+        .video-meta {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .video-meta .rating {
+            color: #ffc107;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons button, .action-buttons a {
+            background-color: #3a3a3a;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Recommendations Section */
+        .recommendations {
+            margin-top: 30px;
+        }
+
+        .recommendations h2 {
+            font-size: 20px;
+            border-bottom: 2px solid #555;
+            padding-bottom: 5px;
+        }
+
+        .movie-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .movie-card {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .movie-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .movie-title {
+            font-size: 14px;
+            margin-top: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-info {
+            font-size: 12px;
+            color: #aaa;
         }
     </style>
 </head>
 <body>
 
-<div class="video-container">
-    <h1 id="videoTitle">Loading...</h1>
-    <video id="videoPlayer" controls autoplay></video>
+<div class="container">
+    <div class="top-bar">
+        <span>Video Hub</span>
+        <div class="top-bar-buttons">
+            <button class="logout-btn">Logout</button>
+            <button class="download-apk">Download APK</button>
+        </div>
+    </div>
+
+    <div class="video-player-container">
+        <video id="videoPlayer" controls autoplay></video>
+    </div>
+    
+    <div class="video-info">
+        <h1 id="videoTitle">Loading...</h1>
+        <div class="video-meta">
+            <span class="rating">★ 8.2</span> • <span id="videoYear">2023</span> • <span id="videoGenre">Action</span>
+        </div>
+        <div class="action-buttons">
+            <button>➕ Add to list</button>
+            <button>🔗 Share</button>
+            <a href="#" id="downloadBtn">📥 Download</a>
+            <button>👁️ View</button>
+        </div>
+    </div>
+
+    <div class="recommendations">
+        <h2>For you</h2>
+        <div class="movie-list">
+            </div>
+    </div>
+
+    <div class="comments">
+        <h2>Comments</h2>
+        </div>
 </div>
 
 <script>
@@ -50,10 +197,35 @@
         if (videoId) {
             document.getElementById('videoTitle').innerText = decodeURIComponent(title);
             document.getElementById('videoPlayer').src = `${API_URL}/ytb/stream?id=${videoId}&format=${format}`;
+            document.getElementById('downloadBtn').href = `${API_URL}/ytb/stream?id=${videoId}&format=${format}`;
         } else {
             document.getElementById('videoTitle').innerText = 'Error: Video not found.';
         }
+        
+        // This is a placeholder for dynamic content loading, like movie recommendations.
+        // For a real-world app, you would fetch this data from your backend.
+        loadRecommendations();
     });
+
+    function loadRecommendations() {
+        const movieData = [
+            { title: 'K.G.F: Chapter 1', image: 'https://via.placeholder.com/150' },
+            { title: 'RRR', image: 'https://via.placeholder.com/150' },
+            { title: 'Bajrangi Bhaijaan', image: 'https://via.placeholder.com/150' },
+            // Add more movie data as needed
+        ];
+        
+        const movieListContainer = document.querySelector('.movie-list');
+        movieData.forEach(movie => {
+            const movieCard = document.createElement('div');
+            movieCard.className = 'movie-card';
+            movieCard.innerHTML = `
+                <img src="${movie.image}" alt="${movie.title}">
+                <div class="movie-title">${movie.title}</div>
+            `;
+            movieListContainer.appendChild(movieCard);
+        });
+    }
 </script>
 
 </body>
