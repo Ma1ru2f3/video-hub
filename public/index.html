@@ -10,7 +10,7 @@
             background-color: #1a1a1a;
             color: #ffffff;
             margin: 0;
-            padding-bottom: 70px; /* Space for the fixed bottom bar */
+            padding-bottom: 70px;
         }
         .container {
             max-width: 800px;
@@ -24,11 +24,11 @@
             color: #f0f0f0;
         }
         .content-area {
-            display: none; /* All content areas are hidden by default */
+            display: none;
             padding-bottom: 20px;
         }
         .content-area.active {
-            display: block; /* The active content area is shown */
+            display: block;
         }
         .search-container {
             display: flex;
@@ -181,61 +181,48 @@
     const homeNavBtn = document.getElementById('homeBtn');
     const searchNavBtn = document.getElementById('searchNavBtn');
     const historyNavBtn = document.getElementById('historyNavBtn');
-    
     const homeContent = document.getElementById('homeContent');
     const searchContent = document.getElementById('searchContent');
     const historyContent = document.getElementById('historyContent');
-    
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
-    
     const homeResultsContainer = document.getElementById('homeResults');
     const searchResultsContainer = document.getElementById('searchResults');
     const historyResultsContainer = document.getElementById('historyResults');
-    
     const API_URL = 'https://video-hub-6e40.onrender.com';
     const HISTORY_KEY = 'ytbHistory';
 
-    // Event listeners for navigation
     homeNavBtn.addEventListener('click', () => {
         showContent('home');
         fetchTrendingVideos();
     });
-
     searchNavBtn.addEventListener('click', () => {
         showContent('search');
     });
-
     historyNavBtn.addEventListener('click', () => {
         showContent('history');
         displayHistory();
     });
-
     searchBtn.addEventListener('click', () => {
         const query = searchInput.value.trim();
         if (query) {
             performSearch(query);
         }
     });
-
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             searchBtn.click();
         }
     });
 
-    // Initial load: show home view and trending videos
     showContent('home');
     fetchTrendingVideos();
 
-    // Helper function to show the correct content area
     function showContent(view) {
         const contentAreas = [homeContent, searchContent, historyContent];
         const navButtons = [homeNavBtn, searchNavBtn, historyNavBtn];
-        
         contentAreas.forEach(area => area.classList.remove('active'));
         navButtons.forEach(btn => btn.classList.remove('active'));
-
         if (view === 'home') {
             homeContent.classList.add('active');
             homeNavBtn.classList.add('active');
@@ -248,13 +235,11 @@
         }
     }
 
-    // Function to fetch and display trending videos
     async function fetchTrendingVideos() {
         homeResultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Loading trending videos...</p>';
         try {
-            const response = await fetch(`${API_URL}/ytb/trending`); 
+            const response = await fetch(`${API_URL}/ytb/trending`);
             const data = await response.json();
-            
             if (data.error) {
                 homeResultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">${data.error}</p>`;
                 return;
@@ -265,13 +250,11 @@
         }
     }
 
-    // Function to perform a search
     async function performSearch(query) {
         searchResultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Searching...</p>';
         try {
             const response = await fetch(`${API_URL}/ytb/search?q=${encodeURIComponent(query)}`);
             const data = await response.json();
-            
             if (data.error) {
                 searchResultsContainer.innerHTML = `<p style="text-align: center; color: #ff0000;">${data.error}</p>`;
                 return;
@@ -283,14 +266,12 @@
         }
     }
     
-    // Function to display video cards in a specified container
     function displayResults(videos, container) {
         container.innerHTML = '';
         if (videos.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: #aaa;">No videos found.</p>';
             return;
         }
-
         videos.forEach(video => {
             const card = document.createElement('div');
             card.className = 'video-card';
@@ -305,30 +286,23 @@
         });
     }
 
-    // Function to add a search query to history
     function addToHistory(query, results) {
         let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
         const newEntry = { query, results, timestamp: new Date().toISOString() };
-        
         history.unshift(newEntry);
-
         if (history.length > 20) {
             history = history.slice(0, 20);
         }
-        
         localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     }
 
-    // Function to display the search history
     function displayHistory() {
         const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
         historyResultsContainer.innerHTML = '';
-        
         if (history.length === 0) {
             historyResultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Your search history is empty.</p>';
             return;
         }
-
         history.forEach(entry => {
             const historyCard = document.createElement('div');
             historyCard.className = 'video-card'; 
@@ -341,6 +315,5 @@
         });
     }
 </script>
-
 </body>
 </html>
