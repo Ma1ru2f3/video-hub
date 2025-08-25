@@ -78,6 +78,28 @@ app.get('/video-link-api', async (req, res) => {
     }
 });
 
+// NEW: API endpoint to fetch related videos
+app.get('/related-videos-api', async (req, res) => {
+    const videoId = req.query.id;
+    if (!videoId) {
+        return res.status(400).json({ error: 'Video ID is required.' });
+    }
+
+    try {
+        const apiBase = await baseApiUrl();
+        if (apiBase) {
+            const relatedVideos = (await axios.get(`${apiBase}/ytRelated?videoId=${videoId}`)).data.slice(0, 7);
+            res.json(relatedVideos);
+        } else {
+            res.status(500).json({ error: 'Failed to get API URL.' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred while fetching related videos.' });
+    }
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
