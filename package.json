@@ -1,14 +1,13 @@
 {
-  "name": "ytb-web",
+  "name": "ytb-web-api",
   "version": "1.0.0",
-  "description": "YouTube info viewer web app",
+  "description": "YouTube API backend and static frontend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "axios": "^1.6.8",
-    "ejs": "^3.1.9",
     "express": "^4.19.2"
   }
 }
