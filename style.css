@@ -1,0 +1,29 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #121212;
+  color: white;
+  text-align: center;
+}
+h1 {
+  margin: 20px;
+}
+#albums {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+.card {
+  background: #1e1e1e;
+  padding: 10px;
+  border-radius: 10px;
+  width: 180px;
+}
+.card img {
+  width: 100%;
+  border-radius: 8px;
+}
+.card audio {
+  margin-top: 5px;
+  width: 100%;
+}
