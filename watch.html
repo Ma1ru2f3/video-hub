@@ -39,6 +39,7 @@
 </div>
 
 <script>
+    // Updated API URL to your Render app
     const API_URL = 'https://video-hub-6e40.onrender.com';
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -47,7 +48,7 @@
         const format = urlParams.get('format');
         const title = urlParams.get('title');
 
-        if (videoId && format) {
+        if (videoId) {
             document.getElementById('videoTitle').innerText = decodeURIComponent(title);
             document.getElementById('videoPlayer').src = `${API_URL}/ytb/stream?id=${videoId}&format=${format}`;
         } else {
