@@ -5,7 +5,6 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
-// Helper function to get the base API URL
 const baseApiUrl = async () => {
     try {
         const response = await axios.get(
@@ -18,10 +17,8 @@ const baseApiUrl = async () => {
     }
 };
 
-// Serve static files from the 'public' directory
 app.use(express.static('public'));
 
-// Search endpoint
 app.get('/api/search', async (req, res) => {
     const { query } = req.query;
     if (!query) {
@@ -52,7 +49,6 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
-// Info endpoint
 app.get('/api/info', async (req, res) => {
     const { id } = req.query;
     if (!id) {
@@ -80,7 +76,6 @@ app.get('/api/info', async (req, res) => {
     }
 });
 
-// Download endpoint
 app.get('/api/download', async (req, res) => {
     const { id, format } = req.query;
     if (!id || !format || !['mp4', 'mp3'].includes(format)) {
@@ -97,9 +92,7 @@ app.get('/api/download', async (req, res) => {
             responseType: 'stream'
         });
         
-        const filename = `${title.replace(/[\\/:"*?<>|]/g, '').slice(0, 50)}.${format}`;
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', response.headers['content-type']);
+        res.setHeader('Content-Type', 'audio/mpeg'); // Set content type for streaming
         response.data.pipe(res);
 
     } catch (error) {
@@ -108,7 +101,6 @@ app.get('/api/download', async (req, res) => {
     }
 });
 
-// Start the server
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
