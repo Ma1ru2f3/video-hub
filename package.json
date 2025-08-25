@@ -1,24 +1,20 @@
 {
-  "name": "smm-music-hub",
+  "name": "spotify-clone-server",
   "version": "1.0.0",
-  "description": "A Spotify-like music hub built with Node.js and Express.",
+  "description": "Backend for Spotify clone using Node.js and Express",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server.js"
   },
-  "keywords": [
-    "music",
-    "hub",
-    "spotify",
-    "clone",
-    "nodejs",
-    "express"
-  ],
-  "author": "Your Name",
-  "license": "ISC",
   "dependencies": {
+    "axios": "^1.6.8",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "ytdl-core": "^4.11.5"
+    "spotify-web-api-node": "^5.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
