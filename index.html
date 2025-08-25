@@ -64,19 +64,20 @@
         #page-title { text-align: center; color: #ff0000; }
         .hidden { display: none; }
         .video-player-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 20px;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
         }
         .video-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 800px;
-            aspect-ratio: 16 / 9;
-            height: auto;
+            height: 100%;
             border: none;
-            border-radius: 8px;
         }
         .video-title-display {
             font-size: 1.5em;
@@ -118,8 +119,8 @@
             <a href="#" class="back-button" onclick="showSearchSection();">Back to Search</a>
             <div class="video-player-container">
                 <iframe id="video-iframe" class="video-iframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                <div id="video-title-display" class="video-title-display"></div>
             </div>
+            <div id="video-title-display" class="video-title-display"></div>
         </div>
     </div>
     
