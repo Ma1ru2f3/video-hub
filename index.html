@@ -91,11 +91,6 @@
         .watch-btn:hover {
             background-color: #0056b3;
         }
-        #videoPlayer {
-            width: 100%;
-            margin-top: 20px;
-            display: none; /* প্রাথমিকভাবে ভিডিও প্লেয়ার লুকানো থাকে */
-        }
     </style>
 </head>
 <body>
@@ -111,8 +106,6 @@
     <div id="results">
         <p style="text-align: center; color: #aaa;">Search for a video or audio to get started.</p>
     </div>
-
-    <video id="videoPlayer" controls></video>
 </div>
 
 <script>
@@ -120,10 +113,9 @@
     const searchVideoBtn = document.getElementById('searchVideoBtn');
     const searchAudioBtn = document.getElementById('searchAudioBtn');
     const resultsContainer = document.getElementById('results');
-    const videoPlayer = document.getElementById('videoPlayer');
     
     // আপনার Render অ্যাপের লাইভ URL
-    const API_URL = 'https://video-hub-6e40.onrender.com';
+    const API_URL = 'https://video-hub-1.onrender.com';
 
     let currentMode = 'video';
 
@@ -142,7 +134,6 @@
     searchInput.addEventListener('input', async (e) => {
         const query = e.target.value.trim();
         resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Searching...</p>';
-        videoPlayer.style.display = 'none';
         
         if (query === '') {
             resultsContainer.innerHTML = '<p style="text-align: center; color: #aaa;">Search for a video or audio to get started.</p>';
@@ -174,23 +165,8 @@
                 <div class="video-title">${video.title}</div>
                 <div class="video-meta">Duration: ${video.time}</div>
                 <div class="video-meta">Channel: ${video.channel.name}</div>
-                <button class="watch-btn" data-id="${video.id}" data-mode="${currentMode}">Watch</button>
+                <a class="watch-btn" href="watch.html?id=${video.id}&format=${currentMode === 'video' ? 'mp4' : 'mp3'}&title=${encodeURIComponent(video.title)}">Watch</a>
             `;
-            
-            card.querySelector('.watch-btn').addEventListener('click', async (e) => {
-                const videoId = e.target.dataset.id;
-                const mode = e.target.dataset.mode;
-                
-                if (mode === 'video') {
-                    videoPlayer.style.display = 'block';
-                    videoPlayer.src = `${API_URL}/ytb/stream?id=${videoId}`;
-                    videoPlayer.play();
-                } else if (mode === 'audio') {
-                    videoPlayer.style.display = 'block';
-                    videoPlayer.src = `${API_URL}/ytb/stream?id=${videoId}&format=mp3`; // অডিও ফরম্যাট
-                    videoPlayer.play();
-                }
-            });
             
             resultsContainer.appendChild(card);
         });
