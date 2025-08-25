@@ -21,7 +21,7 @@
             overflow: hidden; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
             transition: transform 0.2s;
-            position: relative; /* For duration badge positioning */
+            position: relative;
         }
         .video-card:hover { transform: translateY(-5px); }
         .video-thumbnail { width: 100%; height: 180px; object-fit: cover; }
@@ -118,7 +118,7 @@
         <div id="video-player-section" class="hidden">
             <a href="#" class="back-button" onclick="showSearchSection();">Back to Search</a>
             <div class="video-player-container">
-                <iframe id="video-iframe" class="video-iframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <video id="video-player" controls class="video-iframe"></video>
             </div>
             <div id="video-title-display" class="video-title-display"></div>
         </div>
@@ -154,22 +154,40 @@
         const homeLink = document.getElementById('home-link');
         const searchSection = document.getElementById('search-section');
         const videoPlayerSection = document.getElementById('video-player-section');
-        const videoIframe = document.getElementById('video-iframe');
+        const videoPlayer = document.getElementById('video-player');
         const videoTitleDisplay = document.getElementById('video-title-display');
         
         // Functions to toggle sections
         function showSearchSection() {
             searchSection.classList.remove('hidden');
             videoPlayerSection.classList.add('hidden');
-            videoIframe.src = ''; // Stop video playback
+            videoPlayer.src = ''; // Stop video playback
         }
         
-        function showVideoPlayerSection(videoId, videoTitle) {
+        // NEW: Function to show the video player by fetching a direct video link
+        async function showVideoPlayerSection(videoId, videoTitle) {
             searchSection.classList.add('hidden');
             videoPlayerSection.classList.remove('hidden');
-            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&controls=1&showinfo=0`;
-            videoIframe.src = embedUrl;
-            videoTitleDisplay.textContent = videoTitle;
+
+            videoTitleDisplay.textContent = 'Loading video...';
+            videoPlayer.src = '';
+            
+            try {
+                const response = await fetch(`/video-link-api?id=${videoId}`);
+                const data = await response.json();
+                
+                if (response.ok && data.videoUrl) {
+                    videoPlayer.src = data.videoUrl;
+                    videoPlayer.load();
+                    videoPlayer.play();
+                    videoTitleDisplay.textContent = videoTitle;
+                } else {
+                    videoTitleDisplay.textContent = 'Error: Failed to load video.';
+                }
+            } catch (err) {
+                console.error(err);
+                videoTitleDisplay.textContent = 'Error: An error occurred while loading the video.';
+            }
         }
 
         // Function to convert seconds to HH:MM:SS format
