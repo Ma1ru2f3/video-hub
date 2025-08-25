@@ -22,7 +22,7 @@
     .logo{font-size:26px}
     .site-title{font-weight:800;font-size:18px}
     .site-sub{font-size:12px;color:var(--text-secondary)}
-
+    
     main{padding:18px 0;padding-bottom:100px}
     .grid{display:grid;gap:14px}
     .grid.cols-2{grid-template-columns:repeat(2,1fr)}
@@ -53,7 +53,7 @@
     .logo-container img{width:60px;height:60px;object-fit:contain;border-radius:10px}
     .logo-container{flex-shrink:0}
     .details-page, .auth-page, .admin-page, .upcoming-page{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-dark);z-index:200;overflow-y:auto;display:none;padding-bottom:80px}
-
+    
     .auth-page {
         display: flex;
         flex-direction: column;
@@ -72,7 +72,7 @@
     }
     .auth-card h1{font-size: 28px; margin-bottom: 12px;}
     .auth-card p {color: var(--text-secondary); margin-bottom: 24px;}
-
+    
     .details-page .header{position:relative;height:300px;overflow:hidden;background:var(--card-bg)}
     .details-page .header iframe{width:100%;height:100%;}
     .details-page .back-btn, .auth-page .back-btn, .admin-page .back-btn, .upcoming-page .back-btn{position:absolute;top:20px;left:20px;background:rgba(0,0,0,0.5);color:white;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:24px}
@@ -91,65 +91,7 @@
     .more-options h2{margin-top:0;font-size:20px;font-weight:700;}
     @media (max-width:800px){ .grid.cols-2{grid-template-columns:1fr} .row{flex-direction:column;align-items:stretch} .details-page .header{height:200px} }
     .hidden { display: none !important; }
-
-    /* Music player styles */
-    .music-player-bar {
-        position: fixed;
-        bottom: 60px; /* Above the nav bar */
-        left: 0;
-        width: 100%;
-        background: #181818;
-        border-top: 1px solid var(--border-color);
-        padding: 8px 15px;
-        display: none;
-        align-items: center;
-        gap: 15px;
-        z-index: 101;
-        transform: translateY(100%);
-        transition: transform 0.3s ease-in-out;
-    }
-    .music-player-bar.active {
-        display: flex;
-        transform: translateY(0);
-    }
-    .music-player-bar img {
-        width: 45px;
-        height: 45px;
-        object-fit: cover;
-        border-radius: 6px;
-    }
-    .music-player-info {
-        flex: 1;
-        overflow: hidden;
-    }
-    .music-player-title {
-        font-weight: 600;
-        font-size: 14px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .music-player-artist {
-        font-size: 12px;
-        color: var(--text-secondary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .music-player-controls {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-    .music-player-controls button {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-        padding: 5px;
-    }
-
+    
     nav{
         position: fixed;
         bottom: 0;
@@ -229,7 +171,7 @@
         margin-top: 15px;
         display: block;
     }
-
+    
     .upcoming-list .item {
         background: var(--card-bg);
         border-radius: var(--rounded);
@@ -388,19 +330,7 @@
           </div>
         </div>
       </main>
-      <div id="musicPlayerBar" class="music-player-bar">
-        <img id="musicPlayerArt" src="https://via.placeholder.com/45" alt="Album Art">
-        <div class="music-player-info">
-          <div id="musicPlayerTitle" class="music-player-title">No song playing</div>
-          <div id="musicPlayerArtist" class="music-player-artist"></div>
-        </div>
-        <div class="music-player-controls">
-          <button id="prevBtn">⏮️</button>
-          <button id="playPauseBtn">▶️</button>
-          <button id="nextBtn">⏭️</button>
-        </div>
-      </div>
-      <audio id="audioPlayer"></audio>
+      
       <nav id="bottomNav">
         <button class="tab active" data-pane="home">
           <span class="icon">🏠</span>
@@ -438,7 +368,7 @@
             <div id="authLogo" style="font-size: 60px; margin-bottom: 20px;">🎬</div>
             <h1 id="authTitle">Welcome to Video Hub!</h1>
             <p id="authSubtitle">Please sign up or log in to continue.</p>
-
+            
             <div id="signupForm" style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px;">
                 <input id="signupName" type="text" placeholder="Full Name" />
                 <input id="signupEmail" type="text" placeholder="Email Address" />
@@ -455,7 +385,7 @@
             </div>
         </div>
     </div>
-
+    
     <div id="adminDashboardPage" class="admin-page hidden">
         <div class="container">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -604,7 +534,7 @@
             </ul>
         </div>
     </div>
-
+    
     <div id="favoritesPage" class="details-page hidden">
         <div class="body">
             <div class="back-btn" onclick="hidePage('favorites')">←</div>
@@ -636,13 +566,6 @@
       ADMIN_PASS: "123450",
       SHEETDB_API: "https://sheetdb.io/api/v1/vitcn9bcwl84i", 
       APK_DOWNLOAD_LINK: "https://drive.google.com/file/d/1HKWsccAM0YIlUF5tw6YJHeBsQ-bqI0Nw/view?usp=drivesdk"
-    };
-    
-    // আপনার নতুন Render সার্ভারের API এন্ডপয়েন্ট
-    const VIDEO_HUB_API = 'https://video-hub-6e40.onrender.com';
-    const MUSIC_API = {
-        SEARCH: "https://video-hub-9ysg.onrender.com/search",
-        DOWNLOAD: "https://video-hub-9ysg.onrender.com/play"
     };
 
     const OWNER_INFO = {
@@ -701,11 +624,8 @@
       favorites: JSON.parse(localStorage.getItem('bv_favorites') || '[]'),
       downloads: JSON.parse(localStorage.getItem('bv_downloads') || '[]'),
       owner: OWNER_INFO,
-      songs: [], // New property to store search results
-      currentSong: null,
-      currentSongIndex: 0,
     };
-
+    
     function getFileIdFromLink(link) {
       if (!link) return null;
       const regex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([\w-]{25,})/;
@@ -717,12 +637,7 @@
       const fileId = getFileIdFromLink(link);
       return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : link;
     }
-
-    function getAudioLink(link) {
-      const fileId = getFileIdFromLink(link);
-      return fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : link;
-    }
-
+    
     function getThumbnailLink(link) {
         const fileId = getFileIdFromLink(link);
         if (fileId) {
@@ -730,20 +645,7 @@
         }
         return 'https://via.placeholder.com/150x225.png?text=No+Image';
     }
-
-    const parseDuration = (timestamp) => {
-        const parts = timestamp.split(':').map(part => parseInt(part));
-        let seconds = 0;
-
-        if (parts.length === 3) {
-          seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
-        } else if (parts.length === 2) {
-          seconds = parts[0] * 60 + parts[1];
-        }
-
-        return seconds;
-    };
-
+    
     async function loadInitial(){
       try{
         const [videosRaw, usersRaw, reportsRaw, requestsRaw, upcomingRaw] = await Promise.all([
@@ -753,7 +655,7 @@
           apiGet('requests').catch(()=>[]),
           apiGet('upcoming_videos').catch(()=>[])
         ]);
-
+        
         STATE.videos = (Array.isArray(videosRaw) ? videosRaw.map(r => ({
           seriesId: r.seriesId || r.SeriesID || rid('ser'),
           id: r.id || r.ID || rid('vid'),
@@ -776,7 +678,7 @@
             status: r.status || 'active',
             createdAt: r.createdAt || ''
         })) : []);
-
+        
         STATE.reports = Array.isArray(reportsRaw) ? reportsRaw.map(r => ({
             id: r.id, name: r.name, email: r.email, report: r.report, createdAt: r.createdAt
         })) : [];
@@ -795,36 +697,12 @@
       }
     }
 
-    // New function to fetch and render YouTube videos
-    async function fetchAndRenderYoutubeVideos(query, containerId) {
-        const container = qs(containerId);
-        container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Loading...</div>';
-
-        try {
-            const response = await fetch(`${VIDEO_HUB_API}/ytb/search?q=${encodeURIComponent(query)}`);
-            const data = await response.json();
-
-            if (data.error) {
-                container.innerHTML = `<div style="text-align:center;color:var(--accent);padding:20px;">${data.error}</div>`;
-                return;
-            }
-
-            container.innerHTML = '';
-            data.forEach(video => {
-                const card = document.createElement('a');
-                card.href = `watch.html?id=${video.id}&title=${encodeURIComponent(video.title)}`;
-                card.className = 'content-card';
-                card.innerHTML = `
-                    <img src="${video.thumbnail}" alt="${video.title}" style="height:120px; object-fit:cover; border-radius: 8px;">
-                    <div class="content-card-title">${escapeHtml(video.title)}</div>
-                    <div class="small-muted">Duration: ${escapeHtml(video.time)}</div>
-                `;
-                container.appendChild(card);
-            });
-        } catch (error) {
-            console.error('Failed to fetch YouTube videos:', error);
-            container.innerHTML = '<div style="text-align:center;color:var(--accent);padding:20px;">Failed to load videos.</div>';
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
+        return array;
     }
 
     function getUniqueSeries() {
@@ -838,17 +716,21 @@
     }
 
     function renderHomeContent(){
-      // Fetch and render videos from YouTube API
-      fetchAndRenderYoutubeVideos('Trending music videos', '#trendingVideos');
-      fetchAndRenderYoutubeVideos('Most popular movies', '#popularVideos');
-      
+      const allUniqueVideos = getUniqueSeries();
+      const shuffledVideos = shuffleArray([...allUniqueVideos]);
       const categories = [...new Set(STATE.videos.map(v => v.category))];
+      
+      const trendingVideos = shuffledVideos.slice(0, 10);
+      const popularVideos = shuffledVideos.slice(10, 20);
+
+      renderVideoSection(qs('#trendingVideos'), trendingVideos);
+      renderVideoSection(qs('#popularVideos'), popularVideos);
       renderCategories(qs('#categoryChips'), categories);
       renderPaneMovies(getUniqueSeries().filter(v => v.category.toLowerCase().includes('movie')));
       renderPaneSeries(getUniqueSeries().filter(v => v.category.toLowerCase().includes('series')));
     }
-
-    function renderVideoSection(container, videos, isHorizontal = false){
+    
+    function renderVideoSection(container, videos){
       container.innerHTML = '';
       if(!videos.length){
         container.innerHTML = '<div style="color:var(--text-secondary)">No videos found.</div>';
@@ -891,29 +773,7 @@
         container.appendChild(card);
       });
     }
-
-    function renderFilteredSongs(songsToRender, container) {
-        container.innerHTML = '';
-        if (songsToRender.length === 0) {
-            container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No matching songs found.</div>';
-        } else {
-            songsToRender.forEach(song => {
-                const songItem = document.createElement('div');
-                songItem.className = 'song-item';
-                songItem.innerHTML = `
-                    <img src="${song.thumbnail}" onerror="this.src='https://via.placeholder.com/60.png?text=No+Art'" alt="${song.title}">
-                    <div class="song-info">
-                        <div class="song-title">${escapeHtml(song.title)}</div>
-                        <div class="song-artist">${escapeHtml(song.channelTitle || 'Unknown Artist')}</div>
-                        <div class="song-artist" style="font-size:12px;color:var(--accent)">Duration: ${escapeHtml(song.timestamp)}</div>
-                    </div>
-                `;
-                songItem.onclick = () => playSong(song);
-                container.appendChild(songItem);
-            });
-        }
-    }
-
+    
     function renderCategories(container, categories){
       container.innerHTML = '';
       categories.forEach(cat => {
@@ -947,21 +807,16 @@
                                    .sort((a, b) => a.season - b.season || a.episode - b.episode);
       const seasons = [...new Set(episodes.map(e => e.season))].sort((a,b) => a-b);
       const firstEpisode = episodes[0];
-
+      
       const isFavorite = STATE.favorites.includes(series.seriesId);
       const isDownloaded = STATE.downloads.includes(series.seriesId);
-
+      
       const favoriteBtnClass = isFavorite ? 'btn-emerald' : 'btn-primary';
       const downloadBtnClass = isDownloaded ? 'btn-emerald' : 'btn-primary';
-
+      
       const downloadBtnText = isDownloaded ? '⬇️ Downloaded' : '⬇️ Download';
       const favoriteBtnText = isFavorite ? '⭐ Favorited' : '⭐ Favorite';
-
-      const audioPlayer = qs('#audioPlayer');
-      audioPlayer.pause();
-      qs('#playPauseBtn').textContent = '▶️';
-      qs('#musicPlayerBar').classList.remove('active');
-
+      
       page.innerHTML = `
           <div class="header">
               <iframe id="video-player" src="${getEmbedLink(firstEpisode.link)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -1023,12 +878,12 @@
             });
         }
       }
-
+      
       window.playCurrentVideo = function() {
           const iframe = qs('#video-player');
           iframe.src = getEmbedLink(firstEpisode.link);
       }
-
+      
       qs('#favoriteBtn').addEventListener('click', () => {
           const seriesId = series.seriesId;
           if (STATE.favorites.includes(seriesId)) {
@@ -1064,11 +919,11 @@
         qsa('.pane').forEach(p => p.style.display = 'none');
         const activePane = qs(`#pane${paneId.charAt(0).toUpperCase() + paneId.slice(1)}`);
         if(activePane) activePane.style.display = 'block';
-
+        
         qsa('#bottomNav .tab').forEach(t => t.classList.remove('active'));
         qs(`#bottomNav [data-pane="${paneId}"]`).classList.add('active');
     }
-
+    
     qsa('#bottomNav .tab').forEach(btn => {
         btn.addEventListener('click', () => {
             const paneId = btn.dataset.pane;
@@ -1218,7 +1073,7 @@
                 status: 'active',
                 createdAt: new Date().toISOString()
             };
-
+            
             await apiPost('users', newUser);
             STATE.users.push(newUser);
             localStorage.setItem('isUserLoggedIn', newUser.id);
@@ -1233,7 +1088,7 @@
     qs('#btnLogin').addEventListener('click', async () => {
         const email = qs('#loginEmail').value.trim();
         const password = qs('#loginPassword').value.trim();
-
+        
         if (!email || !password) {
             toast('Email and Password are required.');
             return;
@@ -1241,7 +1096,7 @@
 
         try {
             await loadInitial();
-
+            
             if (email === CONFIG.ADMIN_EMAIL && password === CONFIG.ADMIN_PASS) {
                 localStorage.setItem('isAdminLoggedIn', 'true');
                 toast("Admin login successful!");
@@ -1250,7 +1105,7 @@
             }
 
             const user = STATE.users.find(u => u.email === email);
-
+            
             if (!user) {
                 toast('User not found. Please sign up.');
                 return;
@@ -1260,7 +1115,7 @@
                 toast('Incorrect password.');
                 return;
             }
-
+            
             if (user.status === 'blocked') {
                 toast('Your account has been blocked by the admin.');
                 return;
@@ -1286,7 +1141,7 @@
         window.location.reload();
     }
 
-
+    
     function renderAdminDashboard() {
         qsa('.admin-nav .btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1294,7 +1149,7 @@
                 btn.classList.add('active');
                 qsa('.admin-pane').forEach(p => p.classList.add('hidden'));
                 qs(`#admin-${btn.dataset.adminPane}-pane`).classList.remove('hidden');
-
+                
                 if (btn.dataset.adminPane === 'users') {
                     renderUserList();
                 } else if (btn.dataset.adminPane === 'reports') {
@@ -1335,7 +1190,7 @@
             toast('Failed to add upcoming video.');
         }
     }
-
+    
     async function renderUserList() {
         const userListContainer = qs('#userList');
         userListContainer.innerHTML = '';
@@ -1416,7 +1271,7 @@
             requestListContainer.appendChild(item);
         });
     }
-
+    
     function showFavorites() {
         const favoritesContainer = qs('#favoritesGrid');
         favoritesContainer.innerHTML = '';
@@ -1437,12 +1292,12 @@
         }
         openPage('favorites');
     }
-
+    
     function showDownloads() {
         const downloadsContainer = qs('#downloadsGrid');
         downloadsContainer.innerHTML = '';
         const downloadedSeries = getUniqueSeries().filter(v => STATE.downloads.includes(v.seriesId));
-
+        
         if (downloadedSeries.length === 0) {
             downloadsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">You have not downloaded any series.</div>';
         } else {
@@ -1458,82 +1313,33 @@
         }
         openPage('downloads');
     }
-    
-    // Updated search logic to handle YouTube videos
-    qs('#searchInput').addEventListener('input', async (e) => {
-        const query = e.target.value.trim();
+
+    qs('#searchInput').addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
         const resultsContainer = qs('#searchResults');
-        
-        if (query.length > 0) {
-            resultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Searching...</div>';
+        resultsContainer.innerHTML = '';
+        if(query.length > 0){
+            const filteredVideos = getUniqueSeries().filter(v => 
+                v.title && v.title.toLowerCase().includes(query)
+            );
             
-            try {
-                const response = await fetch(`${VIDEO_HUB_API}/ytb/search?q=${encodeURIComponent(query)}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    resultsContainer.innerHTML = `<div style="text-align:center;color:var(--accent);padding:20px;">${data.error}</div>`;
-                    return;
-                }
-                
-                resultsContainer.innerHTML = '';
-                data.forEach(video => {
-                    const card = document.createElement('a');
-                    card.href = `watch.html?id=${video.id}&title=${encodeURIComponent(video.title)}`;
-                    card.className = 'content-card';
-                    card.style.width = '100%';
-                    card.innerHTML = `
-                        <img src="${video.thumbnail}" alt="${video.title}" style="height:120px; object-fit:cover; border-radius: 8px;">
-                        <div class="content-card-title">${escapeHtml(video.title)}</div>
-                        <div class="small-muted">Duration: ${escapeHtml(video.time)}</div>
-                    `;
-                    resultsContainer.appendChild(card);
-                });
-            } catch (error) {
-                console.error('Search API error:', error);
-                resultsContainer.innerHTML = '<div style="text-align:center;color:var(--accent);padding:20px;">An error occurred while searching.</div>';
-            }
-        } else {
-            resultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Search for a video to get started.</div>';
-        }
-    });
-
-    // Dedicated song search logic
-    qs('#songSearchInput').addEventListener('input', async (e) => {
-        const query = e.target.value.trim();
-        const searchResultsContainer = qs('#songSearchResults');
-
-        if (query.length > 0) {
-            searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Searching...</div>';
-
-            try {
-                const searchResponse = await fetch(`${MUSIC_API.SEARCH}?q=${encodeURIComponent(query)}`);
-                const searchData = await searchResponse.json();
-
-                if (searchData && Array.isArray(searchData)) {
-                    const filteredSongs = searchData.filter(video => {
-                        try {
-                            const totalSeconds = parseDuration(video.timestamp);
-                            return totalSeconds < 600; // 10 মিনিটের নিচে
-                        } catch {
-                            return false;
-                        }
+            if(filteredVideos.length === 0){
+                resultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary)">No results found.</div>';
+            } else {
+                if (filteredVideos.length > 0) {
+                    filteredVideos.forEach(v => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `<div class="card-body">
+                                            <div style="font-weight:700">${escapeHtml(v.title)}</div>
+                                            <div class="small-muted">${escapeHtml(v.category)}</div>
+                                            <div class="small-muted">Season ${escapeHtml(v.season)}, Episode ${escapeHtml(v.episode)}</div>
+                                          </div>`;
+                        card.onclick = () => showVideoDetails(v);
+                        resultsContainer.appendChild(card);
                     });
-
-                    STATE.songs = filteredSongs; // Store the results in the state
-                    renderFilteredSongs(filteredSongs, searchResultsContainer);
-                } else {
-                    searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No results found. Please try a different query.</div>';
                 }
-
-            } catch (error) {
-                console.error('Search API error:', error);
-                searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--accent);padding:20px;">An error occurred while searching. Please try again.</div>';
             }
-
-        } else {
-            searchResultsContainer.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">Search for a song to get started.</div>';
-            STATE.songs = []; // Clear the state
         }
     });
 
@@ -1571,7 +1377,7 @@
         console.error(e); toast('Upload failed');
       }
     });
-
+    
     function renderSiteHeader(){
       qs('#siteName').textContent = OWNER_INFO.name;
       qs('#siteAbout').textContent = OWNER_INFO.about;
@@ -1584,7 +1390,7 @@
         const isUserLoggedIn = localStorage.getItem('isUserLoggedIn');
         const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
         const adminDashboardTab = qs('#adminDashboardTab');
-
+        
         if (isUserLoggedIn) {
             qs('#authPage').classList.add('hidden');
             qs('#mainContent').classList.remove('hidden');
@@ -1609,87 +1415,7 @@
             loadInitial();
         }
     }
-
-    // Music Player Logic
-    const audioPlayer = qs('#audioPlayer');
-    const musicPlayerBar = qs('#musicPlayerBar');
-    const musicPlayerTitle = qs('#musicPlayerTitle');
-    const musicPlayerArtist = qs('#musicPlayerArtist');
-    const musicPlayerArt = qs('#musicPlayerArt');
-    const playPauseBtn = qs('#playPauseBtn');
-    const nextBtn = qs('#nextBtn');
-    const prevBtn = qs('#prevBtn');
-
-    async function playSong(song) {
-        if (!song || !song.url) {
-            toast('No valid song link found.');
-            return;
-        }
-
-        musicPlayerTitle.textContent = 'Loading...';
-        musicPlayerArtist.textContent = '';
-        musicPlayerArt.src = 'https://via.placeholder.com/45.png';
-        musicPlayerBar.classList.add('active');
-        playPauseBtn.textContent = '⏳';
-
-        try {
-            const apiResponse = await fetch(`${MUSIC_API.DOWNLOAD}?url=${encodeURIComponent(song.url)}`);
-            const apiData = await apiResponse.json();
-
-            if (apiData && apiData.url) {
-                audioPlayer.src = apiData.url;
-                await audioPlayer.play();
-                musicPlayerTitle.textContent = song.title;
-                musicPlayerArtist.textContent = song.channelTitle || 'Unknown Artist';
-                musicPlayerArt.src = song.thumbnail || 'https://via.placeholder.com/45.png';
-                playPauseBtn.textContent = '⏸️';
-
-                const index = STATE.songs.findIndex(s => s.url === song.url);
-                STATE.currentSongIndex = index;
-            } else {
-                // If the API doesn't return a JSON, assume it's a direct stream
-                audioPlayer.src = `${MUSIC_API.DOWNLOAD}?url=${encodeURIComponent(song.url)}`;
-                await audioPlayer.play();
-                musicPlayerTitle.textContent = song.title;
-                musicPlayerArtist.textContent = song.channelTitle || 'Unknown Artist';
-                musicPlayerArt.src = song.thumbnail || 'https://via.placeholder.com/45.png';
-                playPauseBtn.textContent = '⏸️';
-            }
-        } catch (error) {
-            console.error('Play API error:', error);
-            toast('Error playing song. Please try again.');
-            playPauseBtn.textContent = '▶️';
-            musicPlayerTitle.textContent = 'Playback Failed';
-            musicPlayerArtist.textContent = 'Try another song.';
-        }
-    }
-
-    playPauseBtn.addEventListener('click', () => {
-        if (audioPlayer.paused) {
-            audioPlayer.play();
-            playPauseBtn.textContent = '⏸️';
-        } else {
-            audioPlayer.pause();
-            playPauseBtn.textContent = '▶️';
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
-        if (STATE.songs.length === 0) return;
-        STATE.currentSongIndex = (STATE.currentSongIndex + 1) % STATE.songs.length;
-        playSong(STATE.songs[STATE.currentSongIndex]);
-    });
-
-    prevBtn.addEventListener('click', () => {
-        if (STATE.songs.length === 0) return;
-        STATE.currentSongIndex = (STATE.currentSongIndex - 1 + STATE.songs.length) % STATE.songs.length;
-        playSong(STATE.songs[STATE.currentSongIndex]);
-    });
-
-    audioPlayer.addEventListener('ended', () => {
-        nextBtn.click();
-    });
-
+    
     (function init(){
       renderSiteHeader();
       checkAuthStatus();
