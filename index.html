@@ -23,13 +23,6 @@
         .info-button { display: block; text-align: center; padding: 10px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px; }
         .info-button:hover { background-color: #218838; }
         .error-message { color: red; text-align: center; margin-top: 20px; }
-        .back-button { display: inline-block; margin-bottom: 20px; padding: 10px 15px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; }
-        .video-info-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .thumbnail { width: 100%; max-width: 600px; height: auto; border-radius: 8px; margin-bottom: 20px; }
-        h1 { color: #ff0000; font-size: 2em; margin-bottom: 10px; }
-        ul { list-style-type: none; padding: 0; width: 100%; max-width: 500px; text-align: left; }
-        li { background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 1em; }
-        li strong { color: #555; }
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -61,14 +54,34 @@
             font-size: 24px;
             margin-bottom: 5px;
         }
+        #page-title { text-align: center; color: #ff0000; }
         .hidden { display: none; }
+        .video-player-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .video-iframe {
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            border: none;
+        }
+        .video-title-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="search-section">
             <div class="header">
-                <a href="#"><h1>🎥 Video Hub</h1></a>
+                <a href="#" onclick="showSearchSection();"><h1>🎥 Video Hub</h1></a>
             </div>
             <div class="search-form">
                 <form id="search-form">
@@ -76,19 +89,23 @@
                     <button type="submit" class="search-button">Search</button>
                 </form>
             </div>
+            <h2 id="page-title">Trending Videos</h2>
             <div id="error-message" class="error-message"></div>
             <div id="video-grid" class="video-grid"></div>
         </div>
         
-        <div id="info-section" class="hidden">
+        <div id="video-player-section" class="hidden">
             <a href="#" class="back-button" onclick="showSearchSection();">Back to Search</a>
-            <div id="info-content"></div>
+            <div class="video-player-container">
+                <iframe id="video-iframe" class="video-iframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <div id="video-title-display" class="video-title-display"></div>
+            </div>
         </div>
     </div>
-
+    
     <div class="bottom-nav">
         <div class="nav-item">
-            <a href="#" class="nav-link" onclick="showSearchSection();">
+            <a href="#" class="nav-link" id="home-link">
                 <span class="nav-icon">🏠</span>
                 Home
             </a>
@@ -112,94 +129,87 @@
         const searchInput = document.getElementById('search-input');
         const videoGrid = document.getElementById('video-grid');
         const errorMessage = document.getElementById('error-message');
+        const pageTitle = document.getElementById('page-title');
+        const homeLink = document.getElementById('home-link');
         const searchSection = document.getElementById('search-section');
-        const infoSection = document.getElementById('info-section');
-        const infoContent = document.getElementById('info-content');
-
-        // Function to show the search section and hide the info section
+        const videoPlayerSection = document.getElementById('video-player-section');
+        const videoIframe = document.getElementById('video-iframe');
+        const videoTitleDisplay = document.getElementById('video-title-display');
+        
+        // Functions to toggle sections
         function showSearchSection() {
             searchSection.classList.remove('hidden');
-            infoSection.classList.add('hidden');
+            videoPlayerSection.classList.add('hidden');
+            videoIframe.src = ''; // Stop video playback
         }
-
-        // Function to show the info section and hide the search section
-        function showInfoSection() {
+        
+        function showVideoPlayerSection(videoId, videoTitle) {
             searchSection.classList.add('hidden');
-            infoSection.classList.remove('hidden');
+            videoPlayerSection.classList.remove('hidden');
+            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&controls=1`;
+            videoIframe.src = embedUrl;
+            videoTitleDisplay.textContent = videoTitle;
         }
 
-        // Handle search form submission
-        searchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const query = searchInput.value;
-            if (!query) return;
-
+        // Function to fetch and display videos
+        async function fetchVideos(url, title) {
             videoGrid.innerHTML = 'Loading...';
             errorMessage.innerHTML = '';
-
+            pageTitle.textContent = title;
+            
             try {
-                const response = await fetch(`/search-api?q=${encodeURIComponent(query)}`);
+                const response = await fetch(url);
                 const videos = await response.json();
-
+                
                 if (response.ok) {
                     if (videos.length === 0) {
-                        videoGrid.innerHTML = `<p style="text-align: center;">No results found for "${query}".</p>`;
+                        videoGrid.innerHTML = `<p style="text-align: center;">No results found.</p>`;
                     } else {
-                        videoGrid.innerHTML = ''; // Clear previous results
+                        videoGrid.innerHTML = '';
                         videos.forEach(video => {
                             const card = document.createElement('div');
                             card.className = 'video-card';
                             card.innerHTML = `
-                                <a href="#" onclick="fetchVideoInfo('${video.id}');">
+                                <a href="#" onclick="showVideoPlayerSection('${video.id}', '${video.title.replace(/'/g, "\\'")}');">
                                     <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
                                 </a>
                                 <div class="video-info">
                                     <h3 class="video-title">${video.title}</h3>
-                                    <a href="#" class="info-button" onclick="fetchVideoInfo('${video.id}');">View Info</a>
                                 </div>
                             `;
                             videoGrid.appendChild(card);
                         });
                     }
                 } else {
-                    errorMessage.innerHTML = videos.error || 'Failed to perform search.';
+                    errorMessage.innerHTML = videos.error || 'Failed to fetch videos.';
                     videoGrid.innerHTML = '';
                 }
             } catch (err) {
                 errorMessage.innerHTML = 'An error occurred. Please try again later.';
                 videoGrid.innerHTML = '';
             }
+        }
+
+        // Load trending videos on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchVideos('/home-api', 'Trending Videos');
         });
 
-        // Function to fetch and display video info
-        async function fetchVideoInfo(videoId) {
-            showInfoSection();
-            infoContent.innerHTML = 'Loading...';
-            
-            try {
-                const response = await fetch(`/info-api?v=${videoId}`);
-                const videoInfo = await response.json();
-
-                if (response.ok) {
-                    infoContent.innerHTML = `
-                        <div class="video-info-card">
-                            <img src="${videoInfo.thumbnail}" alt="Video Thumbnail" class="thumbnail">
-                            <h1>${videoInfo.title}</h1>
-                            <ul>
-                                <li><strong>⏳ Duration:</strong> ${videoInfo.duration} minutes</li>
-                                <li><strong>👀 Views:</strong> ${videoInfo.view_count}</li>
-                                <li><strong>👍 Likes:</strong> ${videoInfo.like_count}</li>
-                                <li><strong>📬 Comments:</strong> ${videoInfo.comment_count}</li>
-                            </ul>
-                        </div>
-                    `;
-                } else {
-                    infoContent.innerHTML = `<div class="error-message">${videoInfo.error || 'Failed to retrieve video info.'}</div>`;
-                }
-            } catch (err) {
-                infoContent.innerHTML = `<div class="error-message">An error occurred. Please try again later.</div>`;
+        // Handle search form submission
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = searchInput.value;
+            if (query) {
+                fetchVideos(`/search-api?q=${encodeURIComponent(query)}`, `Search Results for "${query}"`);
             }
-        }
+        });
+
+        // Handle home button click
+        homeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSearchSection();
+            fetchVideos('/home-api', 'Trending Videos');
+        });
     </script>
 </body>
 </html>
