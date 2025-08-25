@@ -1,85 +1,105 @@
 const express = require('express');
-const axios = require('axios');
-const path = require('path');
+const ytdl = require('ytdl-core');
+const ytsr = require('ytsr');
+const ytpl = require('ytpl');
 const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Use CORS to allow requests from your front-end
 app.use(cors());
-app.use(express.json());
 
-// External API URL
-const baseApiUrl = "https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json";
-
-// Serve the index.html file
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Serve the watch.html file
-app.get('/watch.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'watch.html'));
-});
-
-// API endpoint for searching YouTube videos
+// Search for videos
 app.get('/ytb/search', async (req, res) => {
-    const keyWord = req.query.q;
-    if (!keyWord) {
-        return res.status(400).json({ error: 'Search query (q) is required' });
-    }
-
     try {
-        const apiBase = (await axios.get(baseApiUrl)).data.api;
-        const result = (await axios.get(`${apiBase}/ytFullSearch?songName=${encodeURIComponent(keyWord)}`)).data;
-        
-        // Filter out shorts (videos with time <= 60 seconds)
-        const longVideos = result.filter(video => {
-            if (video.time) {
-                const timeParts = video.time.split(':').map(Number);
-                let totalSeconds;
-                if (timeParts.length === 3) {
-                    totalSeconds = timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2];
-                } else if (timeParts.length === 2) {
-                    totalSeconds = timeParts[0] * 60 + timeParts[1];
-                }
-                return totalSeconds > 60;
-            }
-            return false;
-        });
-        
-        // Show only the first 6 long videos
-        const limitedResults = longVideos.slice(0, 6);
-
-        if (limitedResults.length === 0) {
-            return res.status(404).json({ error: 'No long videos found for the keyword.' });
+        const query = req.query.q;
+        if (!query) {
+            return res.status(400).json({ error: 'Query parameter "q" is required.' });
         }
-        res.json(limitedResults);
-    } catch (err) {
-        res.status(500).json({ error: 'An error occurred during search: ' + err.message });
+
+        const filters = await ytsr.getFilters(query);
+        const filter = filters.get('Type').get('Video');
+        const searchResults = await ytsr(filter.url, { limit: 20 });
+
+        const videos = searchResults.items.map(item => ({
+            id: item.id,
+            title: item.title,
+            thumbnail: item.thumbnails[0].url,
+            channel: { name: item.author.name },
+            time: item.duration
+        }));
+
+        res.json(videos);
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({ error: 'Failed to fetch search results.' });
     }
 });
 
-// New endpoint for streaming video
+// Stream video or audio
 app.get('/ytb/stream', async (req, res) => {
-    const videoID = req.query.id;
-    const format = req.query.format || 'mp4';
-    if (!videoID) {
+    const videoId = req.query.id;
+    const format = req.query.format || 'mp4'; // Default to mp4
+
+    if (!videoId) {
         return res.status(400).json({ error: 'Video ID is required.' });
     }
 
     try {
-        const apiBase = (await axios.get(baseApiUrl)).data.api;
-        const { data } = await axios.get(`${apiBase}/ytDl3?link=${videoID}&format=${format}&quality=3`);
-        
-        if (!data.downloadLink) {
-            return res.status(500).json({ error: 'Video stream link not found.' });
+        let stream;
+        let options = { quality: 'highest' };
+
+        if (format === 'mp3') {
+            options.filter = 'audioonly';
+            res.header('Content-Disposition', `attachment; filename="${videoId}.mp3"`);
+            res.header('Content-Type', 'audio/mpeg');
+        } else {
+            options.filter = 'videoandaudio';
+            res.header('Content-Type', 'video/mp4');
         }
-        
-        res.setHeader('Content-Type', format === 'mp3' ? 'audio/mpeg' : 'video/mp4');
-        res.redirect(data.downloadLink);
-    } catch (e) {
-        res.status(500).json({ error: 'Failed to get video stream. Please try again later.' });
+
+        stream = ytdl(videoId, options);
+        stream.pipe(res);
+    } catch (error) {
+        console.error('Stream error:', error);
+        res.status(500).send('Failed to stream video.');
+    }
+});
+
+// Get trending videos (Placeholder)
+app.get('/ytb/trending', async (req, res) => {
+    try {
+        // This is a placeholder for fetching trending videos.
+        // A real implementation would use a service like YouTube's official API.
+        const trendingVideos = [
+            {
+                id: 'dQw4w9WgXcQ',
+                title: 'Never Gonna Give You Up',
+                thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+                channel: { name: 'Rick Astley' },
+                time: '3:33'
+            },
+            {
+                id: 'mCdq_B_z1dM',
+                title: 'PSY - GANGNAM STYLE',
+                thumbnail: 'https://i.ytimg.com/vi/mCdq_B_z1dM/hqdefault.jpg',
+                channel: { name: 'officialpsy' },
+                time: '4:12'
+            },
+            {
+                id: 'v_zL29c5L3o',
+                title: 'Baby Shark Dance',
+                thumbnail: 'https://i.ytimg.com/vi/v_zL29c5L3o/hqdefault.jpg',
+                channel: { name: 'Pinkfong Baby Shark' },
+                time: '2:16'
+            },
+            // Add more trending videos here
+        ];
+        res.json(trendingVideos);
+    } catch (error) {
+        console.error('Trending error:', error);
+        res.status(500).json({ error: 'Failed to fetch trending videos.' });
     }
 });
 
