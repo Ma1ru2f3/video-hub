@@ -10,32 +10,57 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Warning: Hardcoding API keys is not a secure practice.
-// For production, use environment variables as shown in a previous response.
+// Warning: Hardcoding API keys and sensitive data is not a secure practice.
+// For production, use environment variables.
 const YOUTUBE_API_KEY = 'AIzaSyAPyj8OiXR5Int5qtNwsIsBEOcD-Isxqa8';
 
-// Hardcoded admin and user data
-// In a real application, this should be stored in a database
-let users = [
-    { email: 'mymaruf94@gmail.com', status: 'active', role: 'admin' },
-    { email: 'user1@example.com', status: 'active', role: 'user' },
-    { email: 'blocked@example.com', status: 'blocked', role: 'user' }
-];
+// Hardcoded user data to simulate a database.
+// This data will be lost on server restart.
+let users = {
+    'mymaruf94@gmail.com': { password: 'admin_password', status: 'active', role: 'admin' },
+    'user1@example.com': { password: 'user1_password', status: 'active', role: 'user' },
+    'blocked@example.com': { password: 'user_password', status: 'blocked', role: 'user' }
+};
 
-// Admin login check
+// Middleware to check if the user is an admin
 const isAdmin = (req, res, next) => {
-    const { email } = req.body;
-    const user = users.find(u => u.email === email && u.role === 'admin');
-    if (!user) {
+    // For this mock implementation, we'll check against a hardcoded admin email
+    const authHeader = req.headers['authorization'];
+    const email = authHeader && authHeader.split(' ')[1]; // Assuming 'Bearer <email>'
+    
+    if (email !== 'mymaruf94@gmail.com') {
         return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
     }
-    req.user = user;
     next();
 };
 
 // Serve the index.html file from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// --- Authentication API Endpoints ---
+app.post('/api/auth/register', (req, res) => {
+    const { email, password } = req.body;
+    if (users[email]) {
+        return res.status(409).json({ success: false, message: 'Email already exists.' });
+    }
+    users[email] = { password, status: 'active', role: 'user' };
+    console.log(`New user registered: ${email}`);
+    res.json({ success: true, message: 'Registration successful. Please log in.' });
+});
+
+app.post('/api/auth/login', (req, res) => {
+    const { email, password } = req.body;
+    const user = users[email];
+    if (!user || user.password !== password) {
+        return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+    }
+    if (user.status === 'blocked') {
+        return res.status(403).json({ success: false, message: 'Your account has been blocked.' });
+    }
+    res.json({ success: true, message: 'Login successful', user: { email: user.email, status: user.status } });
+});
+
+// --- Music API Endpoints ---
 // API to get random songs
 app.get('/api/songs/random', async (req, res) => {
     try {
@@ -107,11 +132,11 @@ app.get('/api/songs/search', async (req, res) => {
 });
 
 // --- Admin Dashboard API Routes ---
-
 // Admin login
 app.post('/admin/login', (req, res) => {
     const { email, password } = req.body;
-    if (email === 'mymaruf94@gmail.com' && password === 'admin_password') { // Use a secure password
+    const adminUser = users[email];
+    if (adminUser && adminUser.role === 'admin' && adminUser.password === password) {
         res.json({ success: true, message: 'Login successful', role: 'admin' });
     } else {
         res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -120,17 +145,21 @@ app.post('/admin/login', (req, res) => {
 
 // Get user list (Admin only)
 app.get('/admin/users', isAdmin, (req, res) => {
-    res.json({ success: true, users });
+    const userList = Object.keys(users).map(email => ({
+        email: email,
+        status: users[email].status,
+        role: users[email].role
+    }));
+    res.json({ success: true, users: userList });
 });
 
 // Block/Unblock user (Admin only)
 app.post('/admin/user/status', isAdmin, (req, res) => {
     const { email, status } = req.body;
-    const userIndex = users.findIndex(u => u.email === email);
-    if (userIndex === -1) {
+    if (!users[email]) {
         return res.status(404).json({ success: false, message: 'User not found' });
     }
-    users[userIndex].status = status;
+    users[email].status = status;
     res.json({ success: true, message: `User ${email} status changed to ${status}.` });
 });
 
