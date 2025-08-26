@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,6 @@
     <title>Sangeet - A Music Hub</title>
     <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/1200px-Spotify_logo_without_text.svg.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --spotify-green: #1DB954;
@@ -25,7 +25,7 @@
             color: var(--light-text);
             display: flex;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         /* Sidebar */
@@ -40,8 +40,13 @@
             position: fixed;
             height: 100%;
             overflow-y: auto;
+            z-index: 1001;
+            transform: translateX(0);
             transition: transform 0.3s ease-in-out;
-            z-index: 2000;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
         }
 
         .sidebar .logo {
@@ -89,14 +94,13 @@
             overflow-y: auto;
             max-height: calc(100vh - var(--player-height));
             box-sizing: border-box;
-            transition: margin-left 0.3s ease-in-out;
         }
-        
+
         .main-content {
             padding: 20px 40px;
         }
 
-        /* Header (inside main content for search bar and menu button) */
+        /* Header (inside main content for search bar) */
         header {
             display: flex;
             justify-content: space-between;
@@ -108,18 +112,7 @@
             background-color: var(--dark-bg);
             z-index: 100;
         }
-        
-        /* Mobile menu button */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--light-text);
-            font-size: 1.5em;
-            cursor: pointer;
-        }
-        
-        /* User actions and search bar */
+
         .search-bar {
             display: flex;
             gap: 10px;
@@ -157,7 +150,7 @@
             display: flex;
             gap: 15px;
         }
-        
+
         .user-actions .admin-link,
         .user-actions .profile-btn {
             padding: 10px 15px;
@@ -169,10 +162,20 @@
             font-weight: 700;
             transition: background-color 0.2s ease;
         }
+
         .user-actions .admin-link:hover,
         .user-actions .profile-btn:hover {
             background-color: #777;
         }
+
+        .hamburger-menu {
+            display: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            margin-right: 20px;
+            color: var(--light-text);
+        }
+
 
         h2 {
             font-size: 2em;
@@ -445,86 +448,169 @@
             background-color: #777;
         }
 
-        /* Mobile-Specific Styles (changes start here) */
-        .mobile-menu-btn {
-            display: none; /* Hidden on desktop */
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--light-text);
-            font-size: 1.5em;
-            cursor: pointer;
-            z-index: 2001;
-        }
+        /* Font Awesome for Icons */
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 
-        .mobile-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1999;
-        }
-
+        /* --- MEDIA QUERIES FOR MOBILE --- */
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(100%);
+            :root {
+                --sidebar-width: 200px;
+                --player-height: 80px;
             }
+
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                z-index: 1002;
+            }
+
             .sidebar.active {
                 transform: translateX(0);
             }
+
             .main-content-wrapper {
                 margin-left: 0;
+                padding-bottom: var(--player-height);
+                max-height: none;
             }
-            .mobile-menu-btn {
-                display: block;
-            }
-            .mobile-overlay.active {
-                display: block;
-            }
-            .main-content {
-                padding: 20px;
-            }
+
             header {
                 flex-direction: column;
                 align-items: flex-start;
-                margin-bottom: 20px;
+                position: static; /* Make header part of the scrollable content */
+                margin-bottom: 10px;
             }
-            .search-bar {
-                margin-top: 15px;
-                width: 100%;
-                max-width: 100%;
-            }
-            .user-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-            .song-list {
-                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            }
-            .player-left {
-                width: 40%;
-            }
-            .player-center {
-                width: 50%;
-            }
-            .player-right {
-                width: 10%;
+            
+            .hamburger-menu {
+                display: block;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 1003;
+                background-color: rgba(0, 0, 0, 0.5);
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
                 justify-content: center;
+                align-items: center;
             }
-            .volume-control {
+
+            .search-bar {
+                margin-top: 20px;
+                width: 100%;
+                max-width: none;
+            }
+
+            .user-actions {
                 display: none;
+            }
+
+            .main-content {
+                padding: 10px 20px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .song-list {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .song-item {
+                padding: 10px;
+            }
+
+            .song-title {
+                font-size: 1em;
+            }
+
+            /* Player Bar Mobile adjustments */
+            #player-bar {
+                height: auto;
+                flex-direction: column;
+                padding: 10px;
+                border-top: none;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .player-left, .player-center, .player-right {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .player-left {
+                margin-bottom: 10px;
+            }
+
+            .player-left img {
+                display: none; /* Hide album art on small screen to save space */
+            }
+
+            .player-info {
+                max-width: 100%;
+                text-align: center;
+            }
+
+            .player-info .current-song-title, .player-info .current-song-artist {
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+                max-width: none;
+            }
+
+            .player-controls button {
+                font-size: 1.2em;
+                margin: 0 5px;
+            }
+
+            .progress-bar-container {
+                display: none; /* Hide progress bar on mobile for simplicity */
+            }
+
+            .progress-time {
+                justify-content: center;
+                gap: 15px;
+                margin-top: 0;
+            }
+
+            .volume-control {
+                display: none; /* Hide volume control on mobile */
+            }
+
+            /* Admin Panel Mobile adjustments */
+            #admin-login-form, #admin-content {
+                padding: 15px;
+                margin: 20px 10px;
+            }
+
+            #admin-content table {
+                font-size: 0.8em;
+            }
+
+            #admin-content th, #admin-content td {
+                padding: 8px 10px;
             }
         }
     </style>
 </head>
 <body>
-
-    <button class="mobile-menu-btn" id="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+    <div class="hamburger-menu" id="hamburger-menu">
+        <i class="fas fa-bars"></i>
+    </div>
 
     <div class="sidebar" id="sidebar">
         <div class="logo">Sangeet</div>
@@ -533,12 +619,12 @@
                 <li><a href="#" id="home-nav" class="active"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="#" id="search-nav"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="#" id="library-nav"><i class="fas fa-grip-lines"></i> Your Library</a></li>
-                <li><a href="#" id="admin-nav"><i class="fas fa-user-shield"></i> Admin Panel</a></li>
+                <li><a href="#admin-section" id="admin-nav"><i class="fas fa-user-shield"></i> Admin Panel</a></li>
             </ul>
         </nav>
     </div>
 
-    <div class="main-content-wrapper" id="main-content-wrapper">
+    <div class="main-content-wrapper">
         <div class="main-content" id="home-view">
             <header>
                 <div class="search-bar">
@@ -585,8 +671,8 @@
             <p>This is where your saved playlists and songs would appear (feature not implemented in this demo).</p>
         </div>
 
-    </div>
-
+    </div> 
+    
     <div id="player-bar">
         <div class="player-left">
             <img id="player-thumbnail" src="https://via.placeholder.com/60" alt="Song Thumbnail">
@@ -618,380 +704,377 @@
         </div>
     </div>
 
-    <div class="mobile-overlay" id="mobile-overlay"></div>
 
-    <script>
-        const songsContainer = document.getElementById('songs-container');
-        const searchInput = document.getElementById('search-input');
-        const searchButton = document.getElementById('search-button');
+<script>
+    const songsContainer = document.getElementById('songs-container');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
 
-        const playerThumbnail = document.getElementById('player-thumbnail');
-        const playerCurrentTitle = document.getElementById('player-current-title');
-        const playerCurrentArtist = document.getElementById('player-current-artist');
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const progressBarContainer = document.getElementById('progress-bar-container');
-        const progressBar = document.getElementById('progress-bar');
-        const currentTimeSpan = document.getElementById('current-time');
-        const totalTimeSpan = document.getElementById('total-time');
-        const volumeSlider = document.getElementById('volume-slider');
+    const playerThumbnail = document.getElementById('player-thumbnail');
+    const playerCurrentTitle = document.getElementById('player-current-title');
+    const playerCurrentArtist = document.getElementById('player-current-artist');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const progressBarContainer = document.getElementById('progress-bar-container');
+    const progressBar = document.getElementById('progress-bar');
+    const currentTimeSpan = document.getElementById('current-time');
+    const totalTimeSpan = document.getElementById('total-time');
+    const volumeSlider = document.getElementById('volume-slider');
 
-        const homeView = document.getElementById('home-view');
-        const libraryView = document.getElementById('library-view');
-        const adminSection = document.getElementById('admin-section');
-        const currentViewTitle = document.getElementById('current-view-title');
+    const homeView = document.getElementById('home-view');
+    const libraryView = document.getElementById('library-view');
+    const adminSection = document.getElementById('admin-section');
+    const currentViewTitle = document.getElementById('current-view-title');
 
-        const adminLoginForm = document.getElementById('admin-login-form');
-        const adminContent = document.getElementById('admin-content');
-        const adminLoginBtn = document.getElementById('admin-login-btn');
-        const adminEmailInput = document.getElementById('admin-email');
-        const adminPasswordInput = document.getElementById('admin-password');
-        const adminMessage = document.getElementById('admin-message');
-        const userListTable = document.getElementById('user-list');
+    const adminLoginForm = document.getElementById('admin-login-form');
+    const adminContent = document.getElementById('admin-content');
+    const adminLoginBtn = document.getElementById('admin-login-btn');
+    const adminEmailInput = document.getElementById('admin-email');
+    const adminPasswordInput = document.getElementById('admin-password');
+    const adminMessage = document.getElementById('admin-message');
+    const userListTable = document.getElementById('user-list');
 
-        const homeNav = document.getElementById('home-nav');
-        const searchNav = document.getElementById('search-nav');
-        const libraryNav = document.getElementById('library-nav');
-        const adminNav = document.getElementById('admin-nav');
+    // Navigation links
+    const homeNav = document.getElementById('home-nav');
+    const searchNav = document.getElementById('search-nav');
+    const libraryNav = document.getElementById('library-nav');
+    const adminNav = document.getElementById('admin-nav');
 
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const sidebar = document.getElementById('sidebar');
-        const mobileOverlay = document.getElementById('mobile-overlay');
+    // Mobile specific elements
+    const sidebar = document.getElementById('sidebar');
+    const hamburgerMenu = document.getElementById('hamburger-menu');
 
-        const BASE_URL = 'https://video-hub-s3g2.onrender.com';
+    const BASE_URL = 'https://video-hub-s3g2.onrender.com';
 
-        let player;
-        let currentVideoId = null;
-        let currentVideoDuration = 0;
-        let playerReady = false;
+    let player;
+    let currentVideoId = null;
+    let currentVideoDuration = 0;
+    let playerReady = false;
 
-        function onYouTubeIframeAPIReady() {
-            playerReady = true;
-        }
+    // --- YouTube IFrame Player API ---
+    function onYouTubeIframeAPIReady() {
+        playerReady = true;
+    }
 
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = Math.floor(seconds % 60);
-            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-        }
+    // --- Utility Functions ---
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    }
 
-        function updateProgressBar() {
-            if (player && player.getPlayerState) {
-                const currentTime = player.getCurrentTime();
-                const duration = player.getDuration();
-                currentVideoDuration = duration;
-                const progress = (currentTime / duration) * 100;
-                progressBar.style.width = `${progress}%`;
-                currentTimeSpan.textContent = formatTime(currentTime);
-                totalTimeSpan.textContent = formatTime(duration);
+    function updateProgressBar() {
+        if (player && player.getPlayerState) {
+            const currentTime = player.getCurrentTime();
+            const duration = player.getDuration();
+            currentVideoDuration = duration;
+            const progress = (currentTime / duration) * 100;
+            progressBar.style.width = `${progress}%`;
+            currentTimeSpan.textContent = formatTime(currentTime);
+            totalTimeSpan.textContent = formatTime(duration);
 
-                if (player.getPlayerState() === YT.PlayerState.PLAYING) {
-                    requestAnimationFrame(updateProgressBar);
-                }
-            }
-        }
-
-        async function fetchSongs(url, title) {
-            songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px;">Loading songs...</p>';
-            currentViewTitle.textContent = title;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.success) {
-                    renderSongs(data.data);
-                } else {
-                    songsContainer.innerHTML = `<p style="text-align: center; margin-top: 50px; color: #ff4d4d;">${data.message}</p>`;
-                }
-            } catch (error) {
-                songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: #ff4d4d;">Failed to load songs. Please check server or network.</p>';
-                console.error(error);
-            }
-        }
-
-        function renderSongs(songs) {
-            songsContainer.innerHTML = '';
-            if (songs.length === 0) {
-                songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: var(--dark-text);">No songs found.</p>';
-                return;
-            }
-            songs.forEach(song => {
-                const songItem = document.createElement('div');
-                songItem.className = 'song-item';
-                songItem.innerHTML = `
-                    <img src="${song.thumbnail}" alt="${song.title}">
-                    <div class="song-title">${song.title}</div>
-                    <div class="song-channel">${song.channel}</div>
-                `;
-                songItem.addEventListener('click', () => playSong(song.id, song.title, song.channel, song.thumbnail));
-                songsContainer.appendChild(songItem);
-            });
-        }
-
-        function playSong(videoId, title, artist, thumbnail) {
-            if (!playerReady) {
-                console.error("YouTube Player API not ready.");
-                return;
-            }
-            if (sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-                mobileOverlay.classList.remove('active');
-            }
-
-            currentVideoId = videoId;
-            playerCurrentTitle.textContent = title;
-            playerCurrentArtist.textContent = artist || 'Unknown Artist';
-            playerThumbnail.src = thumbnail || 'https://via.placeholder.com/60';
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-
-            if (!player) {
-                player = new YT.Player('player-iframe', {
-                    height: '0',
-                    width: '0',
-                    videoId: videoId,
-                    playerVars: {
-                        'playsinline': 1,
-                        'controls': 0,
-                        'disablekb': 1,
-                        'modestbranding': 1,
-                        'enablejsapi': 1,
-                        'iv_load_policy': 3,
-                        'autoplay': 1
-                    },
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange,
-                        'onError': onPlayerError
-                    }
-                });
-            } else {
-                player.loadVideoById(videoId);
-            }
-        }
-
-        function onPlayerReady(event) {
-            event.target.playVideo();
-            volumeSlider.value = event.target.getVolume();
-            requestAnimationFrame(updateProgressBar);
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING) {
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            if (player.getPlayerState() === YT.PlayerState.PLAYING) {
                 requestAnimationFrame(updateProgressBar);
-            } else {
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-            }
-            if (event.data === YT.PlayerState.ENDED) {
-                playerCurrentTitle.textContent = 'No song playing';
-                playerCurrentArtist.textContent = 'Unknown Artist';
-                playerThumbnail.src = 'https://via.placeholder.com/60';
-                progressBar.style.width = '0%';
-                currentTimeSpan.textContent = '0:00';
-                totalTimeSpan.textContent = '0:00';
             }
         }
+    }
 
-        function onPlayerError(event) {
-            console.error('YouTube Player Error:', event.data);
-            playerCurrentTitle.textContent = 'Error playing song';
-            playerCurrentArtist.textContent = 'Please try another.';
+    // --- Song Display and Playback ---
+    async function fetchSongs(url, title) {
+        songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px;">Loading songs...</p>';
+        currentViewTitle.textContent = title;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.success) {
+                renderSongs(data.data);
+            } else {
+                songsContainer.innerHTML = `<p style="text-align: center; margin-top: 50px; color: #ff4d4d;">${data.message}</p>`;
+            }
+        } catch (error) {
+            songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: #ff4d4d;">Failed to load songs. Please check server or network.</p>';
+            console.error(error);
+        }
+    }
+
+    function renderSongs(songs) {
+        songsContainer.innerHTML = '';
+        if (songs.length === 0) {
+            songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: var(--dark-text);">No songs found.</p>';
+            return;
+        }
+        songs.forEach(song => {
+            const songItem = document.createElement('div');
+            songItem.className = 'song-item';
+            songItem.innerHTML = `
+                <img src="${song.thumbnail}" alt="${song.title}">
+                <div class="song-title">${song.title}</div>
+                <div class="song-channel">${song.channel}</div>
+            `;
+            songItem.addEventListener('click', () => playSong(song.id, song.title, song.channel, song.thumbnail));
+            songsContainer.appendChild(songItem);
+        });
+    }
+
+    function playSong(videoId, title, artist, thumbnail) {
+        if (!playerReady) {
+            console.error("YouTube Player API not ready.");
+            return;
+        }
+
+        currentVideoId = videoId;
+        playerCurrentTitle.textContent = title;
+        playerCurrentArtist.textContent = artist || 'Unknown Artist';
+        playerThumbnail.src = thumbnail || 'https://via.placeholder.com/60';
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+
+        if (!player) {
+            player = new YT.Player('player-iframe', {
+                height: '0',
+                width: '0',
+                videoId: videoId,
+                playerVars: {
+                    'playsinline': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'modestbranding': 1,
+                    'enablejsapi': 1,
+                    'iv_load_policy': 3,
+                    'autoplay': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        } else {
+            player.loadVideoById(videoId);
+        }
+    }
+
+    function onPlayerReady(event) {
+        event.target.playVideo();
+        volumeSlider.value = event.target.getVolume();
+        requestAnimationFrame(updateProgressBar);
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            requestAnimationFrame(updateProgressBar);
+        } else {
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
         }
-
-        // --- Event Listeners ---
-        searchButton.addEventListener('click', () => {
-            const query = searchInput.value;
-            if (query) {
-                fetchSongs(`${BASE_URL}/api/songs/search?query=${encodeURIComponent(query)}`, `Search results for "${query}"`);
-                if (window.innerWidth <= 768) {
-                     sidebar.classList.remove('active');
-                     mobileOverlay.classList.remove('active');
-                }
-            }
-        });
-
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchButton.click();
-            }
-        });
-
-        playPauseBtn.addEventListener('click', () => {
-            if (!player || !player.getPlayerState) return;
-
-            const playerState = player.getPlayerState();
-            if (playerState === YT.PlayerState.PLAYING) {
-                player.pauseVideo();
-            } else {
-                player.playVideo();
-            }
-        });
-
-        volumeSlider.addEventListener('input', () => {
-            if (player && player.setVolume) {
-                player.setVolume(volumeSlider.value);
-            }
-        });
-
-        progressBarContainer.addEventListener('click', (e) => {
-            if (!player || !player.seekTo || currentVideoDuration === 0) return;
-
-            const clickX = e.clientX - progressBarContainer.getBoundingClientRect().left;
-            const percentage = clickX / progressBarContainer.offsetWidth;
-            const seekTime = currentVideoDuration * percentage;
-            player.seekTo(seekTime, true);
-        });
-
-        // --- Navigation & Mobile Menu ---
-        function hideAllViews() {
-            homeView.style.display = 'none';
-            adminSection.style.display = 'none';
-            libraryView.style.display = 'none';
-            document.querySelectorAll('.sidebar nav ul li a').forEach(link => {
-                link.classList.remove('active');
-            });
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
-                mobileOverlay.classList.remove('active');
-            }
+        if (event.data === YT.PlayerState.ENDED) {
+            playerCurrentTitle.textContent = 'No song playing';
+            playerCurrentArtist.textContent = 'Unknown Artist';
+            playerThumbnail.src = 'https://via.placeholder.com/60';
+            progressBar.style.width = '0%';
+            currentTimeSpan.textContent = '0:00';
+            totalTimeSpan.textContent = '0:00';
         }
+    }
 
-        homeNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            hideAllViews();
-            homeView.style.display = 'block';
-            homeNav.classList.add('active');
-            fetchSongs(`${BASE_URL}/api/songs/random`, 'Random Songs');
-        });
+    function onPlayerError(event) {
+        console.error('YouTube Player Error:', event.data);
+        playerCurrentTitle.textContent = 'Error playing song';
+        playerCurrentArtist.textContent = 'Please try another.';
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+    }
 
-        searchNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            hideAllViews();
-            homeView.style.display = 'block';
-            searchNav.classList.add('active');
-            currentViewTitle.textContent = 'Search for Music';
-            songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: var(--dark-text);">Use the search bar above to find songs.</p>';
-            searchInput.focus();
-        });
 
-        libraryNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            hideAllViews();
-            libraryView.style.display = 'block';
-            libraryNav.classList.add('active');
-        });
+    // --- Event Listeners ---
+    searchButton.addEventListener('click', () => {
+        const query = searchInput.value;
+        if (query) {
+            fetchSongs(`${BASE_URL}/api/songs/search?query=${encodeURIComponent(query)}`, `Search results for "${query}"`);
+        }
+    });
 
-        adminNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            hideAllViews();
-            adminSection.style.display = 'block';
-            adminNav.classList.add('active');
-        });
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchButton.click();
+        }
+    });
 
-        mobileMenuBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-            mobileOverlay.classList.toggle('active');
-        });
-        
-        mobileOverlay.addEventListener('click', () => {
+    playPauseBtn.addEventListener('click', () => {
+        if (!player || !player.getPlayerState) return;
+        const playerState = player.getPlayerState();
+        if (playerState === YT.PlayerState.PLAYING) {
+            player.pauseVideo();
+        } else {
+            player.playVideo();
+        }
+    });
+
+    volumeSlider.addEventListener('input', () => {
+        if (player && player.setVolume) {
+            player.setVolume(volumeSlider.value);
+        }
+    });
+
+    progressBarContainer.addEventListener('click', (e) => {
+        if (!player || !player.seekTo || currentVideoDuration === 0) return;
+        const clickX = e.clientX - progressBarContainer.getBoundingClientRect().left;
+        const percentage = clickX / progressBarContainer.offsetWidth;
+        const seekTime = currentVideoDuration * percentage;
+        player.seekTo(seekTime, true);
+    });
+    
+    // --- Mobile Navigation ---
+    hamburgerMenu.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+
+    function closeSidebar() {
+        if (window.innerWidth <= 768) {
             sidebar.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-        });
-
-        // --- Admin Panel Logic ---
-        adminLoginBtn.addEventListener('click', async () => {
-            const email = adminEmailInput.value;
-            const password = adminPasswordInput.value;
-
-            try {
-                const response = await fetch(`${BASE_URL}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    adminLoginForm.style.display = 'none';
-                    adminContent.style.display = 'block';
-                    fetchUserList();
-                } else {
-                    adminMessage.textContent = 'Invalid credentials!';
-                }
-            } catch (error) {
-                adminMessage.textContent = 'Login failed. Server unreachable?';
-                console.error(error);
-            }
-        });
-
-        async function fetchUserList() {
-            try {
-                const response = await fetch(`${BASE_URL}/admin/users`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${adminEmailInput.value}` 
-                    }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    renderUserList(data.users);
-                } else {
-                    adminMessage.textContent = data.message || 'Failed to fetch user list.';
-                }
-            } catch (error) {
-                adminMessage.textContent = 'Failed to fetch user list. Server unreachable?';
-                console.error(error);
-            }
         }
+    }
+    
+    // --- Navigation ---
+    function hideAllViews() {
+        homeView.style.display = 'none';
+        adminSection.style.display = 'none';
+        libraryView.style.display = 'none';
+        document.querySelectorAll('.sidebar nav ul li a').forEach(link => {
+            link.classList.remove('active');
+        });
+    }
 
-        function renderUserList(users) {
-            userListTable.innerHTML = '';
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.email}</td>
-                    <td>${user.status}</td>
-                    <td>
-                        <button onclick="updateUserStatus('${user.email}', '${user.status === 'active' ? 'blocked' : 'active'}')">
-                            ${user.status === 'active' ? 'Block' : 'Unblock'}
-                        </button>
-                    </td>
-                `;
-                userListTable.appendChild(row);
+    homeNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideAllViews();
+        homeView.style.display = 'block';
+        homeNav.classList.add('active');
+        fetchSongs(`${BASE_URL}/api/songs/random`, 'Random Songs');
+        closeSidebar();
+    });
+
+    searchNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideAllViews();
+        homeView.style.display = 'block';
+        searchNav.classList.add('active');
+        currentViewTitle.textContent = 'Search for Music';
+        songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: var(--dark-text);">Use the search bar above to find songs.</p>';
+        searchInput.focus();
+        closeSidebar();
+    });
+
+    libraryNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideAllViews();
+        libraryView.style.display = 'block';
+        libraryNav.classList.add('active');
+        closeSidebar();
+    });
+
+    adminNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideAllViews();
+        adminSection.style.display = 'block';
+        adminNav.classList.add('active');
+        closeSidebar();
+    });
+
+    // --- Admin Panel Logic ---
+    adminLoginBtn.addEventListener('click', async () => {
+        const email = adminEmailInput.value;
+        const password = adminPasswordInput.value;
+
+        try {
+            const response = await fetch(`${BASE_URL}/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
             });
-        }
 
-        async function updateUserStatus(email, newStatus) {
-            try {
-                const response = await fetch(`${BASE_URL}/admin/user/status`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${adminEmailInput.value}`
-                    },
-                    body: JSON.stringify({ email, status: newStatus })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(data.message);
-                    fetchUserList(); 
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                alert('Failed to update user status. Server unreachable?');
-                console.error(error);
+            const data = await response.json();
+            if (data.success) {
+                adminLoginForm.style.display = 'none';
+                adminContent.style.display = 'block';
+                fetchUserList();
+            } else {
+                adminMessage.textContent = 'Invalid credentials!';
             }
+        } catch (error) {
+            adminMessage.textContent = 'Login failed. Server unreachable?';
+            console.error(error);
         }
+    });
 
-        window.onload = () => {
-            fetchSongs(`${BASE_URL}/api/songs/random`, 'Random Songs');
-        };
-    </script>
+    async function fetchUserList() {
+        try {
+            const response = await fetch(`${BASE_URL}/admin/users`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminEmailInput.value}`
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                renderUserList(data.users);
+            } else {
+                adminMessage.textContent = data.message || 'Failed to fetch user list.';
+            }
+        } catch (error) {
+            adminMessage.textContent = 'Failed to fetch user list. Server unreachable?';
+            console.error(error);
+        }
+    }
+
+    function renderUserList(users) {
+        userListTable.innerHTML = '';
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${user.email}</td>
+                <td>${user.status}</td>
+                <td>
+                    <button onclick="updateUserStatus('${user.email}', '${user.status === 'active' ? 'blocked' : 'active'}')">
+                        ${user.status === 'active' ? 'Block' : 'Unblock'}
+                    </button>
+                </td>
+            `;
+            userListTable.appendChild(row);
+        });
+    }
+
+    async function updateUserStatus(email, newStatus) {
+        try {
+            const response = await fetch(`${BASE_URL}/admin/user/status`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminEmailInput.value}`
+                },
+                body: JSON.stringify({ email, status: newStatus })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(data.message);
+                fetchUserList(); 
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            alert('Failed to update user status. Server unreachable?');
+            console.error(error);
+        }
+    }
+
+    // Initial load
+    window.onload = () => {
+        fetchSongs(`${BASE_URL}/api/songs/random`, 'Random Songs');
+    };
+</script>
+
 </body>
 </html>
