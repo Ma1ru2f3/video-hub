@@ -41,7 +41,7 @@
             height: 100%;
             overflow-y: auto;
             transition: transform 0.3s ease-in-out;
-            z-index: 2000; /* Ensure sidebar is on top */
+            z-index: 2000;
         }
 
         .sidebar .logo {
@@ -84,9 +84,9 @@
         /* Main Content */
         .main-content-wrapper {
             flex-grow: 1;
-            margin-left: var(--sidebar-width); /* Push content away from fixed sidebar */
-            padding-bottom: var(--player-height); /* Space for fixed player */
-            overflow-y: auto; /* Allow main content to scroll */
+            margin-left: var(--sidebar-width);
+            padding-bottom: var(--player-height);
+            overflow-y: auto;
             max-height: calc(100vh - var(--player-height));
             box-sizing: border-box;
             transition: margin-left 0.3s ease-in-out;
@@ -108,7 +108,18 @@
             background-color: var(--dark-bg);
             z-index: 100;
         }
-
+        
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--light-text);
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        
+        /* User actions and search bar */
         .search-bar {
             display: flex;
             gap: 10px;
@@ -434,12 +445,12 @@
             background-color: #777;
         }
 
-        /* Mobile-Specific Styles */
+        /* Mobile-Specific Styles (changes start here) */
         .mobile-menu-btn {
             display: none; /* Hidden on desktop */
-            position: absolute;
-            top: 25px;
-            left: 20px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
             background: none;
             border: none;
             color: var(--light-text);
@@ -447,7 +458,7 @@
             cursor: pointer;
             z-index: 2001;
         }
-        
+
         .mobile-overlay {
             display: none;
             position: fixed;
@@ -461,7 +472,7 @@
 
         @media (max-width: 768px) {
             .sidebar {
-                transform: translateX(-100%);
+                transform: translateX(100%);
             }
             .sidebar.active {
                 transform: translateX(0);
@@ -637,18 +648,16 @@
         const adminMessage = document.getElementById('admin-message');
         const userListTable = document.getElementById('user-list');
 
-        // Navigation links
         const homeNav = document.getElementById('home-nav');
         const searchNav = document.getElementById('search-nav');
         const libraryNav = document.getElementById('library-nav');
         const adminNav = document.getElementById('admin-nav');
 
-        // Mobile menu elements
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const sidebar = document.getElementById('sidebar');
         const mobileOverlay = document.getElementById('mobile-overlay');
 
-        const BASE_URL = 'https://video-hub-s3g2.onrender.com'; // Change this to your Render URL
+        const BASE_URL = 'https://video-hub-s3g2.onrender.com';
 
         let player;
         let currentVideoId = null;
@@ -845,7 +854,6 @@
             document.querySelectorAll('.sidebar nav ul li a').forEach(link => {
                 link.classList.remove('active');
             });
-            // Hide sidebar on view change in mobile
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('active');
                 mobileOverlay.classList.remove('active');
@@ -884,7 +892,6 @@
             adminNav.classList.add('active');
         });
 
-        // Mobile Menu Button Logic
         mobileMenuBtn.addEventListener('click', () => {
             sidebar.classList.toggle('active');
             mobileOverlay.classList.toggle('active');
@@ -982,7 +989,6 @@
             }
         }
 
-        // Initial load
         window.onload = () => {
             fetchSongs(`${BASE_URL}/api/songs/random`, 'Random Songs');
         };
