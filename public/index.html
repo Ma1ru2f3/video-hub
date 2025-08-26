@@ -416,35 +416,69 @@
             .song-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
             .song-item { padding: 10px; }
             .song-title { font-size: 0.9em; }
+
+            /* Updated Player Bar for Mobile - Inspired by Image 2 */
             #player-bar {
-                height: auto; flex-direction: column; padding: 10px;
-                justify-content: center; gap: 10px;
+                height: var(--player-height); /* Keep a fixed height */
+                flex-direction: row; /* Keep elements in a row */
+                padding: 0 15px; /* Adjust padding */
+                justify-content: space-between; /* Space out items */
+                align-items: center; /* Vertically align */
             }
-            .spotify-track-info, .spotify-controls-center, .spotify-volume-section {
-                width: 100%;
-                min-width: unset;
-                justify-content: center;
-                text-align: center;
-            }
+
             .spotify-track-info {
-                margin-bottom: 10px;
-                flex-direction: column;
+                flex-direction: row; /* Thumbnail, title, artist in a row */
+                width: auto; /* Adjust width automatically */
+                min-width: unset;
+                justify-content: flex-start; /* Align to the left */
+                flex-grow: 1; /* Allow it to grow */
+                margin-bottom: 0; /* No bottom margin */
             }
-            .spotify-thumbnail { display: none; }
-            .player-info { max-width: 100%; }
-            .spotify-song-title, .spotify-artist-name {
-                white-space: normal; overflow: visible; text-overflow: clip; max-width: none;
+            .spotify-thumbnail {
+                display: block; /* Show thumbnail on mobile */
+                width: 45px; /* Smaller thumbnail for mobile */
+                height: 45px;
+                margin-right: 10px;
+            }
+            .player-info {
+                max-width: 150px; /* Constrain width for title/artist */
+                text-align: left; /* Align text to left */
+            }
+            .spotify-song-title {
+                font-size: 0.9em; /* Smaller font size for mobile */
+                max-width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .spotify-artist-name {
+                font-size: 0.75em; /* Smaller font size for mobile */
+                max-width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .spotify-actions {
-                margin-left: 0;
-                justify-content: center;
-                margin-top: 10px;
+                display: none; /* Hide extra actions on mobile for simplicity */
             }
-            .spotify-playback-controls .control-btn { font-size: 1.1em; margin: 0 5px; }
+
+            .spotify-controls-center {
+                width: auto; /* Adjust width automatically */
+                min-width: unset;
+                flex-direction: row; /* Controls in a row */
+                gap: 10px; /* Space out control buttons */
+                align-items: center;
+                flex-grow: 0; /* Don't let it grow too much */
+            }
+            .spotify-playback-controls {
+                gap: 10px; /* Space between buttons */
+            }
+            .control-btn { font-size: 1.1em; }
             .play-pause-spotify { font-size: 1.8em; }
 
-            .spotify-progress-container { display: none; }
-            .spotify-volume-section { display: none; }
+            .spotify-progress-container { display: none; } /* Still hide progress bar on mobile for now */
+            .spotify-volume-section { display: none; } /* Still hide volume control on mobile for now */
+
             #admin-login-form, #admin-content { padding: 15px; margin: 20px 10px; }
             #admin-content table { font-size: 0.8em; }
             #admin-content th, #admin-content td { padding: 8px 10px; }
