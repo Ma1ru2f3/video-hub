@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -100,7 +99,7 @@
             padding: 20px 40px;
         }
 
-        /* Header (inside main content for search bar) */
+        /* Header */
         header {
             display: flex;
             justify-content: space-between;
@@ -150,7 +149,7 @@
             display: flex;
             gap: 15px;
         }
-
+        
         .user-actions .admin-link,
         .user-actions .profile-btn {
             padding: 10px 15px;
@@ -162,12 +161,11 @@
             font-weight: 700;
             transition: background-color 0.2s ease;
         }
-
         .user-actions .admin-link:hover,
         .user-actions .profile-btn:hover {
             background-color: #777;
         }
-
+        
         .hamburger-menu {
             display: none;
             font-size: 1.5em;
@@ -181,6 +179,15 @@
             font-size: 2em;
             margin-bottom: 25px;
             color: var(--light-text);
+        }
+
+        .content-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
         }
 
         /* Song List Grid */
@@ -201,6 +208,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: relative;
         }
 
         .song-item:hover {
@@ -213,6 +221,18 @@
             border-radius: 4px;
             margin-bottom: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .add-to-playlist-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--light-text);
+            font-size: 1.2em;
+            cursor: pointer;
+            z-index: 10;
         }
 
         .song-title {
@@ -228,6 +248,37 @@
             font-size: 0.9em;
             color: var(--dark-text);
             margin-top: 5px;
+        }
+        
+        /* Playlist View */
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--dark-card);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-bottom: 10px;
+        }
+        .playlist-item:hover {
+            background-color: #282828;
+        }
+        .playlist-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        .playlist-item .info {
+            flex-grow: 1;
+        }
+        .playlist-item .title {
+            font-weight: 700;
+        }
+        .playlist-item .count {
+            font-size: 0.9em;
+            color: var(--dark-text);
         }
 
         /* Player Bar */
@@ -363,6 +414,148 @@
             display: none;
         }
 
+        /* Modal for Playlists */
+        .modal {
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s ease-in-out;
+        }
+
+        .modal.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--dark-card);
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            color: var(--light-text);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+        }
+
+        .modal-header .close-btn {
+            background: none;
+            border: none;
+            color: var(--dark-text);
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .playlist-list-modal {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .playlist-list-modal button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: none;
+            border: 1px solid #333;
+            color: var(--light-text);
+            text-align: left;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .playlist-list-modal button:hover {
+            background-color: #282828;
+        }
+
+        .new-playlist-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .new-playlist-form input {
+            flex-grow: 1;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
+            color: var(--light-text);
+        }
+
+        .new-playlist-form button {
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            background-color: var(--spotify-green);
+            color: var(--light-text);
+            cursor: pointer;
+        }
+
+        /* User Authentication View */
+        #auth-view {
+            display: none;
+            padding: 40px;
+            text-align: center;
+        }
+        #auth-form {
+            background-color: var(--dark-card);
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            margin: auto;
+        }
+        #auth-form h3 {
+            margin-top: 0;
+        }
+        #auth-form input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
+            color: var(--light-text);
+            border-radius: 4px;
+        }
+        #auth-form button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--spotify-green);
+            color: var(--light-text);
+            font-weight: 700;
+            cursor: pointer;
+        }
+        #auth-form p {
+            font-size: 0.9em;
+            margin-top: 15px;
+            color: var(--dark-text);
+        }
+        #auth-form a {
+            color: var(--spotify-green);
+            cursor: pointer;
+        }
+
+
         /* Admin Panel Styling */
         #admin-section {
             display: none;
@@ -486,7 +679,7 @@
             header {
                 flex-direction: column;
                 align-items: flex-start;
-                position: static; /* Make header part of the scrollable content */
+                position: static;
                 margin-bottom: 10px;
             }
             
@@ -557,7 +750,7 @@
             }
 
             .player-left img {
-                display: none; /* Hide album art on small screen to save space */
+                display: none;
             }
 
             .player-info {
@@ -578,7 +771,7 @@
             }
 
             .progress-bar-container {
-                display: none; /* Hide progress bar on mobile for simplicity */
+                display: none;
             }
 
             .progress-time {
@@ -588,7 +781,7 @@
             }
 
             .volume-control {
-                display: none; /* Hide volume control on mobile */
+                display: none;
             }
 
             /* Admin Panel Mobile adjustments */
@@ -619,6 +812,7 @@
                 <li><a href="#" id="home-nav" class="active"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="#" id="search-nav"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="#" id="library-nav"><i class="fas fa-grip-lines"></i> Your Library</a></li>
+                <li><a href="#" id="auth-nav"><i class="fas fa-user-circle"></i> Profile</a></li>
                 <li><a href="#admin-section" id="admin-nav"><i class="fas fa-user-shield"></i> Admin Panel</a></li>
             </ul>
         </nav>
@@ -632,13 +826,71 @@
                     <button id="search-button">Search</button>
                 </div>
                 <div class="user-actions">
-                    <button class="profile-btn"><i class="fas fa-user-circle"></i> Profile</button>
+                    <button class="profile-btn" id="header-auth-btn"><i class="fas fa-user-circle"></i> Login</button>
                 </div>
             </header>
             
-            <h2 id="current-view-title">Random Songs</h2>
-            <div id="songs-container" class="song-list">
-                <p>Loading songs...</p>
+            <h2 id="current-view-title">Home</h2>
+            
+            <div id="home-sections">
+                <div class="content-section" id="recently-played-section">
+                    <h3 class="section-title">Recently Played</h3>
+                    <div id="recently-played-songs" class="song-list">
+                        <p style="color: var(--dark-text);">No songs played recently. Start listening!</p>
+                    </div>
+                </div>
+
+                <div class="content-section" id="popular-songs-section">
+                    <h3 class="section-title">Popular Songs</h3>
+                    <div id="popular-songs" class="song-list">
+                        <p style="text-align: center;">Loading popular songs...</p>
+                    </div>
+                </div>
+
+                <div class="content-section" id="random-songs-section">
+                    <h3 class="section-title">Explore</h3>
+                    <div id="random-songs" class="song-list">
+                        <p style="text-align: center;">Loading songs...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="search-view" style="display: none;">
+                 <div id="search-results" class="song-list">
+                    <p style="text-align: center; margin-top: 50px; color: var(--dark-text);">Use the search bar above to find songs.</p>
+                 </div>
+            </div>
+        </div>
+
+        <div id="auth-view">
+            <h2>User Profile</h2>
+            <div id="auth-form">
+                <h3 id="auth-form-title">Login</h3>
+                <input type="email" id="auth-email" placeholder="Email">
+                <input type="password" id="auth-password" placeholder="Password">
+                <button id="auth-submit-btn">Login</button>
+                <p id="auth-message" style="color: #ff4d4d;"></p>
+                <p><a href="#" id="toggle-auth">Don't have an account? Sign Up</a></p>
+            </div>
+        </div>
+
+        <div id="library-view" class="main-content" style="display: none;">
+            <h2>Your Library</h2>
+            <div id="playlists-container">
+                <h3>Your Playlists</h3>
+                <div id="playlist-list">
+                    <p style="color: var(--dark-text);">You haven't created any playlists yet.</p>
+                </div>
+                <div class="new-playlist-form" style="margin-top: 20px;">
+                    <input type="text" id="new-playlist-name" placeholder="New Playlist Name">
+                    <button id="create-playlist-btn">Create</button>
+                </div>
+            </div>
+
+            <div id="playlist-details" style="display: none; margin-top: 40px;">
+                <h3 id="playlist-details-title"></h3>
+                <div id="playlist-details-songs" class="song-list">
+                </div>
             </div>
         </div>
 
@@ -665,13 +917,7 @@
                 </table>
             </div>
         </div>
-
-        <div id="library-view" class="main-content" style="display: none;">
-            <h2>Your Library</h2>
-            <p>This is where your saved playlists and songs would appear (feature not implemented in this demo).</p>
-        </div>
-
-    </div> 
+    </div>
     
     <div id="player-bar">
         <div class="player-left">
@@ -704,6 +950,21 @@
         </div>
     </div>
 
+    <div id="playlist-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add to Playlist</h3>
+                <button class="close-btn" id="close-modal-btn">&times;</button>
+            </div>
+            <div id="playlist-modal-list" class="playlist-list-modal">
+            </div>
+            <div class="new-playlist-form">
+                <input type="text" id="modal-new-playlist-name" placeholder="New Playlist">
+                <button id="modal-create-playlist-btn">Create</button>
+            </div>
+        </div>
+    </div>
+
 
 <script>
     const songsContainer = document.getElementById('songs-container');
@@ -723,6 +984,7 @@
     const homeView = document.getElementById('home-view');
     const libraryView = document.getElementById('library-view');
     const adminSection = document.getElementById('admin-section');
+    const authView = document.getElementById('auth-view');
     const currentViewTitle = document.getElementById('current-view-title');
 
     const adminLoginForm = document.getElementById('admin-login-form');
@@ -738,10 +1000,39 @@
     const searchNav = document.getElementById('search-nav');
     const libraryNav = document.getElementById('library-nav');
     const adminNav = document.getElementById('admin-nav');
+    const authNav = document.getElementById('auth-nav');
 
     // Mobile specific elements
     const sidebar = document.getElementById('sidebar');
     const hamburgerMenu = document.getElementById('hamburger-menu');
+
+    // Home view sections
+    const homeSections = document.getElementById('home-sections');
+    const searchView = document.getElementById('search-view');
+    const recentlyPlayedSongs = document.getElementById('recently-played-songs');
+    const popularSongs = document.getElementById('popular-songs');
+    const randomSongs = document.getElementById('random-songs');
+    const searchResults = document.getElementById('search-results');
+    
+    // Auth elements
+    const authFormTitle = document.getElementById('auth-form-title');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const toggleAuthLink = document.getElementById('toggle-auth');
+    const headerAuthBtn = document.getElementById('header-auth-btn');
+
+    // Playlist elements
+    const playlistModal = document.getElementById('playlist-modal');
+    const playlistModalList = document.getElementById('playlist-modal-list');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalNewPlaylistNameInput = document.getElementById('modal-new-playlist-name');
+    const modalCreatePlaylistBtn = document.getElementById('modal-create-playlist-btn');
+    const playlistListContainer = document.getElementById('playlist-list');
+    const newPlaylistNameInput = document.getElementById('new-playlist-name');
+    const createPlaylistBtn = document.getElementById('create-playlist-btn');
+    const playlistDetailsContainer = document.getElementById('playlist-details');
+    const playlistDetailsTitle = document.getElementById('playlist-details-title');
+    const playlistDetailsSongs = document.getElementById('playlist-details-songs');
+
 
     const BASE_URL = 'https://video-hub-s3g2.onrender.com';
 
@@ -749,6 +1040,17 @@
     let currentVideoId = null;
     let currentVideoDuration = 0;
     let playerReady = false;
+    let loggedInUser = null; // Stores logged-in user info
+    let currentSongToAdd = null; // Stores the song ID to add to a playlist
+
+    // Store user data in a simple, temporary object
+    const users = {
+        "user@example.com": { email: "user@example.com", password: "password123", playlists: [] }
+    };
+
+    // Store recently played and popular songs
+    let recentlyPlayedList = [];
+    const popularList = [];
 
     // --- YouTube IFrame Player API ---
     function onYouTubeIframeAPIReady() {
@@ -784,27 +1086,26 @@
     }
 
     // --- Song Display and Playback ---
-    async function fetchSongs(url, title) {
-        songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px;">Loading songs...</p>';
-        currentViewTitle.textContent = title;
+    async function fetchSongs(url, container, title) {
+        container.innerHTML = '<p style="text-align: center; margin-top: 20px;">Loading songs...</p>';
         try {
             const response = await fetch(url);
             const data = await response.json();
             if (data.success) {
-                renderSongs(data.data);
+                renderSongs(data.data, container);
             } else {
-                songsContainer.innerHTML = `<p style="text-align: center; margin-top: 50px; color: #ff4d4d;">${data.message}</p>`;
+                container.innerHTML = `<p style="text-align: center; margin-top: 20px; color: #ff4d4d;">${data.message}</p>`;
             }
         } catch (error) {
-            songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: #ff4d4d;">Failed to load songs. Please check server or network.</p>';
+            container.innerHTML = '<p style="text-align: center; margin-top: 20px; color: #ff4d4d;">Failed to load songs. Please check server or network.</p>';
             console.error(error);
         }
     }
 
-    function renderSongs(songs) {
-        songsContainer.innerHTML = '';
+    function renderSongs(songs, container) {
+        container.innerHTML = '';
         if (songs.length === 0) {
-            songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: var(--dark-text);">No songs found.</p>';
+            container.innerHTML = '<p style="text-align: center; margin-top: 20px; color: var(--dark-text);">No songs found.</p>';
             return;
         }
         songs.forEach(song => {
@@ -814,9 +1115,26 @@
                 <img src="${song.thumbnail}" alt="${song.title}">
                 <div class="song-title">${song.title}</div>
                 <div class="song-channel">${song.channel}</div>
+                <button class="add-to-playlist-btn" data-song-id="${song.id}" data-song-title="${song.title}" data-song-channel="${song.channel}" data-song-thumbnail="${song.thumbnail}"><i class="fas fa-plus-circle"></i></button>
             `;
-            songItem.addEventListener('click', () => playSong(song.id, song.title, song.channel, song.thumbnail));
-            songsContainer.appendChild(songItem);
+            songItem.addEventListener('click', (e) => {
+                if (!e.target.closest('.add-to-playlist-btn')) {
+                     playSong(song.id, song.title, song.channel, song.thumbnail);
+                }
+            });
+            container.appendChild(songItem);
+        });
+
+        document.querySelectorAll('.add-to-playlist-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const song = {
+                    id: e.currentTarget.dataset.songId,
+                    title: e.currentTarget.dataset.songTitle,
+                    channel: e.currentTarget.dataset.songChannel,
+                    thumbnail: e.currentTarget.dataset.songThumbnail
+                };
+                openPlaylistModal(song);
+            });
         });
     }
 
@@ -825,6 +1143,20 @@
             console.error("YouTube Player API not ready.");
             return;
         }
+
+        const song = { id: videoId, title, artist, thumbnail };
+        
+        // Add to recently played
+        const existingIndex = recentlyPlayedList.findIndex(s => s.id === song.id);
+        if (existingIndex !== -1) {
+            recentlyPlayedList.splice(existingIndex, 1);
+        }
+        recentlyPlayedList.unshift(song);
+        if (recentlyPlayedList.length > 10) {
+            recentlyPlayedList.pop();
+        }
+        renderSongs(recentlyPlayedList, recentlyPlayedSongs);
+
 
         currentVideoId = videoId;
         playerCurrentTitle.textContent = title;
@@ -892,7 +1224,13 @@
     searchButton.addEventListener('click', () => {
         const query = searchInput.value;
         if (query) {
-            fetchSongs(`${BASE_URL}/api/songs/search?query=${encodeURIComponent(query)}`, `Search results for "${query}"`);
+            hideAllViews();
+            homeView.style.display = 'block';
+            homeSections.style.display = 'none';
+            searchView.style.display = 'block';
+            currentViewTitle.textContent = `Search results for "${query}"`;
+            fetchSongs(`${BASE_URL}/api/songs/search?query=${encodeURIComponent(query)}`, searchResults, 'Search Results');
+            searchNav.classList.add('active');
         }
     });
 
@@ -942,6 +1280,7 @@
         homeView.style.display = 'none';
         adminSection.style.display = 'none';
         libraryView.style.display = 'none';
+        authView.style.display = 'none';
         document.querySelectorAll('.sidebar nav ul li a').forEach(link => {
             link.classList.remove('active');
         });
@@ -951,8 +1290,11 @@
         e.preventDefault();
         hideAllViews();
         homeView.style.display = 'block';
+        homeSections.style.display = 'block';
+        searchView.style.display = 'none';
+        currentViewTitle.textContent = 'Home';
         homeNav.classList.add('active');
-        fetchSongs(`${BASE_URL}/api/songs/random`, 'Random Songs');
+        fetchInitialData();
         closeSidebar();
     });
 
@@ -960,9 +1302,11 @@
         e.preventDefault();
         hideAllViews();
         homeView.style.display = 'block';
+        homeSections.style.display = 'none';
+        searchView.style.display = 'block';
         searchNav.classList.add('active');
         currentViewTitle.textContent = 'Search for Music';
-        songsContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; color: var(--dark-text);">Use the search bar above to find songs.</p>';
+        searchResults.innerHTML = '<p style="text-align: center; margin-top: 50px; color: var(--dark-text);">Use the search bar above to find songs.</p>';
         searchInput.focus();
         closeSidebar();
     });
@@ -972,6 +1316,11 @@
         hideAllViews();
         libraryView.style.display = 'block';
         libraryNav.classList.add('active');
+        if (loggedInUser) {
+            renderPlaylists();
+        } else {
+            playlistListContainer.innerHTML = '<p style="color: var(--dark-text);">You must be logged in to view your library.</p>';
+        }
         closeSidebar();
     });
 
@@ -982,6 +1331,193 @@
         adminNav.classList.add('active');
         closeSidebar();
     });
+
+    authNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideAllViews();
+        authView.style.display = 'block';
+        authNav.classList.add('active');
+        closeSidebar();
+    });
+    
+    headerAuthBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        authNav.click();
+    });
+
+    // --- User Authentication ---
+    let isLogin = true;
+    toggleAuthLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        isLogin = !isLogin;
+        authFormTitle.textContent = isLogin ? 'Login' : 'Sign Up';
+        authSubmitBtn.textContent = isLogin ? 'Login' : 'Sign Up';
+        toggleAuthLink.textContent = isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login";
+        document.getElementById('auth-message').textContent = '';
+    });
+
+    authSubmitBtn.addEventListener('click', () => {
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+        const messageEl = document.getElementById('auth-message');
+
+        if (isLogin) {
+            // Login logic
+            if (users[email] && users[email].password === password) {
+                loggedInUser = users[email];
+                messageEl.textContent = 'Login successful!';
+                messageEl.style.color = var(--spotify-green);
+                headerAuthBtn.textContent = `Hello, ${email.split('@')[0]}`;
+                authNav.innerHTML = `<i class="fas fa-user-circle"></i> Logged In`;
+            } else {
+                messageEl.textContent = 'Invalid email or password.';
+                messageEl.style.color = '#ff4d4d';
+            }
+        } else {
+            // Sign up logic
+            if (users[email]) {
+                messageEl.textContent = 'Email already exists. Please login.';
+                messageEl.style.color = '#ff4d4d';
+            } else {
+                users[email] = { email, password, playlists: [] };
+                messageEl.textContent = 'Sign up successful! Please login.';
+                messageEl.style.color = var(--spotify-green);
+                isLogin = true;
+                authFormTitle.textContent = 'Login';
+                authSubmitBtn.textContent = 'Login';
+                toggleAuthLink.textContent = "Don't have an account? Sign Up";
+            }
+        }
+    });
+
+    // --- Playlists ---
+    function openPlaylistModal(song) {
+        if (!loggedInUser) {
+            alert('Please log in to add songs to a playlist.');
+            return;
+        }
+        currentSongToAdd = song;
+        renderPlaylistsInModal();
+        playlistModal.classList.add('visible');
+    }
+
+    closeModalBtn.addEventListener('click', () => {
+        playlistModal.classList.remove('visible');
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === playlistModal) {
+            playlistModal.classList.remove('visible');
+        }
+    });
+
+    function renderPlaylistsInModal() {
+        playlistModalList.innerHTML = '';
+        if (loggedInUser.playlists.length === 0) {
+            playlistModalList.innerHTML = '<p>No playlists found. Create one below.</p>';
+        } else {
+            loggedInUser.playlists.forEach(playlist => {
+                const button = document.createElement('button');
+                button.textContent = `${playlist.name} (${playlist.songs.length})`;
+                button.addEventListener('click', () => {
+                    addSongToPlaylist(playlist.id, currentSongToAdd);
+                    playlistModal.classList.remove('visible');
+                });
+                playlistModalList.appendChild(button);
+            });
+        }
+    }
+
+    modalCreatePlaylistBtn.addEventListener('click', () => {
+        const name = modalNewPlaylistNameInput.value.trim();
+        if (name) {
+            createPlaylist(name);
+            modalNewPlaylistNameInput.value = '';
+        }
+    });
+
+    createPlaylistBtn.addEventListener('click', () => {
+        const name = newPlaylistNameInput.value.trim();
+        if (name) {
+            createPlaylist(name);
+            newPlaylistNameInput.value = '';
+        }
+    });
+
+    function createPlaylist(name) {
+        if (!loggedInUser) {
+            alert('You must be logged in to create a playlist.');
+            return;
+        }
+        const newPlaylist = {
+            id: Date.now().toString(),
+            name: name,
+            songs: []
+        };
+        loggedInUser.playlists.push(newPlaylist);
+        renderPlaylists();
+        renderPlaylistsInModal();
+    }
+
+    function addSongToPlaylist(playlistId, song) {
+        const playlist = loggedInUser.playlists.find(p => p.id === playlistId);
+        if (playlist) {
+            const isDuplicate = playlist.songs.some(s => s.id === song.id);
+            if (!isDuplicate) {
+                playlist.songs.push(song);
+                alert(`Song added to "${playlist.name}".`);
+            } else {
+                alert('This song is already in this playlist.');
+            }
+        }
+    }
+
+    function renderPlaylists() {
+        playlistListContainer.innerHTML = '';
+        if (loggedInUser.playlists.length === 0) {
+            playlistListContainer.innerHTML = '<p style="color: var(--dark-text);">You haven\'t created any playlists yet.</p>';
+        } else {
+            loggedInUser.playlists.forEach(playlist => {
+                const playlistItem = document.createElement('div');
+                playlistItem.className = 'playlist-item';
+                playlistItem.innerHTML = `
+                    <img src="https://via.placeholder.com/60?text=Playlist" alt="Playlist Cover">
+                    <div class="info">
+                        <div class="title">${playlist.name}</div>
+                        <div class="count">${playlist.songs.length} songs</div>
+                    </div>
+                `;
+                playlistItem.addEventListener('click', () => viewPlaylist(playlist));
+                playlistListContainer.appendChild(playlistItem);
+            });
+        }
+        playlistDetailsContainer.style.display = 'none';
+    }
+
+    function viewPlaylist(playlist) {
+        playlistDetailsContainer.style.display = 'block';
+        playlistDetailsTitle.textContent = playlist.name;
+        renderSongs(playlist.songs, playlistDetailsSongs);
+    }
+
+    // --- Initial Data Fetch ---
+    async function fetchInitialData() {
+        // Fetch popular songs (placeholder for a real API)
+        const popularUrl = `${BASE_URL}/api/songs/random?count=5`;
+        fetchSongs(popularUrl, popularSongs, 'Popular Songs');
+        
+        // Fetch random songs for the 'Explore' section
+        const randomUrl = `${BASE_URL}/api/songs/random?count=10`;
+        fetchSongs(randomUrl, randomSongs, 'Explore');
+
+        // Render recently played songs
+        if (recentlyPlayedList.length > 0) {
+            renderSongs(recentlyPlayedList, recentlyPlayedSongs);
+        } else {
+            recentlyPlayedSongs.innerHTML = '<p style="color: var(--dark-text);">No songs played recently. Start listening!</p>';
+        }
+    }
+
 
     // --- Admin Panel Logic ---
     adminLoginBtn.addEventListener('click', async () => {
@@ -1072,7 +1608,7 @@
 
     // Initial load
     window.onload = () => {
-        fetchSongs(`${BASE_URL}/api/songs/random`, 'Random Songs');
+        fetchInitialData();
     };
 </script>
 
