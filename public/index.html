@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM Music Hub</title>
+    <title>Music Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -153,7 +153,6 @@
             font-size: 12px;
             color: #b3b3b3;
         }
-
         .full-player-view {
             display: none;
             position: fixed;
@@ -316,7 +315,7 @@
     </div>
 
     <script>
-        const popularSongs = [
+        const allSongs = [
             { id: "vB0X57E5M8A", title: "Sroto Shini", channel: "Encore", thumbnail: "https://i.ytimg.com/vi/vB0X57E5M8A/mqdefault.jpg" },
             { id: "t_v21wNfSGY", title: "Karnival", channel: "HIGHWAY", thumbnail: "https://i.ytimg.com/vi/t_v21wNfSGY/mqdefault.jpg" },
             { id: "2-T33r4W4_Q", title: "Ondho Deyal", channel: "Shonar Bangla Circus", thumbnail: "https://i.ytimg.com/vi/2-T33r4W4_Q/mqdefault.jpg" },
@@ -338,7 +337,8 @@
         let currentSongId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            populateSongs(popularSongs, document.getElementById('popularSongsGrid'));
+            const shuffledSongs = shuffleArray(allSongs).slice(0, 4);
+            populateSongs(shuffledSongs, document.getElementById('popularSongsGrid'));
             document.getElementById('searchButton').addEventListener('click', search);
             document.getElementById('searchInput').addEventListener('keyup', function(event) {
                 if (event.key === 'Enter') {
@@ -351,6 +351,15 @@
             audioPlayer.addEventListener('timeupdate', updateProgressBar);
             audioPlayer.addEventListener('loadedmetadata', setDuration);
         });
+
+        // Function to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
         async function search() {
             const query = document.getElementById('searchInput').value;
