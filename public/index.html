@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary-color: #1DB954; /* Spotify Green */
+            --primary-color: #1DB954;
             --primary-light: #2AD165;
             --dark-bg: #0b0b0b;
             --card-bg: #1a1a1a;
@@ -23,7 +23,6 @@
             --active-card-border: 2px solid var(--primary-color);
         }
 
-        /* General & Resets */
         *, *::before, *::after {
             box-sizing: border-box;
         }
@@ -43,12 +42,10 @@
             transition: all 0.3s ease;
         }
 
-        /* General Transitions */
         a, button, .song-item, .hero-card, input, .player-progress-bar::before {
             transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        /* New Full Screen Player CSS */
         .full-screen-player {
             position: fixed;
             top: 0;
@@ -56,7 +53,7 @@
             width: 100%;
             height: 100%;
             background-color: #000;
-            display: none; /* Initially hidden */
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -128,8 +125,6 @@
             font-size: 4rem;
         }
 
-
-        /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
             background-color: #000;
@@ -185,7 +180,6 @@
             font-size: 1.2em;
         }
 
-        /* Main Content */
         .main-content-wrapper {
             flex-grow: 1;
             margin-left: var(--sidebar-width);
@@ -242,7 +236,6 @@
             user-select: none;
         }
 
-        /* Dashboard & Content Sections */
         .content-section h2 {
             font-size: 1.8em;
             margin-bottom: 25px;
@@ -348,7 +341,6 @@
             margin-top: 5px;
         }
 
-        /* Floating Play/Pause Button on Song Items */
         .song-item .play-floating-btn {
             position: absolute;
             bottom: 25px;
@@ -374,13 +366,12 @@
             pointer-events: auto;
         }
 
-        /* Progress Bar on Cards */
         .hero-progress-bar, .song-progress-bar {
             height: 4px;
             background-color: #404040;
             border-radius: 2px;
             margin-top: 10px;
-            display: none; /* Initially hidden */
+            display: none;
             width: 100%;
         }
 
@@ -397,7 +388,6 @@
             display: block;
         }
 
-        /* Player Bar */
         #player-bar {
             position: fixed;
             bottom: 0;
@@ -418,7 +408,6 @@
             cursor: pointer;
         }
 
-        /* Player Bar Left Section (Thumbnail & Info) */
         .player-track-info {
             display: flex;
             align-items: center;
@@ -459,7 +448,6 @@
             margin-top: 2px;
         }
 
-        /* Player Bar Center Section (Controls & Progress) */
         .player-controls-center {
             display: flex;
             flex-direction: column;
@@ -523,7 +511,6 @@
             border-radius: 2px;
         }
 
-        /* Player Bar Right Section (Volume) */
         .player-volume-section {
             width: 30%;
             display: flex;
@@ -558,7 +545,6 @@
             box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
 
-        /* Loading Skeleton */
         .skeleton {
             background-color: #2a2a2a;
             animation: pulse 1.5s infinite ease-in-out;
@@ -578,7 +564,6 @@
             100% { opacity: 0.5; }
         }
 
-        /* Media Queries for Mobile */
         @media (max-width: 768px) {
             :root { --sidebar-width: 250px; --player-height: 70px; }
             body { flex-direction: column; overflow-y: auto; }
@@ -604,7 +589,6 @@
             .song-item { padding: 10px; }
             .song-title { font-size: 0.9em; }
 
-            /* Updated Player Bar for Mobile */
             #player-bar {
                 height: var(--player-height);
                 flex-direction: row;
@@ -627,7 +611,6 @@
             .player-song-title { font-size: 0.9em; max-width: 100px;}
             .player-artist-name { font-size: 0.75em; max-width: 100px;}
 
-            /* Mini-Card Controls & Progress */
             .player-bar-mini-controls {
                 display: flex;
                 align-items: center;
@@ -659,12 +642,10 @@
                 transition: width 0.5s linear;
             }
 
-            /* Hide large controls on mobile */
-            .player-controls-center, .player-progress-container, .player-volume-section { 
-                display: none; 
+            .player-controls-center, .player-progress-container, .player-volume-section {
+                display: none;
             }
 
-            /* New Full Screen Player CSS for Mobile */
             .full-screen-player {
                 padding: 10px;
             }
@@ -681,7 +662,7 @@
             .full-screen-player .song-image {
                 width: 90%;
                 max-width: 300px;
-                margin-top: 50px; 
+                margin-top: 50px;
             }
 
             .full-screen-player .song-details h2 {
@@ -858,11 +839,10 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
-        // --- DOM Elements ---
         const songsContainer = document.getElementById('songs-container');
         const searchInput = document.getElementById('search-input');
         const playPauseBtn = document.getElementById('play-pause-btn');
-        const miniPlayPauseBtn = document.getElementById('mini-play-pause-btn'); 
+        const miniPlayPauseBtn = document.getElementById('mini-play-pause-btn');
         const progressBarContainer = document.getElementById('progress-bar-container');
         const progressBar = document.getElementById('progress-bar');
         const miniProgressBar = document.querySelector('.player-bar-mini-progress');
@@ -872,7 +852,6 @@
         const featuredHeroCard = document.getElementById('featured-hero-card');
         const playerBar = document.getElementById('player-bar');
 
-        // New Full-Screen Player Elements
         const fullScreenPlayer = document.getElementById('full-screen-player');
         const closeFullPlayerBtn = document.getElementById('close-full-player');
         const fullPlayerImage = document.getElementById('full-player-image');
@@ -883,7 +862,6 @@
         const fullPlayerNextBtn = document.getElementById('full-player-next-btn');
 
 
-        // Views
         const homeView = document.getElementById('home-view');
         const libraryView = document.getElementById('library-view');
         const adminSection = document.getElementById('admin-section');
@@ -892,7 +870,6 @@
         const searchResultsTitle = document.getElementById('search-results-title');
         const searchSongsContainer = document.getElementById('search-songs-container');
 
-        // Admin
         const adminLoginForm = document.getElementById('admin-login-form');
         const adminContent = document.getElementById('admin-content');
         const adminLoginBtn = document.getElementById('admin-login-btn');
@@ -901,25 +878,21 @@
         const adminMessage = document.getElementById('admin-message');
         const userListTable = document.getElementById('user-list');
 
-        // Navigation
         const navLinks = document.querySelectorAll('.sidebar nav ul li a');
         const homeNav = document.getElementById('home-nav');
         const searchNav = document.getElementById('search-nav');
         const libraryNav = document.getElementById('library-nav');
         const adminNav = document.getElementById('admin-nav');
 
-        // Mobile
         const sidebar = document.getElementById('sidebar');
         const hamburgerMenu = document.getElementById('hamburger-menu');
 
-        // --- Global State & Constants ---
         const BASE_URL = 'https://video-hub-s3g2.onrender.com';
         let player;
         let currentVideoDuration = 0;
         let allSongsData = [];
-        let currentPlayingSongId = null; 
+        let currentPlayingSongId = null;
 
-        // --- YouTube IFrame Player API ---
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -929,24 +902,23 @@
             player = new YT.Player('player-iframe', {
                 height: '0',
                 width: '0',
-                playerVars: { 
-                    'playsinline': 1, 
-                    'controls': 0, 
-                    'disablekb': 1, 
-                    'modestbranding': 1, 
-                    'enablejsapi': 1, 
+                playerVars: {
+                    'playsinline': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'modestbranding': 1,
+                    'enablejsapi': 1,
                     'iv_load_policy': 3,
-                    'autoplay': 1 
+                    'autoplay': 1
                 },
-                events: { 
-                    'onReady': onPlayerReady, 
-                    'onStateChange': onPlayerStateChange, 
-                    'onError': onPlayerError 
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
                 }
             });
         };
 
-        // --- Player Functions ---
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
@@ -960,11 +932,9 @@
                 currentVideoDuration = duration;
                 const progress = (currentTime / duration) * 100;
 
-                // Update large and mini progress bars
                 progressBar.style.setProperty('--progress-width', `${progress}%`);
                 miniProgressBar.style.setProperty('--progress-width', `${progress}%`);
 
-                // Update card progress bar
                 const currentCard = document.querySelector(`.song-item[data-id="${currentPlayingSongId}"], .hero-card[data-id="${currentPlayingSongId}"]`);
                 if (currentCard) {
                     const cardProgressBarFill = currentCard.querySelector('.hero-progress-fill') || currentCard.querySelector('.song-progress-fill');
@@ -1009,14 +979,35 @@
                     break;
             }
         }
-
+        
+        // --- NEW ERROR HANDLING FUNCTION ---
         function onPlayerError(event) {
             console.error('YouTube Player Error:', event.data);
-            document.getElementById('player-current-title').textContent = 'Error playing song';
-            document.getElementById('player-current-artist').textContent = 'Please try another.';
+            let errorMessage = "An unknown error occurred.";
+            switch(event.data) {
+                case 2:
+                    errorMessage = "Invalid video ID. The song link is broken.";
+                    break;
+                case 5:
+                    errorMessage = "The requested content cannot be played in the HTML5 player.";
+                    break;
+                case 100:
+                    errorMessage = "The video was not found. It may have been removed.";
+                    break;
+                case 101:
+                case 150:
+                    errorMessage = "The video is not available or is restricted in your country.";
+                    break;
+            }
+            document.getElementById('player-current-title').textContent = 'Error: ' + errorMessage;
+            document.getElementById('player-current-artist').textContent = 'Please try another song.';
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             miniPlayPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            fullPlayerPlayPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            updateCardUI(currentPlayingSongId, 'stopped');
+            currentPlayingSongId = null;
         }
+
 
         function resetPlayerDisplay() {
             document.getElementById('player-current-title').textContent = 'No song playing';
@@ -1028,7 +1019,6 @@
             totalTimeSpan.textContent = '0:00';
         }
 
-        // Function to update the card UI
         function updateCardUI(songId, state) {
             const allCards = document.querySelectorAll('.song-item, .hero-card');
             allCards.forEach(card => {
@@ -1084,7 +1074,6 @@
             document.getElementById('player-current-artist').textContent = song.channel || 'Unknown Artist';
             document.getElementById('player-thumbnail').src = song.thumbnail || 'https://via.placeholder.com/60';
 
-            // Update full screen player info
             fullPlayerTitle.textContent = song.title;
             fullPlayerArtist.textContent = song.channel;
             fullPlayerImage.src = song.thumbnail;
@@ -1099,15 +1088,14 @@
             let nextIndex = currentIndex + direction;
 
             if (nextIndex >= allSongsData.length) {
-                nextIndex = 0; // Wrap around to the first song
+                nextIndex = 0;
             } else if (nextIndex < 0) {
-                nextIndex = allSongsData.length - 1; // Wrap around to the last song
+                nextIndex = allSongsData.length - 1;
             }
 
             playSong(allSongsData[nextIndex]);
         }
 
-        // --- UI Rendering ---
         function renderSongs(songs, container) {
             container.innerHTML = '';
             if (!songs || songs.length === 0) {
@@ -1134,7 +1122,7 @@
         function renderFeaturedSong(songs) {
             if (songs && songs.length > 0) {
                 const featured = songs[0];
-                featuredHeroCard.dataset.id = featured.id; 
+                featuredHeroCard.dataset.id = featured.id;
                 featuredHeroCard.innerHTML = `
                     <img src="${featured.thumbnail}" alt="${featured.title}">
                     <div class="hero-info">
@@ -1153,7 +1141,6 @@
             }
         }
 
-        // --- API Calls ---
         async function fetchSongs(url, container, callback) {
             const isFeatured = container === songsContainer;
             container.innerHTML = `
@@ -1200,7 +1187,6 @@
             }
         }
 
-        // --- Full Screen Player Logic ---
         function openFullScreenPlayer() {
             if (currentPlayingSongId) {
                 fullScreenPlayer.classList.add('active');
@@ -1233,7 +1219,6 @@
         });
 
 
-        // --- Event Listeners ---
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && searchInput.value.trim()) {
                 hideAllViews();
@@ -1250,7 +1235,6 @@
         const playerControls = [playPauseBtn, miniPlayPauseBtn];
         playerControls.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                // Prevent event from bubbling up to playerBar
                 e.stopPropagation();
                 if (!player || !player.getPlayerState) return;
                 const playerState = player.getPlayerState();
@@ -1280,7 +1264,6 @@
             }
         });
 
-        // Use event delegation for song grid clicks
         songsContainer.addEventListener('click', handleSongClick);
         searchSongsContainer.addEventListener('click', handleSongClick);
         featuredHeroCard.addEventListener('click', handleSongClick);
@@ -1296,10 +1279,8 @@
             }
         }
 
-        // This is the new event listener for the player bar
         playerBar.addEventListener('click', openFullScreenPlayer);
 
-        // --- Mobile Navigation ---
         hamburgerMenu.addEventListener('click', () => {
             sidebar.classList.toggle('active');
         });
@@ -1309,7 +1290,6 @@
             }
         }
 
-        // --- Navigation Logic ---
         function hideAllViews() {
             homeView.style.display = 'none';
             adminSection.style.display = 'none';
@@ -1361,7 +1341,6 @@
             closeSidebar();
         });
 
-        // --- Admin Panel Logic ---
         adminLoginBtn.addEventListener('click', async () => {
             const email = adminEmailInput.value;
             const password = adminPasswordInput.value;
@@ -1446,7 +1425,6 @@
             }
         };
 
-        // --- Initial Load ---
         fetchSongs(`${BASE_URL}/api/songs/random`, songsContainer, renderFeaturedSong);
     });
 </script>
