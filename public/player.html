@@ -29,6 +29,8 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .background-blur {
@@ -51,7 +53,6 @@
             flex-direction: column;
             align-items: center;
             max-width: 90%;
-            padding: 20px;
             box-sizing: border-box;
         }
 
@@ -74,11 +75,13 @@
             font-weight: 700;
             margin: 0;
             color: var(--text-light);
+            word-wrap: break-word; /* For long titles */
         }
         .track-artist {
             font-size: 1.2em;
             color: var(--text-muted);
             margin-top: 5px;
+            word-wrap: break-word; /* For long artist names */
         }
 
         .player-controls {
@@ -157,6 +160,56 @@
             max-width: 500px;
             font-size: 0.8em;
             color: var(--text-muted);
+        }
+
+        /* --- Mobile Styles --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .back-button, .additional-actions {
+                top: 20px;
+                left: 20px;
+                right: 20px;
+            }
+            .additional-actions {
+                gap: 15px;
+            }
+            .back-button {
+                left: 20px;
+                right: auto;
+            }
+
+            .track-thumbnail {
+                width: 70vw;
+                height: 70vw;
+                margin-bottom: 20px;
+            }
+
+            .track-info {
+                margin-bottom: 30px;
+            }
+            .track-title {
+                font-size: 1.8em;
+            }
+            .track-artist {
+                font-size: 1em;
+            }
+
+            .player-controls {
+                gap: 20px;
+            }
+            .control-btn {
+                font-size: 1.2em;
+            }
+            .play-pause-btn {
+                font-size: 2.5em;
+            }
+
+            .progress-bar-container,
+            .progress-timestamps {
+                width: 90%;
+            }
         }
     </style>
 </head>
