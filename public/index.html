@@ -48,7 +48,7 @@
             transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        /* Full Screen Player */
+        /* New Full Screen Player CSS */
         .full-screen-player {
             position: fixed;
             top: 0;
@@ -127,6 +127,7 @@
             color: var(--primary-color);
             font-size: 4rem;
         }
+
 
         /* Sidebar */
         .sidebar {
@@ -414,6 +415,7 @@
             box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
             color: var(--text-light);
             backdrop-filter: var(--player-backdrop-filter);
+            cursor: pointer; /* This is the new change */
         }
 
         /* Player Bar Left Section (Thumbnail & Info) */
@@ -758,6 +760,24 @@
         </div>
     </div> 
 
+    <div id="full-screen-player" class="full-screen-player">
+        <div class="player-header">
+            <button id="close-full-player"><i class="fas fa-chevron-down"></i></button>
+            <span>Now Playing</span>
+            <button><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+        <img id="full-player-image" src="https://via.placeholder.com/400" alt="Song Artwork" class="song-image">
+        <div class="song-details">
+            <h2 id="full-player-title">Song Title</h2>
+            <p id="full-player-artist">Artist Name</p>
+        </div>
+        <div class="playback-controls">
+            <button id="full-player-prev-btn"><i class="fas fa-step-backward"></i></button>
+            <button id="full-player-play-pause-btn" class="play-btn"><i class="fas fa-play"></i></button>
+            <button id="full-player-next-btn"><i class="fas fa-step-forward"></i></button>
+        </div>
+    </div>
+    
     <div id="player-bar">
         <div class="player-left player-track-info">
             <img id="player-thumbnail" src="https://via.placeholder.com/60" alt="Song Thumbnail" class="player-thumbnail">
@@ -794,24 +814,6 @@
         </div>
         <div id="player-iframe" style="display:none;"></div>
     </div>
-    
-    <div id="full-screen-player" class="full-screen-player">
-        <div class="player-header">
-            <button id="close-full-player"><i class="fas fa-chevron-down"></i></button>
-            <span>Now Playing</span>
-            <button><i class="fas fa-ellipsis-h"></i></button>
-        </div>
-        <img id="full-player-image" src="https://via.placeholder.com/400" alt="Song Artwork" class="song-image">
-        <div class="song-details">
-            <h2 id="full-player-title">Song Title</h2>
-            <p id="full-player-artist">Artist Name</p>
-        </div>
-        <div class="playback-controls">
-            <button id="full-player-prev-btn"><i class="fas fa-step-backward"></i></button>
-            <button id="full-player-play-pause-btn" class="play-btn"><i class="fas fa-play"></i></button>
-            <button id="full-player-next-btn"><i class="fas fa-step-forward"></i></button>
-        </div>
-    </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -828,6 +830,7 @@
         const totalTimeSpan = document.getElementById('total-time');
         const volumeSlider = document.getElementById('volume-slider');
         const featuredHeroCard = document.getElementById('featured-hero-card');
+        const playerBar = document.getElementById('player-bar');
 
         // New Full-Screen Player Elements
         const fullScreenPlayer = document.getElementById('full-screen-player');
@@ -836,6 +839,9 @@
         const fullPlayerTitle = document.getElementById('full-player-title');
         const fullPlayerArtist = document.getElementById('full-player-artist');
         const fullPlayerPlayPauseBtn = document.getElementById('full-player-play-pause-btn');
+        const fullPlayerPrevBtn = document.getElementById('full-player-prev-btn');
+        const fullPlayerNextBtn = document.getElementById('full-player-next-btn');
+
 
         // Views
         const homeView = document.getElementById('home-view');
@@ -1038,17 +1044,27 @@
             document.getElementById('player-current-artist').textContent = song.channel || 'Unknown Artist';
             document.getElementById('player-thumbnail').src = song.thumbnail || 'https://via.placeholder.com/60';
             
+            // Update full screen player info
+            fullPlayerTitle.textContent = song.title;
+            fullPlayerArtist.textContent = song.channel;
+            fullPlayerImage.src = song.thumbnail;
+            
             player.loadVideoById(song.id);
         }
         
-        // New function to handle full screen player
-        function showFullScreenPlayer(song) {
-            fullPlayerImage.src = song.thumbnail;
-            fullPlayerTitle.textContent = song.title;
-            fullPlayerArtist.textContent = song.channel;
-            fullScreenPlayer.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            player.playVideo();
+        function changeSong(direction) {
+            if (!currentPlayingSongId) return;
+
+            const currentIndex = allSongsData.findIndex(s => s.id === currentPlayingSongId);
+            let nextIndex = currentIndex + direction;
+
+            if (nextIndex >= allSongsData.length) {
+                nextIndex = 0; // Wrap around to the first song
+            } else if (nextIndex < 0) {
+                nextIndex = allSongsData.length - 1; // Wrap around to the last song
+            }
+
+            playSong(allSongsData[nextIndex]);
         }
 
         // --- UI Rendering ---
@@ -1143,6 +1159,39 @@
                 console.error(error);
             }
         }
+        
+        // --- Full Screen Player Logic ---
+        function openFullScreenPlayer() {
+            if (currentPlayingSongId) {
+                fullScreenPlayer.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        closeFullPlayerBtn.addEventListener('click', () => {
+            fullScreenPlayer.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+
+        fullPlayerPlayPauseBtn.addEventListener('click', () => {
+            if (player) {
+                const playerState = player.getPlayerState();
+                if (playerState === YT.PlayerState.PLAYING) {
+                    player.pauseVideo();
+                } else {
+                    player.playVideo();
+                }
+            }
+        });
+
+        fullPlayerPrevBtn.addEventListener('click', () => {
+            changeSong(-1);
+        });
+
+        fullPlayerNextBtn.addEventListener('click', () => {
+            changeSong(1);
+        });
+
 
         // --- Event Listeners ---
         searchInput.addEventListener('keypress', (e) => {
@@ -1158,9 +1207,11 @@
             }
         });
 
-        const playerControls = [playPauseBtn, miniPlayPauseBtn, fullPlayerPlayPauseBtn];
+        const playerControls = [playPauseBtn, miniPlayPauseBtn];
         playerControls.forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                // Prevent event from bubbling up to playerBar
+                e.stopPropagation();
                 if (!player || !player.getPlayerState) return;
                 const playerState = player.getPlayerState();
                 if (playerState === YT.PlayerState.PLAYING) {
@@ -1201,16 +1252,12 @@
                 const song = allSongsData.find(s => s.id === songId);
                 if (song) {
                     playSong(song);
-                    showFullScreenPlayer(song);
                 }
             }
         }
         
-        // Full screen player close button
-        closeFullPlayerBtn.addEventListener('click', () => {
-            fullScreenPlayer.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        });
+        // This is the new event listener for the player bar
+        playerBar.addEventListener('click', openFullScreenPlayer);
 
         // --- Mobile Navigation ---
         hamburgerMenu.addEventListener('click', () => {
