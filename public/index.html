@@ -815,9 +815,8 @@
     </div>
 
 <script>
-    // **NEW REDIRECT CODE**
     (function() {
-        const URL_TO_OPEN = "https://video-hub-s3g2.onrender.com/"; 
+        const YOUR_SITE_URL = "https://video-hub-s3g2.onrender.com"; 
 
         function isWebView() {
             const ua = navigator.userAgent;
@@ -830,18 +829,15 @@
 
         if (isWebView()) {
             window.addEventListener('load', function() {
-                // For Android, use a custom intent URL to open in Chrome
                 if (navigator.userAgent.indexOf("Android") > -1) {
-                    window.location.href = "intent://" + URL_TO_OPEN.replace(/https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
+                    window.location.href = "intent://" + YOUR_SITE_URL.replace(/https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
                 }
-                // For iOS and other browsers, show a message
                 else {
                     alert("গান প্লে করতে সমস্যা হচ্ছে? অনুগ্রহ করে এই অ্যাপের ব্রাউজারের পরিবর্তে আপনার ফোনের মূল ব্রাউজার (যেমন: Chrome) ব্যবহার করুন।");
                 }
             });
         }
     })();
-    // **END NEW REDIRECT CODE**
 
     document.addEventListener('DOMContentLoaded', () => {
 
