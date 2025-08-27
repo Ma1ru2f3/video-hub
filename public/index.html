@@ -815,6 +815,34 @@
     </div>
 
 <script>
+    // **NEW REDIRECT CODE**
+    (function() {
+        const URL_TO_OPEN = "https://video-hub-s3g2.onrender.com/"; 
+
+        function isWebView() {
+            const ua = navigator.userAgent;
+            const isAndroidWebView = ua.indexOf("wv") > -1;
+            const isIosWebView = /iPad|iPhone|iPod/.test(ua) && !window.MSStream && ua.indexOf("Safari") === -1;
+            const isFacebook = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
+            
+            return isAndroidWebView || isIosWebView || isFacebook;
+        }
+
+        if (isWebView()) {
+            window.addEventListener('load', function() {
+                // For Android, use a custom intent URL to open in Chrome
+                if (navigator.userAgent.indexOf("Android") > -1) {
+                    window.location.href = "intent://" + URL_TO_OPEN.replace(/https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
+                }
+                // For iOS and other browsers, show a message
+                else {
+                    alert("গান প্লে করতে সমস্যা হচ্ছে? অনুগ্রহ করে এই অ্যাপের ব্রাউজারের পরিবর্তে আপনার ফোনের মূল ব্রাউজার (যেমন: Chrome) ব্যবহার করুন।");
+                }
+            });
+        }
+    })();
+    // **END NEW REDIRECT CODE**
+
     document.addEventListener('DOMContentLoaded', () => {
 
         const songsContainer = document.getElementById('songs-container');
@@ -1315,19 +1343,6 @@
             }
         });
         
-        function isMessengerApp() {
-            var ua = navigator.userAgent || navigator.vendor || window.opera;
-            return (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
-        }
-        
-        window.onload = function() {
-            if (isMessengerApp()) {
-                setTimeout(() => {
-                    alert("গান প্লে করতে সমস্যা হচ্ছে? মেসেঞ্জার ব্রাউজারে কিছু সীমাবদ্ধতা আছে। অনুগ্রহ করে উপরে ডান দিকের তিনটি ডট (...) বাটন এ ক্লিক করে 'Open in Browser' অপশনটি বেছে নিন।");
-                }, 3000);
-            }
-        };
-
         fetchSongs(`${BASE_URL}/api/songs/random`, songsContainer, renderFeaturedSong);
     });
 </script>
