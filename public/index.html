@@ -1424,6 +1424,20 @@
                 console.error(error);
             }
         };
+        
+        // --- NEW Messenger Browser Detection ---
+        function isMessengerApp() {
+            var ua = navigator.userAgent || navigator.vendor || window.opera;
+            return (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
+        }
+        
+        window.onload = function() {
+            if (isMessengerApp()) {
+                setTimeout(() => {
+                    alert("গান প্লে করতে সমস্যা হচ্ছে? মেসেঞ্জার ব্রাউজারে কিছু সীমাবদ্ধতা আছে। অনুগ্রহ করে উপরে ডান দিকের তিনটি ডট (...) বাটন এ ক্লিক করে 'Open in Browser' অপশনটি বেছে নিন।");
+                }, 3000);
+            }
+        };
 
         fetchSongs(`${BASE_URL}/api/songs/random`, songsContainer, renderFeaturedSong);
     });
