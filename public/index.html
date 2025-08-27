@@ -530,8 +530,6 @@
                 justify-content: space-between;
                 align-items: center;
             }
-
-            /* Main part of the mini-card */
             .player-track-info {
                 flex-grow: 1;
                 justify-content: flex-start;
@@ -724,10 +722,10 @@
         const songsContainer = document.getElementById('songs-container');
         const searchInput = document.getElementById('search-input');
         const playPauseBtn = document.getElementById('play-pause-btn');
-        const miniPlayPauseBtn = document.getElementById('mini-play-pause-btn'); // New
+        const miniPlayPauseBtn = document.getElementById('mini-play-pause-btn'); 
         const progressBarContainer = document.getElementById('progress-bar-container');
         const progressBar = document.getElementById('progress-bar');
-        const miniProgressBar = document.querySelector('.player-bar-mini-progress'); // New
+        const miniProgressBar = document.querySelector('.player-bar-mini-progress');
         const currentTimeSpan = document.getElementById('current-time');
         const totalTimeSpan = document.getElementById('total-time');
         const volumeSlider = document.getElementById('volume-slider');
@@ -1176,7 +1174,7 @@
             try {
                 const response = await fetch(`${BASE_URL}/admin/users`, {
                     method: 'GET',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminEmailInput.value}` }
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminEmailInput.value}` },
                 });
                 const data = await response.json();
                 if (data.success) {
