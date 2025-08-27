@@ -915,7 +915,11 @@
                 if (playerState === YT.PlayerState.PLAYING) {
                     player.pauseVideo();
                 } else {
-                    player.playVideo();
+                    if (currentPlayingSongId === null && allSongsData.length > 0) {
+                         playSong(allSongsData[0]);
+                    } else {
+                        player.playVideo();
+                    }
                 }
                 return;
             }
