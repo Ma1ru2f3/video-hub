@@ -472,6 +472,9 @@
             color: var(--text-light);
             transform: scale(1.1);
         }
+        .control-btn.active {
+            color: var(--primary-color);
+        }
         .play-pause-btn {
             font-size: 2.2em;
             color: var(--primary-color);
@@ -697,7 +700,6 @@
                 <li><a href="#" id="home-nav" class="active"><i class="fas fa-grip"></i> Dashboard</a></li>
                 <li><a href="#" id="search-nav"><i class="fas fa-search"></i> Search</a></li>
                 <li><a href="#" id="library-nav"><i class="fas fa-compact-disc"></i> Your Library</a></li>
-                <li><a href="#admin-section" id="admin-nav"><i class="fas fa-user-shield"></i> Admin Panel</a></li>
             </ul>
         </nav>
     </div>
@@ -751,30 +753,6 @@
             </div>
         </div>
 
-        <div id="admin-section" class="main-content" style="display: none;">
-            <h2>Admin Dashboard</h2>
-            <div id="admin-login-form" class="card-bg" style="padding: 20px; border-radius: 8px;">
-                <h3>Admin Login</h3>
-                <input type="email" id="admin-email" placeholder="Admin Email" value="admin@sangeet.com">
-                <input type="password" id="admin-password" placeholder="Password">
-                <button id="admin-login-btn" class="play-btn">Login</button>
-                <p id="admin-message" style="color: #e65252; margin-top: 10px;"></p>
-            </div>
-            <div id="admin-content" style="display: none;">
-                <h3>User Management</h3>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                    <thead>
-                        <tr style="background-color: var(--card-bg-hover);">
-                            <th style="padding: 12px; text-align: left; color: var(--text-light); border-bottom: 2px solid var(--border-color);">Email</th>
-                            <th style="padding: 12px; text-align: left; color: var(--text-light); border-bottom: 2px solid var(--border-color);">Status</th>
-                            <th style="padding: 12px; text-align: left; color: var(--text-light); border-bottom: 2px solid var(--border-color);">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-list"></tbody>
-                </table>
-            </div>
-        </div>
-
         <div id="library-view" class="main-content" style="display: none;">
             <h2>Your Library</h2>
             <p style="text-align: center; color: var(--text-muted);">This is where your saved playlists and songs would appear.</p>
@@ -815,11 +793,11 @@
 
         <div class="player-center player-controls-center">
             <div class="player-playback-controls">
-                <button class="control-btn"><i class="fas fa-random"></i></button>
-                <button class="control-btn"><i class="fas fa-step-backward"></i></button>
+                <button class="control-btn" id="shuffle-btn"><i class="fas fa-random"></i></button>
+                <button class="control-btn" id="prev-btn"><i class="fas fa-step-backward"></i></button>
                 <button id="play-pause-btn" class="control-btn play-pause-btn"><i class="fas fa-play"></i></button>
-                <button class="control-btn"><i class="fas fa-step-forward"></i></button>
-                <button class="control-btn"><i class="fas fa-redo-alt"></i></button>
+                <button class="control-btn" id="next-btn"><i class="fas fa-step-forward"></i></button>
+                <button class="control-btn" id="repeat-btn"><i class="fas fa-redo-alt"></i></button>
             </div>
             <div class="player-progress-container" id="progress-bar-container">
                 <span id="current-time" class="player-time">0:00</span>
@@ -843,6 +821,10 @@
         const searchInput = document.getElementById('search-input');
         const playPauseBtn = document.getElementById('play-pause-btn');
         const miniPlayPauseBtn = document.getElementById('mini-play-pause-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
         const progressBarContainer = document.getElementById('progress-bar-container');
         const progressBar = document.getElementById('progress-bar');
         const miniProgressBar = document.querySelector('.player-bar-mini-progress');
@@ -861,28 +843,17 @@
         const fullPlayerPrevBtn = document.getElementById('full-player-prev-btn');
         const fullPlayerNextBtn = document.getElementById('full-player-next-btn');
 
-
         const homeView = document.getElementById('home-view');
         const libraryView = document.getElementById('library-view');
-        const adminSection = document.getElementById('admin-section');
         const dashboardContent = document.getElementById('dashboard-content');
         const searchResultsContent = document.getElementById('search-results-content');
         const searchResultsTitle = document.getElementById('search-results-title');
         const searchSongsContainer = document.getElementById('search-songs-container');
 
-        const adminLoginForm = document.getElementById('admin-login-form');
-        const adminContent = document.getElementById('admin-content');
-        const adminLoginBtn = document.getElementById('admin-login-btn');
-        const adminEmailInput = document.getElementById('admin-email');
-        const adminPasswordInput = document.getElementById('admin-password');
-        const adminMessage = document.getElementById('admin-message');
-        const userListTable = document.getElementById('user-list');
-
         const navLinks = document.querySelectorAll('.sidebar nav ul li a');
         const homeNav = document.getElementById('home-nav');
         const searchNav = document.getElementById('search-nav');
         const libraryNav = document.getElementById('library-nav');
-        const adminNav = document.getElementById('admin-nav');
 
         const sidebar = document.getElementById('sidebar');
         const hamburgerMenu = document.getElementById('hamburger-menu');
@@ -891,8 +862,11 @@
         let player;
         let currentVideoDuration = 0;
         let allSongsData = [];
+        let shuffledSongs = [];
         let currentPlayingSongId = null;
-
+        let isShuffling = false;
+        let isRepeating = false;
+        
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -973,9 +947,12 @@
                     updateCardUI(currentPlayingSongId, 'paused');
                     break;
                 case YT.PlayerState.ENDED:
-                    resetPlayerDisplay();
-                    updateCardUI(currentPlayingSongId, 'stopped');
-                    currentPlayingSongId = null;
+                    if (isRepeating) {
+                        player.seekTo(0);
+                        player.playVideo();
+                    } else {
+                        changeSong(1);
+                    }
                     break;
             }
         }
@@ -1006,7 +983,6 @@
             updateCardUI(currentPlayingSongId, 'stopped');
             currentPlayingSongId = null;
         }
-
 
         function resetPlayerDisplay() {
             document.getElementById('player-current-title').textContent = 'No song playing';
@@ -1046,6 +1022,10 @@
                 }
             });
         }
+        
+        function getPlaylist() {
+            return isShuffling ? shuffledSongs : allSongsData;
+        }
 
         function playSong(song) {
             if (!player || !player.loadVideoById) {
@@ -1058,11 +1038,7 @@
                 if (playerState === YT.PlayerState.PLAYING) {
                     player.pauseVideo();
                 } else {
-                    if (currentPlayingSongId === null && allSongsData.length > 0) {
-                         playSong(allSongsData[0]);
-                    } else {
-                        player.playVideo();
-                    }
+                    player.playVideo();
                 }
                 return;
             }
@@ -1083,16 +1059,27 @@
         function changeSong(direction) {
             if (!currentPlayingSongId) return;
 
-            const currentIndex = allSongsData.findIndex(s => s.id === currentPlayingSongId);
+            const playlist = getPlaylist();
+            const currentIndex = playlist.findIndex(s => s.id === currentPlayingSongId);
             let nextIndex = currentIndex + direction;
 
-            if (nextIndex >= allSongsData.length) {
+            if (nextIndex >= playlist.length) {
                 nextIndex = 0;
             } else if (nextIndex < 0) {
-                nextIndex = allSongsData.length - 1;
+                nextIndex = playlist.length - 1;
             }
 
-            playSong(allSongsData[nextIndex]);
+            playSong(playlist[nextIndex]);
+        }
+        
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
         }
 
         function renderSongs(songs, container) {
@@ -1175,6 +1162,7 @@
                 const data = await response.json();
                 if (data.success) {
                     allSongsData = data.data;
+                    shuffledSongs = [...allSongsData];
                     renderSongs(allSongsData, container);
                     if (callback) callback(allSongsData);
                 } else {
@@ -1198,40 +1186,7 @@
             document.body.style.overflow = 'auto';
         });
 
-        fullPlayerPlayPauseBtn.addEventListener('click', () => {
-            if (player) {
-                const playerState = player.getPlayerState();
-                if (playerState === YT.PlayerState.PLAYING) {
-                    player.pauseVideo();
-                } else {
-                    player.playVideo();
-                }
-            }
-        });
-
-        fullPlayerPrevBtn.addEventListener('click', () => {
-            changeSong(-1);
-        });
-
-        fullPlayerNextBtn.addEventListener('click', () => {
-            changeSong(1);
-        });
-
-
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && searchInput.value.trim()) {
-                hideAllViews();
-                homeView.style.display = 'block';
-                dashboardContent.style.display = 'none';
-                searchResultsContent.style.display = 'block';
-                searchResultsTitle.textContent = `Results for "${searchInput.value}"`;
-                fetchSongs(`${BASE_URL}/api/songs/search?query=${encodeURIComponent(searchInput.value.trim())}`, searchSongsContainer);
-                updateNavActiveState(searchNav);
-                closeSidebar();
-            }
-        });
-
-        const playerControls = [playPauseBtn, miniPlayPauseBtn];
+        const playerControls = [playPauseBtn, miniPlayPauseBtn, fullPlayerPlayPauseBtn];
         playerControls.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1247,6 +1202,22 @@
                     }
                 }
             });
+        });
+
+        [prevBtn, fullPlayerPrevBtn].forEach(btn => btn.addEventListener('click', () => changeSong(-1)));
+        [nextBtn, fullPlayerNextBtn].forEach(btn => btn.addEventListener('click', () => changeSong(1)));
+
+        shuffleBtn.addEventListener('click', () => {
+            isShuffling = !isShuffling;
+            shuffleBtn.classList.toggle('active', isShuffling);
+            if (isShuffling) {
+                shuffle(shuffledSongs);
+            }
+        });
+
+        repeatBtn.addEventListener('click', () => {
+            isRepeating = !isRepeating;
+            repeatBtn.classList.toggle('active', isRepeating);
         });
 
         progressBarContainer.addEventListener('click', (e) => {
@@ -1291,7 +1262,6 @@
 
         function hideAllViews() {
             homeView.style.display = 'none';
-            adminSection.style.display = 'none';
             libraryView.style.display = 'none';
             navLinks.forEach(link => link.classList.remove('active'));
         }
@@ -1332,97 +1302,18 @@
             closeSidebar();
         });
 
-        adminNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            hideAllViews();
-            adminSection.style.display = 'block';
-            updateNavActiveState(adminNav);
-            closeSidebar();
-        });
-
-        adminLoginBtn.addEventListener('click', async () => {
-            const email = adminEmailInput.value;
-            const password = adminPasswordInput.value;
-            adminMessage.textContent = '';
-            try {
-                const response = await fetch(`${BASE_URL}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    adminLoginForm.style.display = 'none';
-                    adminContent.style.display = 'block';
-                    fetchUserList();
-                } else {
-                    adminMessage.textContent = 'Invalid credentials!';
-                }
-            } catch (error) {
-                adminMessage.textContent = 'Login failed. Server unreachable?';
-                console.error(error);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                hideAllViews();
+                homeView.style.display = 'block';
+                dashboardContent.style.display = 'none';
+                searchResultsContent.style.display = 'block';
+                searchResultsTitle.textContent = `Results for "${searchInput.value}"`;
+                fetchSongs(`${BASE_URL}/api/songs/search?query=${encodeURIComponent(searchInput.value.trim())}`, searchSongsContainer);
+                updateNavActiveState(searchNav);
+                closeSidebar();
             }
         });
-
-        async function fetchUserList() {
-            try {
-                const response = await fetch(`${BASE_URL}/admin/users`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminEmailInput.value}` },
-                });
-                const data = await response.json();
-                if (data.success) {
-                    renderUserList(data.users);
-                } else {
-                    adminMessage.textContent = data.message || 'Failed to fetch user list.';
-                }
-            } catch (error) {
-                adminMessage.textContent = 'Failed to fetch user list. Server unreachable?';
-                console.error(error);
-            }
-        }
-
-        function renderUserList(users) {
-            userListTable.innerHTML = '';
-            if (users.length === 0) {
-                userListTable.innerHTML = '<tr><td colspan="3" style="text-align: center;">No users found.</td></tr>';
-                return;
-            }
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.style.borderBottom = '1px solid var(--border-color)';
-                row.innerHTML = `
-                    <td style="padding: 12px;">${user.email}</td>
-                    <td style="padding: 12px;">${user.status}</td>
-                    <td style="padding: 12px;">
-                        <button style="background-color: ${user.status === 'active' ? '#e65252' : '#1DB954'}; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;" onclick="updateUserStatus('${user.email}', '${user.status === 'active' ? 'blocked' : 'active'}')">
-                            ${user.status === 'active' ? 'Block' : 'Unblock'}
-                        </button>
-                    </td>
-                `;
-                userListTable.appendChild(row);
-            });
-        }
-
-        window.updateUserStatus = async (email, newStatus) => {
-            try {
-                const response = await fetch(`${BASE_URL}/admin/user/status`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminEmailInput.value}` },
-                    body: JSON.stringify({ email, status: newStatus })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert(data.message);
-                    fetchUserList();
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                alert('Failed to update user status. Server unreachable?');
-                console.error(error);
-            }
-        };
         
         function isMessengerApp() {
             var ua = navigator.userAgent || navigator.vendor || window.opera;
