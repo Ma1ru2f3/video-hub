@@ -980,7 +980,6 @@
             }
         }
         
-        // --- NEW ERROR HANDLING FUNCTION ---
         function onPlayerError(event) {
             console.error('YouTube Player Error:', event.data);
             let errorMessage = "An unknown error occurred.";
@@ -1099,7 +1098,7 @@
         function renderSongs(songs, container) {
             container.innerHTML = '';
             if (!songs || songs.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No songs found.</p>';
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No results found.</p>';
                 return;
             }
             songs.forEach(song => {
@@ -1425,7 +1424,6 @@
             }
         };
         
-        // --- NEW Messenger Browser Detection ---
         function isMessengerApp() {
             var ua = navigator.userAgent || navigator.vendor || window.opera;
             return (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
