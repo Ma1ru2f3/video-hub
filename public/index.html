@@ -42,12 +42,92 @@
             overflow: hidden;
             transition: all 0.3s ease;
         }
-
+        
         /* General Transitions */
         a, button, .song-item, .hero-card, input, .player-progress-bar::before {
             transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
+
+        /* Full Screen Player */
+        .full-screen-player {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: none; /* Initially hidden */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .full-screen-player.active {
+            display: flex;
+        }
+
+        .full-screen-player .player-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            top: 20px;
+            padding: 0 20px;
+        }
+
+        .full-screen-player .player-header button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
         
+        .full-screen-player .song-image {
+            width: 80%;
+            max-width: 400px;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 40px;
+        }
+
+        .full-screen-player .song-details h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 5px;
+        }
+
+        .full-screen-player .song-details p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .full-screen-player .playback-controls {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .full-screen-player .playback-controls button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .full-screen-player .playback-controls button.play-btn {
+            color: var(--primary-color);
+            font-size: 4rem;
+        }
+
         /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
@@ -714,6 +794,24 @@
         </div>
         <div id="player-iframe" style="display:none;"></div>
     </div>
+    
+    <div id="full-screen-player" class="full-screen-player">
+        <div class="player-header">
+            <button id="close-full-player"><i class="fas fa-chevron-down"></i></button>
+            <span>Now Playing</span>
+            <button><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+        <img id="full-player-image" src="https://via.placeholder.com/400" alt="Song Artwork" class="song-image">
+        <div class="song-details">
+            <h2 id="full-player-title">Song Title</h2>
+            <p id="full-player-artist">Artist Name</p>
+        </div>
+        <div class="playback-controls">
+            <button id="full-player-prev-btn"><i class="fas fa-step-backward"></i></button>
+            <button id="full-player-play-pause-btn" class="play-btn"><i class="fas fa-play"></i></button>
+            <button id="full-player-next-btn"><i class="fas fa-step-forward"></i></button>
+        </div>
+    </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -730,6 +828,14 @@
         const totalTimeSpan = document.getElementById('total-time');
         const volumeSlider = document.getElementById('volume-slider');
         const featuredHeroCard = document.getElementById('featured-hero-card');
+
+        // New Full-Screen Player Elements
+        const fullScreenPlayer = document.getElementById('full-screen-player');
+        const closeFullPlayerBtn = document.getElementById('close-full-player');
+        const fullPlayerImage = document.getElementById('full-player-image');
+        const fullPlayerTitle = document.getElementById('full-player-title');
+        const fullPlayerArtist = document.getElementById('full-player-artist');
+        const fullPlayerPlayPauseBtn = document.getElementById('full-player-play-pause-btn');
 
         // Views
         const homeView = document.getElementById('home-view');
@@ -839,6 +945,7 @@
                 case YT.PlayerState.PLAYING:
                     playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
                     miniPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    fullPlayerPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
                     updateCardUI(currentPlayingSongId, 'playing');
                     requestAnimationFrame(updateProgressBar);
                     break;
@@ -846,6 +953,7 @@
                 case YT.PlayerState.BUFFERING:
                     playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
                     miniPlayPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    fullPlayerPlayPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
                     updateCardUI(currentPlayingSongId, 'paused');
                     break;
                 case YT.PlayerState.ENDED:
@@ -931,6 +1039,16 @@
             document.getElementById('player-thumbnail').src = song.thumbnail || 'https://via.placeholder.com/60';
             
             player.loadVideoById(song.id);
+        }
+        
+        // New function to handle full screen player
+        function showFullScreenPlayer(song) {
+            fullPlayerImage.src = song.thumbnail;
+            fullPlayerTitle.textContent = song.title;
+            fullPlayerArtist.textContent = song.channel;
+            fullScreenPlayer.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            player.playVideo();
         }
 
         // --- UI Rendering ---
@@ -1040,7 +1158,7 @@
             }
         });
 
-        const playerControls = [playPauseBtn, miniPlayPauseBtn];
+        const playerControls = [playPauseBtn, miniPlayPauseBtn, fullPlayerPlayPauseBtn];
         playerControls.forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!player || !player.getPlayerState) return;
@@ -1083,9 +1201,16 @@
                 const song = allSongsData.find(s => s.id === songId);
                 if (song) {
                     playSong(song);
+                    showFullScreenPlayer(song);
                 }
             }
         }
+        
+        // Full screen player close button
+        closeFullPlayerBtn.addEventListener('click', () => {
+            fullScreenPlayer.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
 
         // --- Mobile Navigation ---
         hamburgerMenu.addEventListener('click', () => {
