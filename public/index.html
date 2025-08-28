@@ -180,8 +180,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        /* Updated play controls for song card */
         .song-card .play-controls-overlay {
             position: absolute;
             top: 0;
@@ -235,8 +233,47 @@
             padding: 10px 20px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
             z-index: 999;
+            flex-direction: column; /* Changed to column to stack elements */
+        }
+        
+        /* New styles for progress bar */
+        .now-playing-bar .progress-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .now-playing-bar .progress-time {
+            font-size: 12px;
+            color: #b3b3b3;
+        }
+        
+        .now-playing-bar .progress-bar {
+            flex-grow: 1;
+            height: 4px;
+            background-color: #404040;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .now-playing-bar .progress-bar-fill {
+            height: 100%;
+            background-color: #1DB954;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
         }
 
+        .now-playing-bar .main-controls-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
         .now-playing-bar .song-info {
             display: flex;
             align-items: center;
@@ -460,22 +497,30 @@
     </div>
     
     <div class="now-playing-bar" id="nowPlayingBar" style="display: none;">
-        <div class="song-info" onclick="maximizePlayer()">
-            <img id="nowPlayingThumbnail" src="" alt="Album Art">
-            <div>
-                <p id="nowPlayingTitle">No song playing...</p>
-                <small id="nowPlayingArtist">Unknown Artist</small>
+        <div class="progress-container">
+            <span id="currentTime" class="progress-time">0:00</span>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
             </div>
+            <span id="totalTime" class="progress-time">0:00</span>
         </div>
-        <div class="controls">
-            <i class="fas fa-play play-pause-btn" id="playPauseBtn" onclick="togglePlayPause()"></i>
+        <div class="main-controls-container">
+            <div class="song-info" onclick="maximizePlayer()">
+                <img id="nowPlayingThumbnail" src="" alt="Album Art">
+                <div>
+                    <p id="nowPlayingTitle">No song playing...</p>
+                    <small id="nowPlayingArtist">Unknown Artist</small>
+                </div>
+            </div>
+            <div class="controls">
+                <i class="fas fa-play play-pause-btn" id="playPauseBtn" onclick="togglePlayPause()"></i>
+            </div>
         </div>
     </div>
     
     <audio id="audioElement" preload="auto"></audio>
     
     <script>
-        // Here is your Render Backend URL
         const BACKEND_URL = 'https://video-hub-s3g2.onrender.com'; 
 
         const sidebar = document.getElementById('sidebar');
@@ -495,10 +540,17 @@
         const fullPlayerTitle = document.getElementById('fullPlayerTitle');
         const fullPlayerArtist = document.getElementById('fullPlayerArtist');
         const fullPlayerPlayPause = document.getElementById('fullPlayerPlayPause');
+        
+        // New elements for progress bar
+        const progressBar = document.getElementById('progressBar');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const currentTimeSpan = document.getElementById('currentTime');
+        const totalTimeSpan = document.getElementById('totalTime');
+
 
         let currentPlayingSong = null;
-        let currentSongList = []; // Track the list of songs currently displayed
-        let currentSongIndex = -1; // Index of the currently playing song in currentSongList
+        let currentSongList = []; 
+        let currentSongIndex = -1; 
 
         function toggleSidebar() {
             sidebar.classList.toggle('open');
@@ -524,8 +576,8 @@
             featuredTracksContainer.innerHTML = 'Loading songs...';
             try {
                 const response = await fetch(`${BACKEND_URL}/api/random-songs`);
-                const songs = await await response.json();
-                currentSongList = songs; // Store the fetched songs
+                const songs = await response.json();
+                currentSongList = songs; 
                 displaySongs(songs, featuredTracksContainer, 'featured');
             } catch (error) {
                 console.error('Failed to load random songs:', error);
@@ -546,7 +598,7 @@
                 const response = await fetch(`${BACKEND_URL}/api/search?query=${encodeURIComponent(query)}`);
                 const songs = await response.json();
                 if (songs && songs.length > 0) {
-                    currentSongList = songs; // Store the fetched songs
+                    currentSongList = songs; 
                     displaySongs(songs, searchResultsContainer, 'search');
                 } else {
                     searchResultsContainer.innerHTML = '<p>No songs found for your search.</p>';
@@ -578,7 +630,6 @@
                         </div>
                     </div>
                 `;
-                // Add event listener to the card itself to play the song
                 songCard.onclick = () => playSong(song.id, song.title, song.channel.name || 'Unknown Artist', song.thumbnail, index);
                 container.appendChild(songCard);
             });
@@ -590,7 +641,6 @@
                 const data = await response.json();
 
                 if (data.downloadLink) {
-                    // Update current playing song info
                     currentPlayingSong = { videoId, title, artist, thumbnail };
                     currentSongIndex = index;
                     
@@ -605,7 +655,6 @@
                     fullPlayerArtist.textContent = artist;
 
                     audioElement.play();
-                    // Update all play/pause buttons
                     updateAllPlayPauseButtons(index);
                     nowPlayingBar.style.display = 'flex';
                 } else {
@@ -623,22 +672,18 @@
             } else {
                 audioElement.pause();
             }
-            // Update all play/pause buttons after toggling global play/pause
             updateAllPlayPauseButtons(currentSongIndex);
         }
 
         function togglePlayPauseFromCard(videoId, title, artist, thumbnail, index) {
             if (currentPlayingSong && currentPlayingSong.videoId === videoId) {
-                // If the same song is clicked, just toggle play/pause
                 togglePlayPause();
             } else {
-                // If a new song is clicked, play it
                 playSong(videoId, title, artist, thumbnail, index);
             }
         }
 
         function updateAllPlayPauseButtons(playingIndex) {
-            // Update global play/pause buttons
             if (audioElement.paused) {
                 playPauseBtn.classList.replace('fa-pause', 'fa-play');
                 fullPlayerPlayPause.classList.replace('fa-pause', 'fa-play');
@@ -647,7 +692,6 @@
                 fullPlayerPlayPause.classList.replace('fa-play', 'fa-pause');
             }
 
-            // Update all song card play/pause buttons
             document.querySelectorAll('.play-pause-toggle').forEach((button, index) => {
                 if (index === playingIndex && !audioElement.paused) {
                     button.innerHTML = '<i class="fas fa-pause"></i>';
@@ -671,7 +715,6 @@
             }
         }
 
-
         function maximizePlayer() {
             if (currentPlayingSong) {
                 nowPlayingFullScreen.classList.add('active');
@@ -681,6 +724,32 @@
         function minimizePlayer() {
             nowPlayingFullScreen.classList.remove('active');
         }
+        
+        // Helper function to format time
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Event listeners for progress bar
+        audioElement.addEventListener('timeupdate', () => {
+            const { currentTime, duration } = audioElement;
+            const progressPercent = (currentTime / duration) * 100;
+            progressBarFill.style.width = `${progressPercent}%`;
+            currentTimeSpan.textContent = formatTime(currentTime);
+        });
+
+        audioElement.addEventListener('loadedmetadata', () => {
+            totalTimeSpan.textContent = formatTime(audioElement.duration);
+        });
+        
+        progressBar.addEventListener('click', (e) => {
+            const width = progressBar.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audioElement.duration;
+            audioElement.currentTime = (clickX / width) * duration;
+        });
 
         searchInput.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
@@ -689,8 +758,8 @@
         });
 
         audioElement.addEventListener('ended', () => {
-            playPreviousNext('next', currentSongIndex); // Play next song automatically
-            updateAllPlayPauseButtons(currentSongIndex); // Update buttons for the next song
+            playPreviousNext('next', currentSongIndex); 
+            updateAllPlayPauseButtons(currentSongIndex); 
         });
 
         audioElement.addEventListener('play', () => {
