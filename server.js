@@ -11,7 +11,6 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from the 'public' directory
-// This is crucial for serving your index.html file
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Function to get the base API URL
@@ -31,7 +30,6 @@ const baseApiUrl = async () => {
 app.get('/api/random-songs', async (req, res) => {
     try {
         const base = await baseApiUrl();
-        // Use a variety of keywords to get more diverse random results
         const keywords = ['latest songs', 'trending songs', 'top hits', 'bangla songs', 'hindi songs', 'english pop']; 
         const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
         const response = await axios.get(`${base}/ytFullSearch?songName=${encodeURIComponent(randomKeyword)}`);
