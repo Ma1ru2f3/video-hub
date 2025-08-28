@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// YouTube API-er base URL
+// YouTube API URL
 const baseApiUrl = 'https://yt-api-dipto.onrender.com';
 
 // Search endpoint
@@ -26,7 +26,7 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
-// Stream endpoint for playing music
+// Stream endpoint
 app.get('/api/stream', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
@@ -39,6 +39,7 @@ app.get('/api/stream', async (req, res) => {
             return res.status(404).json({ error: 'Download link not found for the video.' });
         }
         const streamResponse = await axios.get(downloadLink, { responseType: 'stream' });
+        res.setHeader('Content-Type', 'audio/mpeg');
         streamResponse.data.pipe(res);
     } catch (error) {
         console.error('Error during streaming:', error);
