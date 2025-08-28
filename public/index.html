@@ -181,7 +181,30 @@
             text-overflow: ellipsis;
         }
 
-        .song-card .play-button {
+        /* Updated play controls for song card */
+        .song-card .play-controls-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px; /* Space between buttons */
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.3s ease;
+            pointer-events: none; /* Allow clicks on elements underneath by default */
+        }
+
+        .song-card:hover .play-controls-overlay {
+            opacity: 1; /* Show on hover */
+            pointer-events: all; /* Enable clicks on buttons */
+        }
+
+        .song-card .play-controls-overlay .control-btn-small {
             background-color: #1DB954;
             color: #fff;
             border-radius: 50%;
@@ -191,16 +214,14 @@
             justify-content: center;
             align-items: center;
             font-size: 18px;
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
         }
 
-        .song-card:hover .play-button {
-            opacity: 1;
+        .song-card .play-controls-overlay .control-btn-small:hover {
+            background-color: #1ed760;
         }
+
 
         .now-playing-bar {
             position: fixed;
@@ -476,6 +497,8 @@
         const fullPlayerPlayPause = document.getElementById('fullPlayerPlayPause');
 
         let currentPlayingSong = null;
+        let currentSongList = []; // Track the list of songs currently displayed
+        let currentSongIndex = -1; // Index of the currently playing song in currentSongList
 
         function toggleSidebar() {
             sidebar.classList.toggle('open');
@@ -501,8 +524,9 @@
             featuredTracksContainer.innerHTML = 'Loading songs...';
             try {
                 const response = await fetch(`${BACKEND_URL}/api/random-songs`);
-                const songs = await response.json();
-                displaySongs(songs, featuredTracksContainer);
+                const songs = await await response.json();
+                currentSongList = songs; // Store the fetched songs
+                displaySongs(songs, featuredTracksContainer, 'featured');
             } catch (error) {
                 console.error('Failed to load random songs:', error);
                 featuredTracksContainer.innerHTML = '<p>Failed to load songs. Please try again later.</p>';
@@ -522,7 +546,8 @@
                 const response = await fetch(`${BACKEND_URL}/api/search?query=${encodeURIComponent(query)}`);
                 const songs = await response.json();
                 if (songs && songs.length > 0) {
-                    displaySongs(songs, searchResultsContainer);
+                    currentSongList = songs; // Store the fetched songs
+                    displaySongs(songs, searchResultsContainer, 'search');
                 } else {
                     searchResultsContainer.innerHTML = '<p>No songs found for your search.</p>';
                 }
@@ -532,32 +557,44 @@
             }
         }
 
-        function displaySongs(songs, container) {
+        function displaySongs(songs, container, source) {
             container.innerHTML = '';
-            songs.forEach(song => {
+            songs.forEach((song, index) => {
                 const songCard = document.createElement('div');
                 songCard.classList.add('song-card');
                 songCard.innerHTML = `
                     <img src="${song.thumbnail}" alt="${song.title}">
                     <h3>${song.title}</h3>
                     <p>${song.channel.name || 'Unknown Artist'}</p>
-                    <div class="play-button" onclick="event.stopPropagation(); playSong('${song.id}', '${song.title}', '${song.channel.name || 'Unknown Artist'}', '${song.thumbnail}')">
-                        <i class="fas fa-play"></i>
+                    <div class="play-controls-overlay">
+                        <div class="control-btn-small" onclick="event.stopPropagation(); playPreviousNext('prev', ${index})">
+                            <i class="fas fa-backward"></i>
+                        </div>
+                        <div class="control-btn-small play-pause-toggle" id="playPauseToggle-${source}-${index}" onclick="event.stopPropagation(); togglePlayPauseFromCard('${song.id}', '${song.title}', '${song.channel.name || 'Unknown Artist'}', '${song.thumbnail}', ${index})">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <div class="control-btn-small" onclick="event.stopPropagation(); playPreviousNext('next', ${index})">
+                            <i class="fas fa-forward"></i>
+                        </div>
                     </div>
                 `;
-                songCard.onclick = () => playSong(song.id, song.title, song.channel.name || 'Unknown Artist', song.thumbnail);
+                // Add event listener to the card itself to play the song
+                songCard.onclick = () => playSong(song.id, song.title, song.channel.name || 'Unknown Artist', song.thumbnail, index);
                 container.appendChild(songCard);
             });
         }
 
-        async function playSong(videoId, title, artist, thumbnail) {
+        async function playSong(videoId, title, artist, thumbnail, index) {
             try {
                 const response = await fetch(`${BACKEND_URL}/api/audio?videoId=${videoId}`);
                 const data = await response.json();
 
                 if (data.downloadLink) {
-                    audioElement.src = data.downloadLink;
+                    // Update current playing song info
                     currentPlayingSong = { videoId, title, artist, thumbnail };
+                    currentSongIndex = index;
+                    
+                    audioElement.src = data.downloadLink;
                     
                     nowPlayingThumbnail.src = thumbnail;
                     nowPlayingTitle.textContent = title;
@@ -568,8 +605,8 @@
                     fullPlayerArtist.textContent = artist;
 
                     audioElement.play();
-                    playPauseBtn.classList.replace('fa-play', 'fa-pause');
-                    fullPlayerPlayPause.classList.replace('fa-play', 'fa-pause');
+                    // Update all play/pause buttons
+                    updateAllPlayPauseButtons(index);
                     nowPlayingBar.style.display = 'flex';
                 } else {
                     alert('Could not find audio for this song.');
@@ -583,14 +620,57 @@
         function togglePlayPause() {
             if (audioElement.paused) {
                 audioElement.play();
-                playPauseBtn.classList.replace('fa-play', 'fa-pause');
-                fullPlayerPlayPause.classList.replace('fa-play', 'fa-pause');
             } else {
                 audioElement.pause();
-                playPauseBtn.classList.replace('fa-pause', 'fa-play');
-                fullPlayerPlayPause.classList.replace('fa-pause', 'fa-play');
+            }
+            // Update all play/pause buttons after toggling global play/pause
+            updateAllPlayPauseButtons(currentSongIndex);
+        }
+
+        function togglePlayPauseFromCard(videoId, title, artist, thumbnail, index) {
+            if (currentPlayingSong && currentPlayingSong.videoId === videoId) {
+                // If the same song is clicked, just toggle play/pause
+                togglePlayPause();
+            } else {
+                // If a new song is clicked, play it
+                playSong(videoId, title, artist, thumbnail, index);
             }
         }
+
+        function updateAllPlayPauseButtons(playingIndex) {
+            // Update global play/pause buttons
+            if (audioElement.paused) {
+                playPauseBtn.classList.replace('fa-pause', 'fa-play');
+                fullPlayerPlayPause.classList.replace('fa-pause', 'fa-play');
+            } else {
+                playPauseBtn.classList.replace('fa-play', 'fa-pause');
+                fullPlayerPlayPause.classList.replace('fa-play', 'fa-pause');
+            }
+
+            // Update all song card play/pause buttons
+            document.querySelectorAll('.play-pause-toggle').forEach((button, index) => {
+                if (index === playingIndex && !audioElement.paused) {
+                    button.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    button.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            });
+        }
+
+        function playPreviousNext(direction, currentIndex) {
+            let nextIndex = currentIndex;
+            if (direction === 'next') {
+                nextIndex = (currentIndex + 1) % currentSongList.length;
+            } else if (direction === 'prev') {
+                nextIndex = (currentIndex - 1 + currentSongList.length) % currentSongList.length;
+            }
+
+            if (currentSongList[nextIndex]) {
+                const nextSong = currentSongList[nextIndex];
+                playSong(nextSong.id, nextSong.title, nextSong.channel.name || 'Unknown Artist', nextSong.thumbnail, nextIndex);
+            }
+        }
+
 
         function maximizePlayer() {
             if (currentPlayingSong) {
@@ -609,8 +689,16 @@
         });
 
         audioElement.addEventListener('ended', () => {
-            playPauseBtn.classList.replace('fa-pause', 'fa-play');
-            fullPlayerPlayPause.classList.replace('fa-pause', 'fa-play');
+            playPreviousNext('next', currentSongIndex); // Play next song automatically
+            updateAllPlayPauseButtons(currentSongIndex); // Update buttons for the next song
+        });
+
+        audioElement.addEventListener('play', () => {
+            updateAllPlayPauseButtons(currentSongIndex);
+        });
+
+        audioElement.addEventListener('pause', () => {
+            updateAllPlayPauseButtons(currentSongIndex);
         });
 
         document.addEventListener('DOMContentLoaded', () => {
