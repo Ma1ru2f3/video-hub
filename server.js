@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
+const ytdl = require('ytdl-core'); // Added ytdl-core for audio streaming
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -129,6 +130,41 @@ app.get('/api/songs/search', async (req, res) => {
     } catch (error) {
         console.error('YouTube API Error:', error.message);
         res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+});
+
+// --- NEW Music Download Endpoint ---
+// This endpoint streams the audio of a YouTube video as an MP3 file,
+// similar to the "GoatBot" system you mentioned.
+app.get('/ytDl3', async (req, res) => {
+    const { link } = req.query; // The video ID is passed as 'link'
+    const audioFormat = 'mp3'; // Currently only supports MP3
+
+    if (!link) {
+        return res.status(400).json({ success: false, message: 'YouTube video ID (link) is required.' });
+    }
+
+    try {
+        // Get basic video information to set the file name
+        const videoInfo = await ytdl.getInfo(link);
+        const title = videoInfo.videoDetails.title.replace(/[|/:*?"<>]/g, '');
+
+        // Set response headers for a file download
+        res.header('Content-Disposition', `attachment; filename="${title}.${audioFormat}"`);
+        res.header('Content-Type', `audio/${audioFormat}`);
+
+        // Get the audio stream and pipe it to the response
+        const audioStream = ytdl(link, { quality: 'lowestaudio' });
+        audioStream.pipe(res);
+
+        audioStream.on('error', (err) => {
+            console.error('YTDL stream error:', err.message);
+            res.status(500).json({ success: false, message: 'Failed to stream audio.' });
+        });
+
+    } catch (error) {
+        console.error('Download error:', error.message);
+        res.status(500).json({ success: false, message: 'Internal Server Error. The video might not be available or downloadable.' });
     }
 });
 
