@@ -1,44 +1,210 @@
-const express = require('express');
-const axios = require('axios');
-const path = require('path');
-const app = express();
-const PORT = process.env.PORT || 3000;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.H Music Hub</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #1DB954;
+            margin: 0;
+            font-size: 24px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .search-container input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 50px;
+            background-color: #282828;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .search-container input::placeholder {
+            color: #b3b3b3;
+        }
+        .song-list h2 {
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        .song-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .song-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+        .song-details h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .song-details p {
+            margin: 5px 0 0;
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+        .player-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #171717;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #282828;
+        }
+        .player-info {
+            display: flex;
+            align-items: center;
+        }
+        .player-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .player-info h4 {
+            margin: 0;
+            font-size: 14px;
+        }
+        .player-info p {
+            margin: 0;
+            font-size: 12px;
+            color: #b3b3b3;
+        }
+        .player-controls button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>H Music Hub</h1>
+    </div>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for songs...">
+    </div>
+    <div class="song-list" id="songList">
+        <h2>Featured Track</h2>
+        </div>
+    <div class="player-bar">
+        <div class="player-info">
+            <img id="player-thumbnail" src="https://via.placeholder.com/40" alt="Song thumbnail">
+            <div>
+                <h4 id="player-title">No song playing...</h4>
+                <p id="player-artist">Unknown Artist</p>
+            </div>
+        </div>
+        <div class="player-controls">
+            <button id="playButton">▶</button>
+        </div>
+        <audio id="audioPlayer" src=""></audio>
+    </div>
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const songList = document.getElementById('songList');
+            const playButton = document.getElementById('playButton');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const playerTitle = document.getElementById('player-title');
+            const playerArtist = document.getElementById('player-artist');
+            const playerThumbnail = document.getElementById('player-thumbnail');
 
-const baseApiUrl = 'https://yt-api-dipto.onrender.com'; // Replace with your actual base API URL
+            const fetchAndDisplaySongs = async (query = '') => {
+                let url;
+                if (query) {
+                    url = `/api/search?q=${encodeURIComponent(query)}`;
+                } else {
+                    // For random songs, you can fetch trending or a default list
+                    // For simplicity, we'll search for a common term to get random results
+                    const randomQueries = ['bangla song 2024', 'new hit songs', 'top music'];
+                    const randomQuery = randomQueries[Math.floor(Math.random() * randomQueries.length)];
+                    url = `/api/search?q=${encodeURIComponent(randomQuery)}`;
+                }
 
-app.get('/api/search', async (req, res) => {
-    const query = req.query.q;
-    if (!query) {
-        return res.status(400).json({ error: 'Search query is required' });
-    }
-    try {
-        const response = await axios.get(`${baseApiUrl}/ytFullSearch?songName=${encodeURIComponent(query)}`);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error during search:', error);
-        res.status(500).json({ error: 'Failed to fetch search results' });
-    }
-});
+                try {
+                    const response = await fetch(url);
+                    const songs = await response.json();
+                    
+                    songList.innerHTML = `<h2>${query ? 'Search Results' : 'Featured Tracks'}</h2>`;
+                    songs.forEach(song => {
+                        const songItem = document.createElement('div');
+                        songItem.classList.add('song-item');
+                        songItem.innerHTML = `
+                            <img src="${song.thumbnail}" alt="${song.title} thumbnail">
+                            <div class="song-details">
+                                <h3>${song.title}</h3>
+                                <p>${song.channel.name}</p>
+                            </div>
+                        `;
+                        songItem.addEventListener('click', () => {
+                            playSong(song);
+                        });
+                        songList.appendChild(songItem);
+                    });
+                } catch (error) {
+                    console.error('Error fetching songs:', error);
+                    songList.innerHTML = `<p>Error loading songs. Please try again.</p>`;
+                }
+            };
 
-app.get('/api/stream', async (req, res) => {
-    const videoId = req.query.id;
-    if (!videoId) {
-        return res.status(400).json({ error: 'Video ID is required' });
-    }
-    try {
-        const response = await axios.get(`${baseApiUrl}/ytDl3?link=${videoId}&format=mp3&quality=3`);
-        const downloadLink = response.data.downloadLink;
-        const streamResponse = await axios.get(downloadLink, { responseType: 'stream' });
-        streamResponse.data.pipe(res);
-    } catch (error) {
-        console.error('Error during streaming:', error);
-        res.status(500).json({ error: 'Failed to stream audio' });
-    }
-});
+            const playSong = (song) => {
+                playerTitle.textContent = song.title;
+                playerArtist.textContent = song.channel.name;
+                playerThumbnail.src = song.thumbnail;
+                audioPlayer.src = `/api/stream?id=${song.id}`;
+                audioPlayer.play();
+                playButton.textContent = '⏸';
+            };
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+            playButton.addEventListener('click', () => {
+                if (audioPlayer.paused) {
+                    audioPlayer.play();
+                    playButton.textContent = '⏸';
+                } else {
+                    audioPlayer.pause();
+                    playButton.textContent = '▶';
+                }
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    fetchAndDisplaySongs(searchInput.value);
+                }
+            });
+
+            fetchAndDisplaySongs(); // Initial load of random songs
+        });
+    </script>
+</body>
+</html>
