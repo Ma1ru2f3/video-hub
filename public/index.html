@@ -162,6 +162,39 @@
             font-weight: 700;
         }
 
+        /* New style for the APK download section */
+        .find-music-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .find-music-header h2 {
+            margin-bottom: 0; /* Remove extra bottom margin from h2 */
+        }
+
+        .apk-download-btn {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none; /* For anchor tag */
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .apk-download-btn:hover {
+            background-color: #1ed760;
+            transform: scale(1.05);
+        }
+
         .song-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -194,6 +227,14 @@
         @media (max-width: 768px) {
             .song-card img {
                 height: 150px;
+            }
+            .find-music-header {
+                flex-direction: column; /* Stack elements on small screens */
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .find-music-header h2 {
+                margin-bottom: 0;
             }
         }
 
@@ -637,12 +678,18 @@
             </div>
         </header>
 
-        <section id="find-music-section" class="content-section" style="display: none;">
-            <h2>Find Music</h2>
+        <section id="find-music-section" class="content-section" style="display: block;">
+            <div class="find-music-header">
+                <h2>Find Music</h2>
+                <a href="https://drive.google.com/file/d/1NcZto9RD11f_A1Ep8M0Edo05yrtrvllO/view?usp=drivesdk" 
+                   target="_blank" class="apk-download-btn">
+                    <i class="fas fa-mobile-alt"></i> Download APK
+                </a>
+            </div>
             <p>Use the search bar above to find songs.</p>
         </section>
 
-        <section id="featured-tracks-section" class="content-section active">
+        <section id="featured-tracks-section" class="content-section active" style="display: none;">
             <h2>Featured Tracks</h2>
             <div id="featuredTracksContainer" class="song-grid">
             </div>
@@ -758,11 +805,17 @@
             });
             document.getElementById(sectionId).style.display = 'block';
 
-            if (sectionId !== 'search-results-section') {
-                searchResultsContainer.innerHTML = '';
+            // Special handling for find-music-section to always be visible by default
+            if (sectionId === 'find-music-section') {
                 document.getElementById('find-music-section').style.display = 'block';
             } else {
+                // For other sections, ensure find-music-section is hidden if not active
                 document.getElementById('find-music-section').style.display = 'none';
+            }
+
+
+            if (sectionId !== 'search-results-section') {
+                searchResultsContainer.innerHTML = '';
             }
         }
 
@@ -1045,7 +1098,10 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchRandomSongs();
-            showSection('featured-tracks-section');
+            // Initially show 'Find Music' or 'Featured Tracks'
+            showSection('find-music-section'); 
+            // Commenting out showSection('featured-tracks-section'); to ensure 'Find Music' is default
+            // If you want featured tracks to be default, simply call showSection('featured-tracks-section');
             audioElement.volume = volumeSlider.value; // Initialize audio volume
             updateVolumeIcon(audioElement.volume); // Set initial volume icon
         });
