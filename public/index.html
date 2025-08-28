@@ -746,19 +746,16 @@
                 alert('Failed to play song. Please try again.');
             }
         }
-        
-        async function downloadCurrentSong() {
-            if (!currentPlayingSong) {
-                alert('No song is currently playing to download.');
-                return;
-            }
+
+        async function downloadSong(videoId, title) {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/audio?videoId=${currentPlayingSong.videoId}`);
+                const response = await fetch(`${BACKEND_URL}/api/audio?videoId=${videoId}`);
                 const data = await response.json();
+
                 if (data.downloadLink) {
                     const link = document.createElement('a');
                     link.href = data.downloadLink;
-                    link.download = `${currentPlayingSong.title}.mp3`;
+                    link.download = `${title}.mp3`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -769,6 +766,14 @@
                 console.error('Error downloading song:', error);
                 alert('Failed to download song. Please try again.');
             }
+        }
+
+        async function downloadCurrentSong() {
+            if (!currentPlayingSong) {
+                alert('No song is currently playing to download.');
+                return;
+            }
+            await downloadSong(currentPlayingSong.videoId, currentPlayingSong.title);
         }
 
         function togglePlayPause() {
@@ -850,4 +855,46 @@
             const width = progressBar.clientWidth;
             const clickX = e.offsetX;
             const duration = audioElement.duration;
-            if
+            if (duration) {
+                audioElement.currentTime = (clickX / width) * duration;
+            }
+        });
+        
+        // This is the new, central event listener
+        nowPlayingBar.addEventListener('click', (e) => {
+            // Check if the click target is a control icon
+            if (e.target.closest('.controls')) {
+                // If it's a control icon, let its own onclick handle it
+                return;
+            }
+            // If it's not a control icon, maximize the player
+            maximizePlayer();
+        });
+
+
+        searchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        audioElement.addEventListener('ended', () => {
+            playPreviousNext('next', currentSongIndex); 
+            updateAllPlayPauseButtons(currentSongIndex); 
+        });
+
+        audioElement.addEventListener('play', () => {
+            updateAllPlayPauseButtons(currentSongIndex);
+        });
+
+        audioElement.addEventListener('pause', () => {
+            updateAllPlayPauseButtons(currentSongIndex);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchRandomSongs();
+            showSection('featured-tracks-section');
+        });
+    </script>
+</body>
+</html>
