@@ -202,7 +202,7 @@
             pointer-events: all; 
         }
 
-        .song-card .play-controls-overlay .control-btn-small {
+        .song-card .control-btn-small {
             background-color: #1DB954;
             color: #fff;
             border-radius: 50%;
@@ -216,7 +216,7 @@
             transition: background-color 0.2s ease;
         }
 
-        .song-card .play-controls-overlay .control-btn-small:hover {
+        .song-card .control-btn-small:hover {
             background-color: #1ed760;
         }
 
@@ -227,24 +227,24 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: #4A0207; /* Dark reddish-brown from Spotify example */
+            background-color: #4A0207;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 10px; /* Reduced vertical padding */
+            padding: 0 10px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
             z-index: 999;
-            height: 60px; /* Fixed height for a compact bar */
-            border-top-left-radius: 10px; /* Rounded corners */
+            height: 60px;
+            border-top-left-radius: 10px;
             border-top-right-radius: 10px;
-            transform: translateY(0); /* Ensure it's visible by default */
+            transform: translateY(0);
             transition: transform 0.3s ease-in-out;
-            box-sizing: border-box; /* Include padding in height calculation */
-            cursor: pointer; /* Make the whole bar clickable */
+            box-sizing: border-box;
+            cursor: pointer;
         }
         
         .now-playing-bar.hidden {
-            transform: translateY(100%); /* Hide when 'hidden' class is applied */
+            transform: translateY(100%);
         }
 
         .now-playing-bar .main-controls-container {
@@ -252,43 +252,43 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 100%; /* Take full height of the bar */
-            pointer-events: none; /* Make container unclickable to allow bar click */
+            height: 100%;
+            pointer-events: all; /* Fixed: Changed from 'none' to 'all' */
         }
 
         .now-playing-bar .song-info {
             display: flex;
             align-items: center;
-            flex-grow: 1; /* Allow song info to take available space */
-            max-width: calc(100% - 150px); /* Adjust based on control width */
+            flex-grow: 1;
+            max-width: calc(100% - 150px);
         }
 
         .now-playing-bar .song-info img {
-            width: 45px; /* Slightly smaller album art */
+            width: 45px;
             height: 45px;
             object-fit: cover;
-            margin-right: 10px; /* Reduced margin */
-            border-radius: 4px; /* Slight border-radius */
+            margin-right: 10px;
+            border-radius: 4px;
         }
 
         .now-playing-bar .song-info div {
             flex-grow: 1;
-            overflow: hidden; /* Hide overflow for text */
-            white-space: nowrap; /* Prevent wrapping */
+            overflow: hidden;
+            white-space: nowrap;
         }
 
         .now-playing-bar .song-info p {
             margin: 0;
-            font-size: 14px; /* Slightly smaller font for title */
+            font-size: 14px;
             font-weight: bold;
             color: #ffffff;
-            text-overflow: ellipsis; /* Add ellipsis for long titles */
+            text-overflow: ellipsis;
             overflow: hidden;
         }
 
         .now-playing-bar .song-info small {
             color: #b3b3b3;
-            font-size: 11px; /* Smaller font for artist */
+            font-size: 11px;
             text-overflow: ellipsis;
             overflow: hidden;
         }
@@ -296,56 +296,55 @@
         .now-playing-bar .controls {
             display: flex;
             align-items: center;
-            gap: 15px; /* Spacing between control icons */
-            padding-right: 10px; /* Padding for controls on the right */
+            gap: 15px;
+            padding-right: 10px;
         }
 
         .now-playing-bar .controls .control-icon {
-            font-size: 20px; /* Size for control icons */
-            color: #ffffff; /* White color for icons */
+            font-size: 20px;
+            color: #ffffff;
             cursor: pointer;
             transition: color 0.2s ease;
-            pointer-events: all; /* Make controls clickable */
+            pointer-events: all;
         }
 
         .now-playing-bar .controls .control-icon:hover {
-            color: #1DB954; /* Green hover effect */
+            color: #1DB954;
         }
 
         .now-playing-bar .controls .play-pause-btn {
-            font-size: 24px; /* Larger play/pause button */
-            color: #ffffff; /* White color */
+            font-size: 24px;
+            color: #ffffff;
         }
 
-        /* Progress bar directly at the bottom of the bar */
         .now-playing-bar .progress-container {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 3px; /* Thin progress bar */
-            background-color: transparent; /* No background for container */
-            pointer-events: none; /* Don't block clicks on the bar */
+            height: 3px;
+            background-color: transparent;
+            pointer-events: all; /* Fixed: Changed from 'none' to 'all' to make it clickable */
         }
         
         .now-playing-bar .progress-bar {
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.3); /* Lighter grey for track */
-            border-radius: 0; /* No rounded corners for thin bar */
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 0;
             position: relative;
         }
         
         .now-playing-bar .progress-bar-fill {
             height: 100%;
-            background-color: #1DB954; /* Spotify green */
+            background-color: #1DB954;
             border-radius: 0;
             width: 0%;
             transition: width 0.1s linear;
         }
         
         .now-playing-bar .progress-time {
-            display: none; /* Hide time display on compact bar */
+            display: none;
         }
 
 
@@ -382,7 +381,7 @@
         .player-details {
             text-align: center;
             margin-bottom: 50px;
-            padding: 0 20px; /* Add some padding for smaller screens */
+            padding: 0 20px;
         }
 
         .player-details img {
@@ -391,7 +390,7 @@
             object-fit: cover;
             border-radius: 8px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Add a subtle shadow */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .player-details h3 {
@@ -400,7 +399,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 90vw; /* Constrain width on smaller screens */
+            max-width: 90vw;
         }
 
         .player-details p {
@@ -479,7 +478,7 @@
             }
             /* Adjustments for now-playing-bar on smaller screens */
             .now-playing-bar {
-                height: 60px; /* Maintain height */
+                height: 60px;
                 padding: 0 10px;
             }
             .now-playing-bar .song-info img {
@@ -563,7 +562,7 @@
     
     <div class="now-playing-bar" id="nowPlayingBar" style="display: none;" onclick="maximizePlayer()"> 
         <div class="progress-container">
-            <div class="progress-bar" id="progressBar">
+            <div class="progress-bar" id="progressBar" onclick="event.stopPropagation();">
                 <div class="progress-bar-fill" id="progressBarFill"></div>
             </div>
         </div>
@@ -787,14 +786,12 @@
             nowPlayingFullScreen.classList.remove('active');
         }
         
-        // Helper function to format time
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
         }
         
-        // Event listeners for progress bar
         audioElement.addEventListener('timeupdate', () => {
             const { currentTime, duration } = audioElement;
             if (duration) {
@@ -804,7 +801,7 @@
         });
 
         progressBar.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent the click from bubbling up and maximizing the player
+            e.stopPropagation();
             const width = progressBar.clientWidth;
             const clickX = e.offsetX;
             const duration = audioElement.duration;
