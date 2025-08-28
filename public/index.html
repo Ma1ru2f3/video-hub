@@ -408,6 +408,22 @@
             cursor: pointer;
         }
 
+        /* New download button for full screen player */
+        .full-screen-player .download-btn-full {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .full-screen-player .download-btn-full:hover {
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
         .player-details {
             text-align: center;
             margin-bottom: 50px;
@@ -446,6 +462,7 @@
             display: flex;
             gap: clamp(20px, 10vw, 50px);
             align-items: center;
+            margin-bottom: 30px; /* Space for progress bar */
         }
 
         .player-controls .control-btn {
@@ -467,6 +484,88 @@
         .player-controls .big-play-btn:hover {
             transform: scale(1.05);
         }
+
+        /* Full screen player progress bar */
+        .full-player-progress-container {
+            width: clamp(250px, 80vw, 500px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .full-player-progress-time {
+            font-size: 14px;
+            color: var(--subtle-text-color);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .full-player-progress-bar {
+            flex-grow: 1;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .full-player-progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Full screen player volume control */
+        .volume-control-container {
+            width: clamp(200px, 70vw, 400px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .volume-control-container i {
+            font-size: 24px;
+            color: var(--subtle-text-color);
+            cursor: pointer;
+            width: 30px; /* Fixed width for consistent alignment */
+            text-align: center;
+        }
+
+        .volume-slider {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            border-radius: 3px;
+            transition: opacity .2s;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
 
         button {
             background-color: var(--primary-color);
@@ -507,6 +606,11 @@
             }
             .song-grid {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+
+            .full-player-progress-container,
+            .volume-control-container {
+                width: 90vw; /* Adjust width for better mobile fit */
             }
         }
     </style>
@@ -554,15 +658,32 @@
     
     <section id="now-playing-full-screen" class="full-screen-player">
         <i class="fas fa-chevron-down minimize-player-btn" onclick="minimizePlayer()"></i>
+        <i class="fas fa-download download-btn-full" onclick="downloadCurrentSong()" title="Download Song"></i>
+        
         <div class="player-details">
             <img id="fullPlayerThumbnail" src="" alt="Album Art">
             <h3 id="fullPlayerTitle"></h3>
             <p id="fullPlayerArtist"></p>
         </div>
+
         <div class="player-controls">
             <i class="fas fa-backward control-btn" onclick="playPreviousNext('prev', currentSongIndex)"></i>
             <i class="fas fa-play control-btn big-play-btn" id="fullPlayerPlayPause" onclick="togglePlayPause()"></i>
             <i class="fas fa-forward control-btn" onclick="playPreviousNext('next', currentSongIndex)"></i>
+        </div>
+
+        <div class="full-player-progress-container">
+            <span id="fullPlayerCurrentTime" class="full-player-progress-time">0:00</span>
+            <div class="full-player-progress-bar" onclick="seekSongFullPlayer(event)">
+                <div class="full-player-progress-bar-fill" id="fullPlayerProgressBarFill"></div>
+            </div>
+            <span id="fullPlayerDuration" class="full-player-progress-time">0:00</span>
+        </div>
+
+        <div class="volume-control-container">
+            <i class="fas fa-volume-down" id="volumeIcon"></i>
+            <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider" id="volumeSlider">
+            <i class="fas fa-volume-up"></i>
         </div>
     </section>
 
@@ -611,10 +732,20 @@
         const fullPlayerPlayPause = document.getElementById('fullPlayerPlayPause');
         const progressBarFill = document.getElementById('progressBarFill');
 
+        // New elements for full screen player
+        const fullPlayerCurrentTime = document.getElementById('fullPlayerCurrentTime');
+        const fullPlayerDuration = document.getElementById('fullPlayerDuration');
+        const fullPlayerProgressBarFill = document.getElementById('fullPlayerProgressBarFill');
+        const fullPlayerProgressBar = document.querySelector('.full-player-progress-bar');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeIcon = document.getElementById('volumeIcon');
+
+
         let currentPlayingSong = null;
         let currentSongList = []; 
         let currentSongIndex = -1; 
         let isPlaying = false;
+        let lastVolume = 1; // To store volume before mute
 
         function toggleSidebar() {
             sidebar.classList.toggle('open');
@@ -816,8 +947,25 @@
             nowPlayingFullScreen.classList.remove('active');
         }
 
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return "0:00";
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
         function seekSong(e) {
             const progressBar = e.currentTarget;
+            const width = progressBar.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audioElement.duration;
+            if (duration) {
+                audioElement.currentTime = (clickX / width) * duration;
+            }
+        }
+
+        function seekSongFullPlayer(e) {
+            const progressBar = fullPlayerProgressBar;
             const width = progressBar.clientWidth;
             const clickX = e.offsetX;
             const duration = audioElement.duration;
@@ -831,7 +979,16 @@
             if (duration) {
                 const progressPercent = (currentTime / duration) * 100;
                 progressBarFill.style.width = `${progressPercent}%`;
+                fullPlayerProgressBarFill.style.width = `${progressPercent}%`;
+
+                fullPlayerCurrentTime.textContent = formatTime(currentTime);
+                fullPlayerDuration.textContent = formatTime(duration);
             }
+        });
+
+        // Event listener for when the audio metadata is loaded (duration becomes available)
+        audioElement.addEventListener('loadedmetadata', () => {
+            fullPlayerDuration.textContent = formatTime(audioElement.duration);
         });
 
         searchInput.addEventListener('keypress', function(event) {
@@ -854,9 +1011,43 @@
             updateAllPlayPauseButtons(currentSongIndex);
         });
 
+        // Volume control functionality
+        volumeSlider.addEventListener('input', () => {
+            audioElement.volume = volumeSlider.value;
+            updateVolumeIcon(volumeSlider.value);
+            if (volumeSlider.value > 0) {
+                lastVolume = volumeSlider.value; // Update last volume if not muted
+            }
+        });
+
+        volumeIcon.addEventListener('click', () => {
+            if (audioElement.volume > 0) {
+                lastVolume = audioElement.volume; // Save current volume
+                audioElement.volume = 0;
+                volumeSlider.value = 0;
+            } else {
+                audioElement.volume = lastVolume; // Restore to last volume
+                volumeSlider.value = lastVolume;
+            }
+            updateVolumeIcon(audioElement.volume);
+        });
+
+        function updateVolumeIcon(volume) {
+            volumeIcon.classList.remove('fa-volume-mute', 'fa-volume-down', 'fa-volume-up');
+            if (volume == 0) {
+                volumeIcon.classList.add('fa-volume-mute');
+            } else if (volume < 0.5) {
+                volumeIcon.classList.add('fa-volume-down');
+            } else {
+                volumeIcon.classList.add('fa-volume-up');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             fetchRandomSongs();
             showSection('featured-tracks-section');
+            audioElement.volume = volumeSlider.value; // Initialize audio volume
+            updateVolumeIcon(audioElement.volume); // Set initial volume icon
         });
     </script>
 </body>
