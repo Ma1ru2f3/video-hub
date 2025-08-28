@@ -806,14 +806,14 @@
             }
         });
         
-        // This is the new, central event listener
+        // This is the new, central event listener for the whole bar
         nowPlayingBar.addEventListener('click', (e) => {
             // Check if the click target is a control icon
-            if (e.target.closest('.controls')) {
-                // If it's a control icon, let its own onclick handle it
+            if (e.target.closest('.controls') || e.target.closest('#progressBar')) {
+                // If it's a control icon or the progress bar, do nothing.
                 return;
             }
-            // If it's not a control icon, maximize the player
+            // If it's not a control icon, maximize the player.
             maximizePlayer();
         });
 
