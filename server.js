@@ -1,22 +1,18 @@
-
 // server.js
 const express = require('express');
 const axios = require('axios');
-const cors = require('cors'); // Added for cross-origin requests
+const cors = require('cors');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors()); // Enable CORS for all routes
+app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// The base URL for the external YouTube API
-// NOTE: Ensure this URL is correct and the API is active.
+// Your external API endpoint
 const baseApiUrl = 'https://yt-api-dipto.onrender.com';
 
-// Endpoint to handle song search
 app.get('/api/search', async (req, res) => {
     const query = req.query.q;
     if (!query) {
@@ -24,7 +20,6 @@ app.get('/api/search', async (req, res) => {
     }
     try {
         const response = await axios.get(`${baseApiUrl}/ytFullSearch?songName=${encodeURIComponent(query)}`);
-        // The API returns a direct array, we send it directly
         res.json(response.data);
     } catch (error) {
         console.error('Error during search:', error.message);
@@ -32,7 +27,6 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
-// Endpoint to handle audio streaming
 app.get('/api/stream', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
@@ -46,14 +40,12 @@ app.get('/api/stream', async (req, res) => {
             return res.status(404).json({ error: 'Download link not found for the video.' });
         }
 
-        // Stream the audio directly to the client
         const streamResponse = await axios({
             method: 'get',
             url: downloadLink,
             responseType: 'stream',
         });
 
-        // Set content type and pipe the stream
         res.setHeader('Content-Type', 'audio/mpeg');
         streamResponse.data.pipe(res);
     } catch (error) {
@@ -62,12 +54,10 @@ app.get('/api/stream', async (req, res) => {
     }
 });
 
-// A route for the homepage
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
