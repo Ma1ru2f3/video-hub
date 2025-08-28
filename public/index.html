@@ -3,97 +3,620 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song Web</title>
+    <title>M.H Music Hub</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
-        body { font-family: sans-serif; margin: 20px; }
-        .song-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-        .song-card { width: 250px; border: 1px solid #ccc; padding: 10px; text-align: center; cursor: pointer; }
-        .song-card img { width: 100%; height: 150px; object-fit: cover; }
-        #search-box { margin-bottom: 20px; }
-        #search-results { margin-top: 20px; }
-        .audio-player { margin-top: 20px; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            background-color: #000000;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .sidebar.open {
+            width: 250px;
+        }
+
+        .sidebar-header {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            width: calc(100% - 40px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            color: #1DB954;
+        }
+
+        .sidebar .close-btn {
+            color: #818181;
+            font-size: 36px;
+            position: absolute;
+            top: 0;
+            right: 25px;
+            cursor: pointer;
+        }
+
+        .sidebar a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            color: #ffffff;
+            background-color: #282828;
+        }
+
+        .sidebar a i {
+            margin-right: 15px;
+        }
+
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.5s;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 250px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        .search-bar {
+            flex-grow: 1;
+            display: flex;
+            background-color: #282828;
+            border-radius: 50px;
+            padding: 8px 15px;
+            max-width: 500px;
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+            border: none;
+            background: transparent;
+            color: #ffffff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-bar .search-icon {
+            color: #b3b3b3;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .content-section {
+            padding: 20px 0;
+        }
+
+        .content-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-left: 5px solid #1DB954;
+            padding-left: 10px;
+        }
+
+        .song-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .song-card {
+            background-color: #181818;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .song-card:hover {
+            background-color: #282828;
+        }
+
+        .song-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .song-card h3 {
+            font-size: 16px;
+            margin: 5px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-card p {
+            font-size: 14px;
+            color: #b3b3b3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-card .play-button {
+            background-color: #1DB954;
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .song-card:hover .play-button {
+            opacity: 1;
+        }
+
+        .now-playing-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #181818;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .now-playing-bar .song-info {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .now-playing-bar .song-info img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+
+        .now-playing-bar .song-info p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .now-playing-bar .song-info small {
+            color: #b3b3b3;
+            font-size: 12px;
+        }
+
+        .now-playing-bar .controls .play-pause-btn {
+            font-size: 24px;
+            color: #1DB954;
+            cursor: pointer;
+            margin-left: 20px;
+        }
+
+        .full-screen-player {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            transition: transform 0.3s ease-in-out;
+            transform: translateY(100%);
+        }
+
+        .full-screen-player.active {
+            transform: translateY(0);
+        }
+
+        .minimize-player-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 30px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .player-details {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .player-details img {
+            width: 250px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .player-details h3 {
+            font-size: 32px;
+            margin: 10px 0;
+        }
+
+        .player-details p {
+            font-size: 18px;
+            color: #b3b3b3;
+        }
+
+        .player-controls {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .player-controls .control-btn {
+            font-size: 40px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .player-controls .big-play-btn {
+            font-size: 60px;
+            color: #1DB954;
+        }
+
+        button {
+            background-color: #1DB954;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1ed760;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar.open {
+                width: 100%;
+            }
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+            .search-bar {
+                max-width: 100%;
+            }
+            .song-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            .player-details img {
+                width: 200px;
+                height: 200px;
+            }
+            .player-details h3 {
+                font-size: 24px;
+            }
+            .player-details p {
+                font-size: 16px;
+            }
+            .player-controls .control-btn {
+                font-size: 30px;
+            }
+            .player-controls .big-play-btn {
+                font-size: 50px;
+            }
+            .now-playing-bar {
+                padding: 8px 15px;
+            }
+            .now-playing-bar .song-info img {
+                width: 40px;
+                height: 40px;
+            }
+            .now-playing-bar .song-info p {
+                font-size: 14px;
+            }
+            .now-playing-bar .song-info small {
+                font-size: 10px;
+            }
+            .now-playing-bar .controls .play-pause-btn {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>My Song Web</h1>
-
-    <div id="search-box">
-        <input type="text" id="searchInput" placeholder="Search for a song...">
-        <button onclick="searchSongs()">Search</button>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="close-btn" onclick="toggleSidebar()">&times;</span>
+            <h2>M.H Music Hub</h2>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#" class="active" onclick="showSection('featured-tracks-section'); toggleSidebar();"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="#" onclick="showSection('search-section'); toggleSidebar();"><i class="fas fa-search"></i> Search</a>
+            <a href="#"><i class="fas fa-list"></i> Your Library</a>
+        </div>
     </div>
-
-    <div id="search-results" class="song-container" style="display: none;"></div>
-
-    <div id="homepage" class="song-container"></div>
-
-    <div class="audio-player">
-        <h3>Now Playing: <span id="songTitle"></span></h3>
-        <audio id="audioElement" controls></audio>
+    
+    <div class="main-content" id="main-content">
+        <header>
+            <i class="fas fa-bars menu-icon" onclick="toggleSidebar()"></i>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search for songs...">
+                <i class="fas fa-search search-icon" onclick="performSearch()"></i>
+            </div>
+        </header>
+        
+        <section id="find-music-section" class="content-section" style="display: none;">
+            <h2>Find Music</h2>
+            <p>Use the search bar above to find songs.</p>
+        </section>
+        
+        <section id="featured-tracks-section" class="content-section active">
+            <h2>Featured Tracks</h2>
+            <div id="featuredTracksContainer" class="song-grid">
+            </div>
+            <button onclick="fetchRandomSongs()">Refresh Tracks</button>
+        </section>
+        
+        <section id="search-results-section" class="content-section" style="display: none;">
+            <h2>Search Results</h2>
+            <div id="searchResultsContainer" class="song-grid">
+            </div>
+        </section>
+        
+        <section id="now-playing-full-screen" class="content-section full-screen-player" style="display: none;">
+            <i class="fas fa-chevron-down minimize-player-btn" onclick="minimizePlayer()"></i>
+            <div class="player-details">
+                <img id="fullPlayerThumbnail" src="" alt="Album Art">
+                <h3 id="fullPlayerTitle"></h3>
+                <p id="fullPlayerArtist"></p>
+            </div>
+            <div class="player-controls">
+                <i class="fas fa-backward control-btn"></i>
+                <i class="fas fa-play control-btn big-play-btn" id="fullPlayerPlayPause" onclick="togglePlayPause()"></i>
+                <i class="fas fa-forward control-btn"></i>
+            </div>
+        </section>
     </div>
-
+    
+    <div class="now-playing-bar" id="nowPlayingBar" style="display: none;">
+        <div class="song-info" onclick="maximizePlayer()">
+            <img id="nowPlayingThumbnail" src="" alt="Album Art">
+            <div>
+                <p id="nowPlayingTitle">No song playing...</p>
+                <small id="nowPlayingArtist">Unknown Artist</small>
+            </div>
+        </div>
+        <div class="controls">
+            <i class="fas fa-play play-pause-btn" id="playPauseBtn" onclick="togglePlayPause()"></i>
+        </div>
+    </div>
+    
+    <audio id="audioElement" preload="auto"></audio>
+    
     <script>
-        // Replace with your Render/Vercel backend URL
+        // Here is your Render Backend URL
         const BACKEND_URL = 'https://video-hub-s3g2.onrender.com'; 
 
-        document.addEventListener('DOMContentLoaded', fetchRandomSongs);
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const searchInput = document.getElementById('searchInput');
+        const featuredTracksContainer = document.getElementById('featuredTracksContainer');
+        const searchResultsContainer = document.getElementById('searchResultsContainer');
+        const nowPlayingBar = document.getElementById('nowPlayingBar');
+        const nowPlayingThumbnail = document.getElementById('nowPlayingThumbnail');
+        const nowPlayingTitle = document.getElementById('nowPlayingTitle');
+        const nowPlayingArtist = document.getElementById('nowPlayingArtist');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const audioElement = document.getElementById('audioElement');
+
+        const nowPlayingFullScreen = document.getElementById('now-playing-full-screen');
+        const fullPlayerThumbnail = document.getElementById('fullPlayerThumbnail');
+        const fullPlayerTitle = document.getElementById('fullPlayerTitle');
+        const fullPlayerArtist = document.getElementById('fullPlayerArtist');
+        const fullPlayerPlayPause = document.getElementById('fullPlayerPlayPause');
+
+        let currentPlayingSong = null;
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('sidebar-open');
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+
+            if (sectionId !== 'search-results-section') {
+                searchResultsContainer.innerHTML = '';
+                document.getElementById('find-music-section').style.display = 'block';
+            } else {
+                document.getElementById('find-music-section').style.display = 'none';
+            }
+        }
 
         async function fetchRandomSongs() {
+            showSection('featured-tracks-section');
+            featuredTracksContainer.innerHTML = 'Loading songs...';
             try {
                 const response = await fetch(`${BACKEND_URL}/api/random-songs`);
                 const songs = await response.json();
-                displaySongs(songs, 'homepage');
+                displaySongs(songs, featuredTracksContainer);
             } catch (error) {
                 console.error('Failed to load random songs:', error);
+                featuredTracksContainer.innerHTML = '<p>Failed to load songs. Please try again later.</p>';
             }
         }
 
-        async function searchSongs() {
-            const query = document.getElementById('searchInput').value;
-            if (!query) return;
+        async function performSearch() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                alert('Please enter a song name to search.');
+                return;
+            }
 
+            showSection('search-results-section');
+            searchResultsContainer.innerHTML = 'Searching...';
             try {
                 const response = await fetch(`${BACKEND_URL}/api/search?query=${encodeURIComponent(query)}`);
                 const songs = await response.json();
-                displaySongs(songs, 'search-results');
-                document.getElementById('homepage').style.display = 'none';
-                document.getElementById('search-results').style.display = 'flex';
+                if (songs && songs.length > 0) {
+                    displaySongs(songs, searchResultsContainer);
+                } else {
+                    searchResultsContainer.innerHTML = '<p>No songs found for your search.</p>';
+                }
             } catch (error) {
                 console.error('Failed to search songs:', error);
+                searchResultsContainer.innerHTML = '<p>Failed to perform search. Please try again later.</p>';
             }
         }
 
-        function displaySongs(songs, containerId) {
-            const container = document.getElementById(containerId);
+        function displaySongs(songs, container) {
             container.innerHTML = '';
             songs.forEach(song => {
-                const card = document.createElement('div');
-                card.className = 'song-card';
-                card.innerHTML = `
+                const songCard = document.createElement('div');
+                songCard.classList.add('song-card');
+                songCard.innerHTML = `
                     <img src="${song.thumbnail}" alt="${song.title}">
-                    <p>${song.title}</p>
+                    <h3>${song.title}</h3>
+                    <p>${song.channel.name || 'Unknown Artist'}</p>
+                    <div class="play-button" onclick="event.stopPropagation(); playSong('${song.id}', '${song.title}', '${song.channel.name || 'Unknown Artist'}', '${song.thumbnail}')">
+                        <i class="fas fa-play"></i>
+                    </div>
                 `;
-                card.onclick = () => playSong(song);
-                container.appendChild(card);
+                songCard.onclick = () => playSong(song.id, song.title, song.channel.name || 'Unknown Artist', song.thumbnail);
+                container.appendChild(songCard);
             });
         }
 
-        async function playSong(song) {
-            const audio = document.getElementById('audioElement');
-            const songTitle = document.getElementById('songTitle');
+        async function playSong(videoId, title, artist, thumbnail) {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/audio?videoId=${song.id}`);
+                const response = await fetch(`${BACKEND_URL}/api/audio?videoId=${videoId}`);
                 const data = await response.json();
+
                 if (data.downloadLink) {
-                    audio.src = data.downloadLink;
-                    songTitle.textContent = song.title;
-                    audio.play();
+                    audioElement.src = data.downloadLink;
+                    currentPlayingSong = { videoId, title, artist, thumbnail };
+                    
+                    nowPlayingThumbnail.src = thumbnail;
+                    nowPlayingTitle.textContent = title;
+                    nowPlayingArtist.textContent = artist;
+
+                    fullPlayerThumbnail.src = thumbnail;
+                    fullPlayerTitle.textContent = title;
+                    fullPlayerArtist.textContent = artist;
+
+                    audioElement.play();
+                    playPauseBtn.classList.replace('fa-play', 'fa-pause');
+                    fullPlayerPlayPause.classList.replace('fa-play', 'fa-pause');
+                    nowPlayingBar.style.display = 'flex';
                 } else {
-                    console.error('No download link found.');
+                    alert('Could not find audio for this song.');
                 }
             } catch (error) {
                 console.error('Error playing song:', error);
+                alert('Failed to play song. Please try again.');
             }
         }
+
+        function togglePlayPause() {
+            if (audioElement.paused) {
+                audioElement.play();
+                playPauseBtn.classList.replace('fa-play', 'fa-pause');
+                fullPlayerPlayPause.classList.replace('fa-play', 'fa-pause');
+            } else {
+                audioElement.pause();
+                playPauseBtn.classList.replace('fa-pause', 'fa-play');
+                fullPlayerPlayPause.classList.replace('fa-pause', 'fa-play');
+            }
+        }
+
+        function maximizePlayer() {
+            if (currentPlayingSong) {
+                nowPlayingFullScreen.classList.add('active');
+            }
+        }
+
+        function minimizePlayer() {
+            nowPlayingFullScreen.classList.remove('active');
+        }
+
+        searchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        audioElement.addEventListener('ended', () => {
+            playPauseBtn.classList.replace('fa-pause', 'fa-play');
+            fullPlayerPlayPause.classList.replace('fa-pause', 'fa-play');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchRandomSongs();
+            showSection('featured-tracks-section');
+        });
     </script>
 </body>
 </html>
