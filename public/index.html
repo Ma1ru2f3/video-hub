@@ -189,10 +189,10 @@
             background-color: rgba(0, 0, 0, 0.7); 
             border-radius: 8px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row; /* Changed from column to row */
             justify-content: center;
             align-items: center;
-            gap: 10px; 
+            gap: 20px; /* Increased gap */
             opacity: 0; 
             transition: opacity 0.3s ease;
             pointer-events: none; 
@@ -207,12 +207,12 @@
             background-color: #1DB954;
             color: #fff;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 45px; /* Increased size */
+            height: 45px; /* Increased size */
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
+            font-size: 20px; /* Increased font size */
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
@@ -220,16 +220,6 @@
         .song-card .control-btn-small:hover {
             background-color: #1ed760;
         }
-
-        .song-card .download-btn {
-            font-size: 16px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            background-color: #555;
-            color: #fff;
-            cursor: pointer;
-        }
-
 
         /* Spotify-like Now Playing Bar */
         .now-playing-bar {
@@ -706,9 +696,6 @@
                         <div class="control-btn-small" onclick="event.stopPropagation(); playPreviousNext('next', ${index})">
                             <i class="fas fa-forward"></i>
                         </div>
-                        <div class="download-btn" onclick="event.stopPropagation(); downloadSong('${song.id}', '${song.title}')">
-                            <i class="fas fa-download"></i> Download
-                        </div>
                     </div>
                 `;
                 songCard.onclick = () => playSong(song.id, song.title, song.channel.name || 'Unknown Artist', song.thumbnail, index);
@@ -746,16 +733,19 @@
                 alert('Failed to play song. Please try again.');
             }
         }
-
-        async function downloadSong(videoId, title) {
+        
+        async function downloadCurrentSong() {
+            if (!currentPlayingSong) {
+                alert('No song is currently playing to download.');
+                return;
+            }
             try {
-                const response = await fetch(`${BACKEND_URL}/api/audio?videoId=${videoId}`);
+                const response = await fetch(`${BACKEND_URL}/api/audio?videoId=${currentPlayingSong.videoId}`);
                 const data = await response.json();
-
                 if (data.downloadLink) {
                     const link = document.createElement('a');
                     link.href = data.downloadLink;
-                    link.download = `${title}.mp3`;
+                    link.download = `${currentPlayingSong.title}.mp3`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -766,14 +756,6 @@
                 console.error('Error downloading song:', error);
                 alert('Failed to download song. Please try again.');
             }
-        }
-
-        async function downloadCurrentSong() {
-            if (!currentPlayingSong) {
-                alert('No song is currently playing to download.');
-                return;
-            }
-            await downloadSong(currentPlayingSong.videoId, currentPlayingSong.title);
         }
 
         function togglePlayPause() {
