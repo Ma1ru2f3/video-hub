@@ -186,20 +186,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+            background-color: rgba(0, 0, 0, 0.7); 
             border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px; /* Space between buttons */
-            opacity: 0; /* Hidden by default */
+            gap: 15px; 
+            opacity: 0; 
             transition: opacity 0.3s ease;
-            pointer-events: none; /* Allow clicks on elements underneath by default */
+            pointer-events: none; 
         }
 
         .song-card:hover .play-controls-overlay {
-            opacity: 1; /* Show on hover */
-            pointer-events: all; /* Enable clicks on buttons */
+            opacity: 1; 
+            pointer-events: all; 
         }
 
         .song-card .play-controls-overlay .control-btn-small {
@@ -233,10 +233,10 @@
             padding: 10px 20px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
             z-index: 999;
-            flex-direction: column; /* Changed to column to stack elements */
+            flex-direction: column; 
         }
         
-        /* New styles for progress bar */
+        /* Styles for progress bar */
         .now-playing-bar .progress-container {
             width: 100%;
             display: flex;
@@ -298,11 +298,17 @@
             font-size: 12px;
         }
 
-        .now-playing-bar .controls .play-pause-btn {
+        .now-playing-bar .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .now-playing-bar .controls .play-pause-btn,
+        .now-playing-bar .controls .power-btn {
             font-size: 24px;
             color: #1DB954;
             cursor: pointer;
-            margin-left: 20px;
         }
 
         .full-screen-player {
@@ -513,6 +519,7 @@
                 </div>
             </div>
             <div class="controls">
+                <i class="fas fa-power-off power-btn" onclick="togglePlayerVisibility()"></i>
                 <i class="fas fa-play play-pause-btn" id="playPauseBtn" onclick="togglePlayPause()"></i>
             </div>
         </div>
@@ -730,6 +737,20 @@
             const minutes = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+        
+        // New function to toggle player visibility
+        function togglePlayerVisibility() {
+            if (nowPlayingBar.style.display === 'flex') {
+                audioElement.pause();
+                nowPlayingBar.style.display = 'none';
+            } else {
+                nowPlayingBar.style.display = 'flex';
+                // You may want to start playing the last song if it was playing before
+                // if (currentPlayingSong) {
+                //     audioElement.play();
+                // }
+            }
         }
 
         // Event listeners for progress bar
