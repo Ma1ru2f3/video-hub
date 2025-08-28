@@ -5,40 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M.H Music Hub</title>
     <style>
+        /* General Styles */
         body {
             background-color: #000;
             color: #fff;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            overflow-x: hidden;
+            display: flex;
         }
-        .header {
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #040404;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+        .sidebar.show {
+            left: 0;
+        }
+        .sidebar h2 {
+            color: #1DB954;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        .sidebar-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            padding: 12px;
+            color: #b3b3b3;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .sidebar-item:hover {
+            background-color: #282828;
+            color: #fff;
+        }
+        .sidebar-item svg {
+            margin-right: 10px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 0;
+            padding: 20px;
+            width: 100%;
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.shift {
+            margin-left: 250px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
             margin-bottom: 20px;
         }
-        .header h1 {
-            color: #1DB954;
-            margin: 0;
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: #fff;
             font-size: 24px;
+            margin-right: 15px;
+            cursor: pointer;
         }
         .search-container {
-            margin-bottom: 20px;
+            flex-grow: 1;
         }
         .search-container input {
             width: 100%;
             padding: 12px;
-            border: 2px solid #1DB954;
+            border: none;
             border-radius: 50px;
             background-color: #282828;
             color: #fff;
             box-sizing: border-box;
             font-size: 16px;
         }
-        .song-list h2 {
-            font-size: 18px;
-            color: #fff;
+        
+        /* Featured Section */
+        .featured-section {
+            margin-bottom: 30px;
+        }
+        .featured-section h2 {
+            font-size: 22px;
             margin-bottom: 15px;
         }
         .song-grid {
@@ -52,6 +112,10 @@
             padding: 15px;
             text-align: center;
             cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .song-card:hover {
+            background-color: #282828;
         }
         .song-card img {
             width: 100%;
@@ -70,6 +134,8 @@
             color: #b3b3b3;
             margin: 5px 0 0;
         }
+
+        /* Player Bar */
         .player-bar {
             position: fixed;
             bottom: 0;
@@ -82,6 +148,11 @@
             align-items: center;
             justify-content: space-between;
             border-top: 1px solid #282828;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .player-bar.show {
+            transform: translateY(0);
         }
         .player-info {
             display: flex;
@@ -109,21 +180,47 @@
             font-size: 24px;
             cursor: pointer;
         }
+        #downloadButton {
+            font-size: 20px;
+            margin-left: 15px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>M.H Music Hub</h1>
+
+    <div class="sidebar" id="sidebar">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <h2>M.H Music Hub</h2>
+        <a class="sidebar-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            Dashboard
+        </a>
+        <a class="sidebar-item" id="search-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Search
+        </a>
+        <a class="sidebar-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-book"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V6.5A2.5 2.5 0 0 0 17.5 4H4v15.5z"></path></svg>
+            Your Library
+        </a>
     </div>
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search for songs...">
-    </div>
-    <div class="song-list" id="songList">
-        <h2>Featured Track</h2>
-        <div class="song-grid">
+
+    <div class="main-content" id="mainContent">
+        <div class="top-bar">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search for songs...">
             </div>
+        </div>
+        
+        <div class="featured-section">
+            <h2 id="sectionTitle">Discover New Releases</h2>
+            <div class="song-grid" id="songGrid">
+                </div>
+        </div>
     </div>
-    <div class="player-bar">
+
+    <div class="player-bar" id="playerBar">
         <div class="player-info">
             <img id="player-thumbnail" src="https://via.placeholder.com/40" alt="Song thumbnail">
             <div>
@@ -133,6 +230,7 @@
         </div>
         <div class="player-controls">
             <button id="playButton">▶</button>
+            <button id="downloadButton">⬇</button>
         </div>
         <audio id="audioPlayer" src=""></audio>
     </div>
@@ -140,26 +238,40 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchInput');
-            const songGrid = document.querySelector('.song-grid');
-            const songListHeader = document.querySelector('#songList h2');
+            const songGrid = document.getElementById('songGrid');
             const playButton = document.getElementById('playButton');
+            const downloadButton = document.getElementById('downloadButton');
             const audioPlayer = document.getElementById('audioPlayer');
+            const playerBar = document.getElementById('playerBar');
             const playerTitle = document.getElementById('player-title');
             const playerArtist = document.getElementById('player-artist');
             const playerThumbnail = document.getElementById('player-thumbnail');
+            const sectionTitle = document.getElementById('sectionTitle');
+            const searchLink = document.getElementById('search-link');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+
+            let currentSong = null;
+
+            window.toggleSidebar = () => {
+                sidebar.classList.toggle('show');
+                mainContent.classList.toggle('shift');
+            };
 
             const fetchAndDisplaySongs = async (query = '') => {
-                songListHeader.textContent = 'Loading...';
-                songGrid.innerHTML = '';
+                songGrid.innerHTML = `<h2>Loading...</h2>`;
+                sectionTitle.textContent = query ? 'Search Results' : 'Discover New Releases';
+
                 try {
                     const url = query ? `/api/search?q=${encodeURIComponent(query)}` : `/api/search?q=bangla music`;
                     const response = await fetch(url);
+                    if (!response.ok) throw new Error('Network response was not ok');
                     const songs = await response.json();
                     
-                    songListHeader.textContent = query ? 'Search Results' : 'Featured Tracks';
+                    songGrid.innerHTML = '';
                     if (songs.length === 0) {
-                        songGrid.innerHTML = `<p>No songs found.</p>`;
-                        return;
+                         songGrid.innerHTML += `<p>No songs found for your search.</p>`;
+                         return;
                     }
 
                     songs.forEach(song => {
@@ -182,12 +294,36 @@
             };
 
             const playSong = (song) => {
+                currentSong = song;
                 playerTitle.textContent = song.title;
                 playerArtist.textContent = song.channel.name;
                 playerThumbnail.src = song.thumbnail;
                 audioPlayer.src = `/api/stream?id=${song.id}`;
                 audioPlayer.play();
                 playButton.textContent = '⏸';
+                playerBar.classList.add('show');
+            };
+
+            const downloadSong = async () => {
+                if (!currentSong) return;
+                try {
+                    const response = await fetch(`/api/stream?id=${currentSong.id}`);
+                    if (!response.ok) throw new Error('Failed to download');
+                    
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `${currentSong.title}.mp3`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    alert('Failed to download the song.');
+                }
             };
 
             playButton.addEventListener('click', () => {
@@ -200,10 +336,19 @@
                 }
             });
 
+            downloadButton.addEventListener('click', downloadSong);
+
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     fetchAndDisplaySongs(searchInput.value);
                 }
+            });
+
+            searchLink.addEventListener('click', () => {
+                toggleSidebar();
+                sectionTitle.textContent = 'Find Music';
+                songGrid.innerHTML = `<p>Use the search bar above to find songs.</p>`;
+                searchInput.focus();
             });
 
             fetchAndDisplaySongs();
