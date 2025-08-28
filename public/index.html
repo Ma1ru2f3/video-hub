@@ -341,31 +341,29 @@
             margin-top: 5px;
         }
 
-        .song-item .card-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .song-item .card-buttons .play-btn,
-        .song-item .card-buttons .download-btn {
+        .song-item .play-floating-btn {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
             background-color: var(--primary-color);
             color: #fff;
-            border: none;
-            border-radius: 50px;
-            width: 40px;
-            height: 40px;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.1em;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease;
+            font-size: 1.2em;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
-        .song-item .card-buttons .play-btn:hover,
-        .song-item .card-buttons .download-btn:hover {
-            transform: scale(1.1);
+        .song-item:hover .play-floating-btn, .song-item.active .play-floating-btn {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
         }
 
         .hero-progress-bar, .song-progress-bar {
@@ -817,8 +815,9 @@
     </div>
 
 <script>
+    // This script is used to detect if the page is running inside a WebView and prompt the user to use a proper browser.
     (function() {
-        const YOUR_SITE_URL = "https://video-hub-s3g2.onrender.com"; 
+        const YOUR_SITE_URL = "https://your-site.com"; 
 
         function isWebView() {
             const ua = navigator.userAgent;
@@ -832,9 +831,10 @@
         if (isWebView()) {
             window.addEventListener('load', function() {
                 if (navigator.userAgent.indexOf("Android") > -1) {
-                    window.location.href = "intent://" + YOUR_SITE_URL.replace(/https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
-                }
-                else {
+                    // Note: This intent scheme is for demonstration purposes. It may not work in all environments.
+                    // window.location.href = "intent://" + YOUR_SITE_URL.replace(/https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
+                    console.log("Detected a WebView. Please open this link in a proper browser for a better experience.");
+                } else {
                     alert("গান প্লে করতে সমস্যা হচ্ছে? অনুগ্রহ করে এই অ্যাপের ব্রাউজারের পরিবর্তে আপনার ফোনের মূল ব্রাউজার (যেমন: Chrome) ব্যবহার করুন।");
                 }
             });
@@ -842,7 +842,10 @@
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
+        // The base URL for the server. Set to localhost for local testing.
+        const BASE_URL = 'http://localhost:3000';
 
+        // Get all necessary HTML elements
         const songsContainer = document.getElementById('songs-container');
         const searchInput = document.getElementById('search-input');
         const playPauseBtn = document.getElementById('play-pause-btn');
@@ -884,7 +887,7 @@
         const sidebar = document.getElementById('sidebar');
         const hamburgerMenu = document.getElementById('hamburger-menu');
 
-        const BASE_API_URL = 'https://blank-api-dipto.onrender.com';
+        // YouTube Player API variables
         let player;
         let currentVideoDuration = 0;
         let allSongsData = [];
@@ -893,11 +896,13 @@
         let isShuffling = false;
         let isRepeating = false;
 
+        // Load the YouTube Iframe API script asynchronously.
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+        // This function is called by the YouTube Iframe API
         window.onYouTubeIframeAPIReady = () => {
             player = new YT.Player('player-iframe', {
                 height: '0',
@@ -909,7 +914,7 @@
                     'modestbranding': 1,
                     'enablejsapi': 1,
                     'iv_load_policy': 3,
-                    'autoplay': 1
+                    'autoplay': 0 // Set to 0 to prevent autoplay on load
                 },
                 events: {
                     'onReady': onPlayerReady,
@@ -919,12 +924,14 @@
             });
         };
 
+        // Helper function to format time in mm:ss format
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
             return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
         }
 
+        // Updates the progress bar and time displays
         function updateProgressBar() {
             if (player && player.getPlayerState) {
                 const currentTime = player.getCurrentTime();
@@ -953,9 +960,10 @@
         }
 
         function onPlayerReady(event) {
-            // No autoplay on ready, will play on user interaction
+            // Player is ready, but we won't play until user interaction
         }
 
+        // Handles player state changes (playing, paused, ended, etc.)
         function onPlayerStateChange(event) {
             switch (event.data) {
                 case YT.PlayerState.PLAYING:
@@ -983,6 +991,7 @@
             }
         }
 
+        // Handles player errors
         function onPlayerError(event) {
             console.error('YouTube Player Error:', event.data);
             let errorMessage = "An unknown error occurred.";
@@ -1010,21 +1019,12 @@
             currentPlayingSongId = null;
         }
 
-        function resetPlayerDisplay() {
-            document.getElementById('player-current-title').textContent = 'No song playing';
-            document.getElementById('player-current-artist').textContent = 'Unknown Artist';
-            document.getElementById('player-thumbnail').src = 'https://via.placeholder.com/60';
-            progressBar.style.setProperty('--progress-width', `0%`);
-            miniProgressBar.style.setProperty('--progress-width', `0%`);
-            currentTimeSpan.textContent = '0:00';
-            totalTimeSpan.textContent = '0:00';
-        }
-
+        // Updates the visual state of the song cards (active, playing, etc.)
         function updateCardUI(songId, state) {
             const allCards = document.querySelectorAll('.song-item, .hero-card');
             allCards.forEach(card => {
                 const cardId = card.dataset.id;
-                const playButtonIcon = card.querySelector('.play-btn i');
+                const playButtonIcon = card.querySelector('.play-floating-btn i, .play-btn i');
                 const progressBar = card.querySelector('.hero-progress-bar, .song-progress-bar');
 
                 card.classList.remove('active');
@@ -1049,10 +1049,12 @@
             });
         }
 
+        // Get the current playlist, either shuffled or not
         function getPlaylist() {
             return isShuffling ? shuffledSongs : allSongsData;
         }
 
+        // Plays a song using the YouTube API
         function playSong(song) {
             if (!player || !player.loadVideoById) {
                 console.error("YouTube Player API not ready.");
@@ -1082,6 +1084,7 @@
             player.loadVideoById(song.id);
         }
 
+        // Changes the song based on the direction (-1 for previous, 1 for next)
         function changeSong(direction) {
             if (!currentPlayingSongId) return;
 
@@ -1098,6 +1101,7 @@
             playSong(playlist[nextIndex]);
         }
 
+        // Shuffles an array
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -1108,6 +1112,7 @@
             return array;
         }
 
+        // Renders song items into a container
         function renderSongs(songs, container) {
             container.innerHTML = '';
             if (!songs || songs.length === 0) {
@@ -1122,10 +1127,7 @@
                     <img src="${song.thumbnail}" alt="${song.title}">
                     <div class="song-title">${song.title}</div>
                     <div class="song-artist">${song.channel}</div>
-                    <div class="card-buttons">
-                        <button class="play-btn" data-id="${song.id}"><i class="fas fa-play"></i></button>
-                        <a href="${BASE_API_URL}/ytDl3?link=${song.id}&format=mp3" class="download-btn" download="${song.title.replace(/[|/:*?"<>]/g, '')}.mp3"><i class="fas fa-download"></i></a>
-                    </div>
+                    <div class="play-floating-btn"><i class="fas fa-play"></i></div>
                     <div class="song-progress-bar">
                         <div class="song-progress-fill"></div>
                     </div>
@@ -1134,6 +1136,7 @@
             });
         }
 
+        // Renders the featured song in the hero card
         function renderFeaturedSong(songs) {
             if (songs && songs.length > 0) {
                 const featured = songs[0];
@@ -1145,7 +1148,6 @@
                         <p>${featured.channel}</p>
                         <div class="hero-controls">
                             <button class="play-btn" data-id="${featured.id}"><i class="fas fa-play"></i> Play Now</button>
-                            <a href="${BASE_API_URL}/ytDl3?link=${featured.id}&format=mp3" class="download-btn" download="${featured.title.replace(/[|/:*?"<>]/g, '')}.mp3"><i class="fas fa-download"></i> Download</a>
                             <div class="hero-progress-bar">
                                 <div class="hero-progress-fill"></div>
                             </div>
@@ -1157,6 +1159,7 @@
             }
         }
 
+        // Fetches songs from the server and renders them
         async function fetchSongs(url, container, callback) {
             const isFeatured = container === songsContainer;
             container.innerHTML = `
@@ -1204,6 +1207,7 @@
             }
         }
 
+        // Opens the full-screen player view
         function openFullScreenPlayer() {
             if (currentPlayingSongId) {
                 fullScreenPlayer.classList.add('active');
@@ -1211,6 +1215,7 @@
             }
         }
 
+        // Event listeners for player controls
         closeFullPlayerBtn.addEventListener('click', () => {
             fullScreenPlayer.classList.remove('active');
             document.body.style.overflow = 'auto';
@@ -1264,27 +1269,14 @@
             }
         });
 
-        songsContainer.addEventListener('click', handleCardButton);
-        searchSongsContainer.addEventListener('click', handleCardButton);
-        featuredHeroCard.addEventListener('click', handleHeroButton);
+        songsContainer.addEventListener('click', handleSongClick);
+        searchSongsContainer.addEventListener('click', handleSongClick);
+        featuredHeroCard.addEventListener('click', handleSongClick);
 
-        function handleCardButton(e) {
-            const button = e.target.closest('.play-btn');
-            const songItem = e.target.closest('.song-item');
-            if (button && songItem) {
+        function handleSongClick(e) {
+            const songItem = e.target.closest('.song-item, .hero-card');
+            if (songItem) {
                 const songId = songItem.dataset.id;
-                const song = allSongsData.find(s => s.id === songId);
-                if (song) {
-                    playSong(song);
-                }
-            }
-        }
-
-        function handleHeroButton(e) {
-            const button = e.target.closest('.play-btn');
-            const heroCard = e.target.closest('.hero-card');
-            if (button && heroCard) {
-                const songId = heroCard.dataset.id;
                 const song = allSongsData.find(s => s.id === songId);
                 if (song) {
                     playSong(song);
@@ -1320,7 +1312,7 @@
             dashboardContent.style.display = 'block';
             searchResultsContent.style.display = 'none';
             updateNavActiveState(homeNav);
-            fetchSongs(`${BASE_API_URL}/ytFullSearch?songName=top+songs`, songsContainer, renderFeaturedSong);
+            fetchSongs(`${BASE_URL}/api/songs/search?query=popular music`, songsContainer, renderFeaturedSong);
             closeSidebar();
         });
 
@@ -1352,13 +1344,14 @@
                 dashboardContent.style.display = 'none';
                 searchResultsContent.style.display = 'block';
                 searchResultsTitle.textContent = `Results for "${searchInput.value}"`;
-                fetchSongs(`${BASE_API_URL}/ytFullSearch?songName=${encodeURIComponent(searchInput.value.trim())}`, searchSongsContainer);
+                fetchSongs(`${BASE_URL}/api/songs/search?query=${encodeURIComponent(searchInput.value.trim())}`, searchSongsContainer);
                 updateNavActiveState(searchNav);
                 closeSidebar();
             }
         });
 
-        fetchSongs(`${BASE_API_URL}/ytFullSearch?songName=top+songs`, songsContainer, renderFeaturedSong);
+        // Initial fetch for popular music on page load
+        fetchSongs(`${BASE_URL}/api/songs/search?query=popular music`, songsContainer, renderFeaturedSong);
     });
 </script>
 </body>
