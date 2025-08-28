@@ -318,7 +318,7 @@
             width: 100%;
             height: 100%;
             background-color: #000000;
-            display: flex;
+            display: none; /* Changed from 'none' to 'flex' on active */
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -329,6 +329,7 @@
 
         .full-screen-player.active {
             transform: translateY(0);
+            display: flex;
         }
 
         .minimize-player-btn {
@@ -487,7 +488,7 @@
             </div>
         </section>
         
-        <section id="now-playing-full-screen" class="content-section full-screen-player" style="display: none;">
+        <section id="now-playing-full-screen" class="content-section full-screen-player">
             <i class="fas fa-chevron-down minimize-player-btn" onclick="minimizePlayer()"></i>
             <div class="player-details">
                 <img id="fullPlayerThumbnail" src="" alt="Album Art">
