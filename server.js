@@ -8,8 +8,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// YouTube API URL (ei URL-ta apnar code-e hardcoded thik ache)
 const baseApiUrl = 'https://yt-api-dipto.onrender.com';
 
+// Search endpoint
 app.get('/api/search', async (req, res) => {
     const query = req.query.q;
     if (!query) {
@@ -24,6 +26,7 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
+// Stream endpoint for playing music
 app.get('/api/stream', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) {
