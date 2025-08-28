@@ -94,7 +94,7 @@
             justify-content: space-between;
             border-top: 1px solid #282828;
             transition: transform 0.3s ease-in-out;
-            transform: translateY(100%); /* Initially hidden */
+            transform: translateY(100%);
         }
         .player-bar.show {
             transform: translateY(0);
@@ -145,6 +145,10 @@
         #downloadButton {
             font-size: 20px;
             margin-left: 15px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
@@ -274,7 +278,7 @@
                 }
             });
 
-            fetchAndDisplaySongs(); // Initial load
+            fetchAndDisplaySongs();
         });
     </script>
 </body>
