@@ -118,6 +118,7 @@
             justify-content: space-between;
             padding: 10px 0;
             margin-bottom: 20px;
+            gap: 15px; /* Add space between search bar and new button */
         }
 
         .menu-icon {
@@ -162,18 +163,7 @@
             font-weight: 700;
         }
 
-        /* New style for the APK download section */
-        .find-music-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .find-music-header h2 {
-            margin-bottom: 0; /* Remove extra bottom margin from h2 */
-        }
-
+        /* New style for the APK download button */
         .apk-download-btn {
             background-color: var(--primary-color);
             color: var(--text-color);
@@ -228,13 +218,13 @@
             .song-card img {
                 height: 150px;
             }
-            .find-music-header {
+            header {
                 flex-direction: column; /* Stack elements on small screens */
                 align-items: flex-start;
                 gap: 10px;
             }
-            .find-music-header h2 {
-                margin-bottom: 0;
+            .search-bar {
+                max-width: 100%;
             }
         }
 
@@ -676,16 +666,15 @@
                 <input type="text" id="searchInput" placeholder="Search for songs...">
                 <i class="fas fa-search search-icon" onclick="performSearch()"></i>
             </div>
+            
+<a href="https://drive.google.com/file/d/1NcZto9RD11f_A1Ep8M0Edo05yrtrvllO/view?usp=drivesdk" 
+               target="_blank" class="apk-download-btn">
+                <i class="fas fa-mobile-alt"></i>
+            </a>
         </header>
 
         <section id="find-music-section" class="content-section" style="display: block;">
-            <div class="find-music-header">
-                <h2>Find Music</h2>
-                <a href="https://drive.google.com/file/d/1NcZto9RD11f_A1Ep8M0Edo05yrtrvllO/view?usp=drivesdk" 
-                   target="_blank" class="apk-download-btn">
-                    <i class="fas fa-mobile-alt"></i> Download APK
-                </a>
-            </div>
+            <h2>Find Music</h2>
             <p>Use the search bar above to find songs.</p>
         </section>
 
@@ -804,16 +793,6 @@
                 section.style.display = 'none';
             });
             document.getElementById(sectionId).style.display = 'block';
-
-            // Special handling for find-music-section to always be visible by default
-            if (sectionId === 'find-music-section') {
-                document.getElementById('find-music-section').style.display = 'block';
-            } else {
-                // For other sections, ensure find-music-section is hidden if not active
-                document.getElementById('find-music-section').style.display = 'none';
-            }
-
-
             if (sectionId !== 'search-results-section') {
                 searchResultsContainer.innerHTML = '';
             }
@@ -1098,10 +1077,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchRandomSongs();
-            // Initially show 'Find Music' or 'Featured Tracks'
-            showSection('find-music-section'); 
-            // Commenting out showSection('featured-tracks-section'); to ensure 'Find Music' is default
-            // If you want featured tracks to be default, simply call showSection('featured-tracks-section');
+            showSection('featured-tracks-section'); 
             audioElement.volume = volumeSlider.value; // Initialize audio volume
             updateVolumeIcon(audioElement.volume); // Set initial volume icon
         });
