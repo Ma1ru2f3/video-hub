@@ -240,6 +240,7 @@
             transform: translateY(0); /* Ensure it's visible by default */
             transition: transform 0.3s ease-in-out;
             box-sizing: border-box; /* Include padding in height calculation */
+            cursor: pointer; /* Make the whole bar clickable */
         }
         
         .now-playing-bar.hidden {
@@ -252,12 +253,12 @@
             justify-content: space-between;
             align-items: center;
             height: 100%; /* Take full height of the bar */
+            pointer-events: none; /* Make container unclickable to allow bar click */
         }
 
         .now-playing-bar .song-info {
             display: flex;
             align-items: center;
-            cursor: pointer;
             flex-grow: 1; /* Allow song info to take available space */
             max-width: calc(100% - 150px); /* Adjust based on control width */
         }
@@ -304,6 +305,7 @@
             color: #ffffff; /* White color for icons */
             cursor: pointer;
             transition: color 0.2s ease;
+            pointer-events: all; /* Make controls clickable */
         }
 
         .now-playing-bar .controls .control-icon:hover {
@@ -323,6 +325,7 @@
             width: 100%;
             height: 3px; /* Thin progress bar */
             background-color: transparent; /* No background for container */
+            pointer-events: none; /* Don't block clicks on the bar */
         }
         
         .now-playing-bar .progress-bar {
@@ -330,7 +333,6 @@
             height: 100%;
             background-color: rgba(255, 255, 255, 0.3); /* Lighter grey for track */
             border-radius: 0; /* No rounded corners for thin bar */
-            cursor: pointer;
             position: relative;
         }
         
@@ -559,14 +561,14 @@
         </section>
     </div>
     
-    <div class="now-playing-bar" id="nowPlayingBar" style="display: none;">
+    <div class="now-playing-bar" id="nowPlayingBar" style="display: none;" onclick="maximizePlayer()"> 
         <div class="progress-container">
             <div class="progress-bar" id="progressBar">
                 <div class="progress-bar-fill" id="progressBarFill"></div>
             </div>
-            </div>
+        </div>
         <div class="main-controls-container">
-            <div class="song-info" onclick="maximizePlayer()"> 
+            <div class="song-info"> 
                 <img id="nowPlayingThumbnail" src="" alt="Album Art">
                 <div>
                     <p id="nowPlayingTitle">No song playing...</p>
@@ -574,8 +576,8 @@
                 </div>
             </div>
             <div class="controls">
-                <i class="fas fa-plus-circle control-icon" title="Add to queue"></i>
-                <i class="fas fa-music control-icon" title="Lyrics"></i>
+                <i class="fas fa-plus-circle control-icon" title="Add to queue" onclick="event.stopPropagation();"></i>
+                <i class="fas fa-music control-icon" title="Lyrics" onclick="event.stopPropagation();"></i>
                 <i class="fas fa-play control-icon play-pause-btn" id="playPauseBtn" onclick="event.stopPropagation(); togglePlayPause()" title="Play/Pause"></i>
             </div>
         </div>
@@ -604,11 +606,8 @@
         const fullPlayerArtist = document.getElementById('fullPlayerArtist');
         const fullPlayerPlayPause = document.getElementById('fullPlayerPlayPause');
         
-        // Elements for progress bar (only progressBar and progressBarFill are visible on compact bar)
         const progressBar = document.getElementById('progressBar');
         const progressBarFill = document.getElementById('progressBarFill');
-        const currentTimeSpan = document.getElementById('currentTime'); // Still exists for full screen
-        const totalTimeSpan = document.getElementById('totalTime');     // Still exists for full screen
 
 
         let currentPlayingSong = null;
@@ -795,42 +794,17 @@
             return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
         }
         
-        // New function to toggle player visibility (power button behavior)
-        function togglePlayerVisibility() {
-            if (nowPlayingBar.style.display === 'flex') {
-                audioElement.pause();
-                nowPlayingBar.style.display = 'none';
-            } else {
-                // If it was hidden and you want to show it, you might want to resume playback
-                // This logic might need refinement based on desired behavior
-                if (currentPlayingSong) {
-                    audioElement.play();
-                }
-                nowPlayingBar.style.display = 'flex';
-            }
-        }
-
         // Event listeners for progress bar
         audioElement.addEventListener('timeupdate', () => {
             const { currentTime, duration } = audioElement;
             if (duration) {
                 const progressPercent = (currentTime / duration) * 100;
                 progressBarFill.style.width = `${progressPercent}%`;
-                // Update time display only for full screen player
-                if (nowPlayingFullScreen.classList.contains('active')) {
-                    currentTimeSpan.textContent = formatTime(currentTime);
-                }
             }
         });
 
-        audioElement.addEventListener('loadedmetadata', () => {
-            // Update total time display only for full screen player
-            if (nowPlayingFullScreen.classList.contains('active')) {
-                totalTimeSpan.textContent = formatTime(audioElement.duration);
-            }
-        });
-        
         progressBar.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the click from bubbling up and maximizing the player
             const width = progressBar.clientWidth;
             const clickX = e.offsetX;
             const duration = audioElement.duration;
