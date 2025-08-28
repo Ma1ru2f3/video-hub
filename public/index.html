@@ -341,29 +341,31 @@
             margin-top: 5px;
         }
 
-        .song-item .play-floating-btn {
-            position: absolute;
-            bottom: 25px;
-            right: 25px;
+        .song-item .card-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .song-item .card-buttons .play-btn,
+        .song-item .card-buttons .download-btn {
             background-color: var(--primary-color);
             color: #fff;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
+            border: none;
+            border-radius: 50px;
+            width: 40px;
+            height: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2em;
-            opacity: 0;
-            transform: translateY(10px);
-            pointer-events: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
         }
-        .song-item:hover .play-floating-btn, .song-item.active .play-floating-btn {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
+        .song-item .card-buttons .play-btn:hover,
+        .song-item .card-buttons .download-btn:hover {
+            transform: scale(1.1);
         }
 
         .hero-progress-bar, .song-progress-bar {
@@ -661,7 +663,7 @@
             .full-screen-player .player-header button {
                 font-size: 1.2rem;
             }
-            
+
             .full-screen-player .song-image {
                 width: 90%;
                 max-width: 300px;
@@ -823,7 +825,7 @@
             const isAndroidWebView = ua.indexOf("wv") > -1;
             const isIosWebView = /iPad|iPhone|iPod/.test(ua) && !window.MSStream && ua.indexOf("Safari") === -1;
             const isFacebook = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
-            
+
             return isAndroidWebView || isIosWebView || isFacebook;
         }
 
@@ -882,7 +884,7 @@
         const sidebar = document.getElementById('sidebar');
         const hamburgerMenu = document.getElementById('hamburger-menu');
 
-        const BASE_URL = 'https://video-hub-s3g2.onrender.com';
+        const BASE_API_URL = 'https://blank-api-dipto.onrender.com';
         let player;
         let currentVideoDuration = 0;
         let allSongsData = [];
@@ -890,7 +892,7 @@
         let currentPlayingSongId = null;
         let isShuffling = false;
         let isRepeating = false;
-        
+
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -980,7 +982,7 @@
                     break;
             }
         }
-        
+
         function onPlayerError(event) {
             console.error('YouTube Player Error:', event.data);
             let errorMessage = "An unknown error occurred.";
@@ -1022,7 +1024,7 @@
             const allCards = document.querySelectorAll('.song-item, .hero-card');
             allCards.forEach(card => {
                 const cardId = card.dataset.id;
-                const playButtonIcon = card.querySelector('.play-floating-btn i, .play-btn i');
+                const playButtonIcon = card.querySelector('.play-btn i');
                 const progressBar = card.querySelector('.hero-progress-bar, .song-progress-bar');
 
                 card.classList.remove('active');
@@ -1046,7 +1048,7 @@
                 }
             });
         }
-        
+
         function getPlaylist() {
             return isShuffling ? shuffledSongs : allSongsData;
         }
@@ -1095,7 +1097,7 @@
 
             playSong(playlist[nextIndex]);
         }
-        
+
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -1120,7 +1122,10 @@
                     <img src="${song.thumbnail}" alt="${song.title}">
                     <div class="song-title">${song.title}</div>
                     <div class="song-artist">${song.channel}</div>
-                    <div class="play-floating-btn"><i class="fas fa-play"></i></div>
+                    <div class="card-buttons">
+                        <button class="play-btn" data-id="${song.id}"><i class="fas fa-play"></i></button>
+                        <a href="${BASE_API_URL}/ytDl3?link=${song.id}&format=mp3" class="download-btn" download="${song.title.replace(/[|/:*?"<>]/g, '')}.mp3"><i class="fas fa-download"></i></a>
+                    </div>
                     <div class="song-progress-bar">
                         <div class="song-progress-fill"></div>
                     </div>
@@ -1140,6 +1145,7 @@
                         <p>${featured.channel}</p>
                         <div class="hero-controls">
                             <button class="play-btn" data-id="${featured.id}"><i class="fas fa-play"></i> Play Now</button>
+                            <a href="${BASE_API_URL}/ytDl3?link=${featured.id}&format=mp3" class="download-btn" download="${featured.title.replace(/[|/:*?"<>]/g, '')}.mp3"><i class="fas fa-download"></i> Download</a>
                             <div class="hero-progress-bar">
                                 <div class="hero-progress-fill"></div>
                             </div>
@@ -1258,14 +1264,27 @@
             }
         });
 
-        songsContainer.addEventListener('click', handleSongClick);
-        searchSongsContainer.addEventListener('click', handleSongClick);
-        featuredHeroCard.addEventListener('click', handleSongClick);
+        songsContainer.addEventListener('click', handleCardButton);
+        searchSongsContainer.addEventListener('click', handleCardButton);
+        featuredHeroCard.addEventListener('click', handleHeroButton);
 
-        function handleSongClick(e) {
-            const songItem = e.target.closest('.song-item, .hero-card');
-            if (songItem) {
+        function handleCardButton(e) {
+            const button = e.target.closest('.play-btn');
+            const songItem = e.target.closest('.song-item');
+            if (button && songItem) {
                 const songId = songItem.dataset.id;
+                const song = allSongsData.find(s => s.id === songId);
+                if (song) {
+                    playSong(song);
+                }
+            }
+        }
+
+        function handleHeroButton(e) {
+            const button = e.target.closest('.play-btn');
+            const heroCard = e.target.closest('.hero-card');
+            if (button && heroCard) {
+                const songId = heroCard.dataset.id;
                 const song = allSongsData.find(s => s.id === songId);
                 if (song) {
                     playSong(song);
@@ -1301,7 +1320,7 @@
             dashboardContent.style.display = 'block';
             searchResultsContent.style.display = 'none';
             updateNavActiveState(homeNav);
-            fetchSongs(`${BASE_URL}/api/songs/random`, songsContainer, renderFeaturedSong);
+            fetchSongs(`${BASE_API_URL}/ytFullSearch?songName=top+songs`, songsContainer, renderFeaturedSong);
             closeSidebar();
         });
 
@@ -1333,13 +1352,13 @@
                 dashboardContent.style.display = 'none';
                 searchResultsContent.style.display = 'block';
                 searchResultsTitle.textContent = `Results for "${searchInput.value}"`;
-                fetchSongs(`${BASE_URL}/api/songs/search?query=${encodeURIComponent(searchInput.value.trim())}`, searchSongsContainer);
+                fetchSongs(`${BASE_API_URL}/ytFullSearch?songName=${encodeURIComponent(searchInput.value.trim())}`, searchSongsContainer);
                 updateNavActiveState(searchNav);
                 closeSidebar();
             }
         });
-        
-        fetchSongs(`${BASE_URL}/api/songs/random`, songsContainer, renderFeaturedSong);
+
+        fetchSongs(`${BASE_API_URL}/ytFullSearch?songName=top+songs`, songsContainer, renderFeaturedSong);
     });
 </script>
 </body>
