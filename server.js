@@ -1,52 +1,68 @@
-// server.js
 const express = require('express');
 const axios = require('axios');
-const path = require('path');
-const app = express();
-const PORT = process.env.PORT || 3000;
+const cors = require('cors'); // To allow requests from your frontend
 
-app.use(express.static(path.join(__dirname, 'public')));
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(cors());
 app.use(express.json());
 
-// YouTube API URL (ei URL-ta apnar code-e hardcoded thik ache)
-const baseApiUrl = 'https://yt-api-dipto.onrender.com';
+// Function to get the base API URL
+const baseApiUrl = async () => {
+  const base = await axios.get(
+    `https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`
+  );
+  return base.data.api;
+};
 
-// Search endpoint
+// Endpoint for random songs
+app.get('/api/random-songs', async (req, res) => {
+  try {
+    const base = await baseApiUrl();
+    const keywords = ['latest songs', 'trending songs', 'top hits', 'chill beats', 'rock ballads']; // Some random keywords
+    const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+    const response = await axios.get(`${base}/ytFullSearch?songName=${encodeURIComponent(randomKeyword)}`);
+    const randomSongs = response.data.slice(0, 15);
+    res.json(randomSongs);
+  } catch (error) {
+    console.error('Error fetching random songs:', error);
+    res.status(500).json({ error: 'Failed to fetch random songs.' });
+  }
+});
+
+// Endpoint for search functionality
 app.get('/api/search', async (req, res) => {
-    const query = req.query.q;
-    if (!query) {
-        return res.status(400).json({ error: 'Search query is required' });
-    }
-    try {
-        const response = await axios.get(`${baseApiUrl}/ytFullSearch?songName=${encodeURIComponent(query)}`);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error during search:', error);
-        res.status(500).json({ error: 'Failed to fetch search results' });
-    }
+  const { query } = req.query;
+  if (!query) {
+    return res.status(400).json({ error: 'Search query is required.' });
+  }
+  try {
+    const base = await baseApiUrl();
+    const response = await axios.get(`${base}/ytFullSearch?songName=${encodeURIComponent(query)}`);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching search results:', error);
+    res.status(500).json({ error: 'Failed to fetch search results.' });
+  }
 });
 
-// Stream endpoint for playing music
-app.get('/api/stream', async (req, res) => {
-    const videoId = req.query.id;
-    if (!videoId) {
-        return res.status(400).json({ error: 'Video ID is required' });
-    }
-    try {
-        const response = await axios.get(`${baseApiUrl}/ytDl3?link=${videoId}&format=mp3&quality=3`);
-        const downloadLink = response.data.downloadLink;
-        if (!downloadLink) {
-            return res.status(404).json({ error: 'Download link not found for the video.' });
-        }
-        const streamResponse = await axios.get(downloadLink, { responseType: 'stream' });
-        res.setHeader('Content-Type', 'audio/mpeg');
-        streamResponse.data.pipe(res);
-    } catch (error) {
-        console.error('Error during streaming:', error);
-        res.status(500).json({ error: 'Failed to stream audio' });
-    }
+// Endpoint to get audio URL
+app.get('/api/audio', async (req, res) => {
+  const { videoId } = req.query;
+  if (!videoId) {
+    return res.status(400).json({ error: 'Video ID is required.' });
+  }
+  try {
+    const base = await baseApiUrl();
+    const { data } = await axios.get(`${base}/ytDl3?link=${videoId}&format=mp3&quality=3`);
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching audio link:', error);
+    res.status(500).json({ error: 'Failed to retrieve audio.' });
+  }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
