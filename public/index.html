@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +44,7 @@
         .sidebar.open {
             width: 250px;
         }
-        
+
         @media (max-width: 768px) {
             .sidebar.open {
                 width: 100%;
@@ -182,7 +183,7 @@
             text-align: center;
             min-width: 80px;
         }
-        
+
         .apk-download-btn .apk-icon {
             font-size: 24px;
         }
@@ -225,7 +226,7 @@
             margin-bottom: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
-        
+
         /* Popular Brands section styles */
         .brand-grid {
             display: flex;
@@ -265,7 +266,7 @@
             margin: 0;
             font-weight: 600;
         }
-        
+
         @media (max-width: 768px) {
             .song-card img {
                 height: 150px;
@@ -464,7 +465,7 @@
             width: 0%;
             transition: width 0.1s linear;
         }
-        
+
         /* Full Screen Player */
         .full-screen-player {
             position: fixed;
@@ -565,7 +566,7 @@
         .player-controls .control-btn:hover {
             transform: scale(1.1);
         }
-        
+
         .player-controls .big-play-btn {
             font-size: clamp(50px, 12vw, 60px);
             color: var(--primary-color);
@@ -699,7 +700,7 @@
                 <input type="text" id="searchInput" placeholder="Search for songs...">
                 <i class="fas fa-search search-icon" onclick="performSearch()"></i>
             </div>
-            
+
             <a href="https://drive.google.com/file/d/1NcZto9RD11f_A1Ep8M0Edo05yrtrvllO/view?usp=drivesdk" 
                target="_blank" class="apk-download-btn">
                 <span class="apk-icon">📥</span>
@@ -751,11 +752,11 @@
             </div>
         </section>
     </div>
-    
+
     <section id="now-playing-full-screen" class="full-screen-player">
         <i class="fas fa-chevron-down minimize-player-btn" onclick="minimizePlayer()"></i>
         <i class="fas fa-download download-btn-full" onclick="downloadCurrentSong()" title="Download Song"></i>
-        
+
         <div class="player-details">
             <img id="fullPlayerThumbnail" src="" alt="Album Art">
             <h3 id="fullPlayerTitle"></h3>
@@ -857,7 +858,7 @@
                 searchResultsContainer.innerHTML = '';
             }
         }
-        
+
         // New function to search by brand name
         function searchByBrand(brandName) {
             searchInput.value = brandName;
@@ -1071,7 +1072,7 @@
                 audioElement.currentTime = (clickX / width) * duration;
             }
         }
-        
+
         audioElement.addEventListener('timeupdate', () => {
             const { currentTime, duration } = audioElement;
             if (duration) {
@@ -1147,3 +1148,4 @@
     </script>
 </body>
 </html>
+
