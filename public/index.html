@@ -43,7 +43,7 @@
         .sidebar.open {
             width: 250px;
         }
-
+        
         @media (max-width: 768px) {
             .sidebar.open {
                 width: 100%;
@@ -163,7 +163,6 @@
             font-weight: 700;
         }
 
-        /* New style for the APK download button */
         .apk-download-btn {
             background-color: var(--primary-color);
             color: var(--text-color);
@@ -173,7 +172,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: none; /* For anchor tag */
+            text-decoration: none;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -183,7 +182,7 @@
             text-align: center;
             min-width: 80px;
         }
-
+        
         .apk-download-btn .apk-icon {
             font-size: 24px;
         }
@@ -192,7 +191,6 @@
             font-size: 10px;
             line-height: 1;
         }
-
 
         .apk-download-btn:hover {
             background-color: #1ed760;
@@ -227,18 +225,65 @@
             margin-bottom: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
+        
+        /* Popular Brands section styles */
+        .brand-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
 
+        .brand-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #181818;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .brand-card:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .brand-card img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 50%;
+            margin-bottom: 8px;
+        }
+        .brand-card p {
+            font-size: 14px;
+            margin: 0;
+            font-weight: 600;
+        }
+        
         @media (max-width: 768px) {
             .song-card img {
                 height: 150px;
             }
             header {
-                flex-direction: column; /* Stack elements on small screens */
+                flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
             .search-bar {
                 max-width: 100%;
+            }
+            .song-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .full-player-progress-container,
+            .volume-control-container {
+                width: 90vw;
             }
         }
 
@@ -265,33 +310,33 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); 
+            background-color: rgba(0, 0, 0, 0.7);
             border-radius: 8px;
             display: flex;
-            flex-direction: row; 
+            flex-direction: row;
             justify-content: center;
             align-items: center;
-            gap: 20px; 
-            opacity: 0; 
+            gap: 20px;
+            opacity: 0;
             transition: opacity 0.3s ease;
-            pointer-events: none; 
+            pointer-events: none;
         }
 
         .song-card:hover .play-controls-overlay {
-            opacity: 1; 
-            pointer-events: all; 
+            opacity: 1;
+            pointer-events: all;
         }
 
         .song-card .control-btn-small {
             background-color: var(--primary-color);
             color: var(--text-color);
             border-radius: 50%;
-            width: 45px; 
-            height: 45px; 
+            width: 45px;
+            height: 45px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 20px; 
+            font-size: 20px;
             cursor: pointer;
             transition: transform 0.2s ease, background-color 0.2s ease;
         }
@@ -419,7 +464,7 @@
             width: 0%;
             transition: width 0.1s linear;
         }
-
+        
         /* Full Screen Player */
         .full-screen-player {
             position: fixed;
@@ -520,7 +565,7 @@
         .player-controls .control-btn:hover {
             transform: scale(1.1);
         }
-
+        
         .player-controls .big-play-btn {
             font-size: clamp(50px, 12vw, 60px);
             color: var(--primary-color);
@@ -632,76 +677,6 @@
             background-color: #1ed760;
             transform: scale(1.05);
         }
-
-        /* Styles for the new Brands section */
-        .brand-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .brand-card {
-            background-color: #181818;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .brand-card:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .brand-card img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .brand-card h4 {
-            font-size: 14px;
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: 600;
-        }
-
-
-        @media (max-width: 768px) {
-            .now-playing-bar .song-info {
-                max-width: calc(100% - 120px);
-            }
-            .now-playing-bar .controls {
-                gap: 10px;
-            }
-            .now-playing-bar .controls .control-icon {
-                font-size: 20px;
-            }
-            .now-playing-bar .controls .play-pause-btn {
-                font-size: 24px;
-            }
-            .search-bar {
-                max-width: 100%;
-            }
-            .song-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            }
-
-            .full-player-progress-container,
-            .volume-control-container {
-                width: 90vw; /* Adjust width for better mobile fit */
-            }
-        }
     </style>
 </head>
 <body>
@@ -711,7 +686,7 @@
             <h2>M.H Music Hub</h2>
         </div>
         <div class="sidebar-menu">
-            <a href="#" class="active" onclick="showSection('dashboard-section'); toggleSidebar();"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="#" class="active" onclick="showSection('featured-tracks-section'); toggleSidebar();"><i class="fas fa-th-large"></i> Dashboard</a>
             <a href="#" onclick="showSection('search-section'); toggleSidebar();"><i class="fas fa-search"></i> Search</a>
             <a href="#" onclick="alert('This feature is coming soon!');"><i class="fas fa-list"></i> Your Library</a>
         </div>
@@ -724,23 +699,50 @@
                 <input type="text" id="searchInput" placeholder="Search for songs...">
                 <i class="fas fa-search search-icon" onclick="performSearch()"></i>
             </div>
-
+            
             <a href="https://drive.google.com/file/d/1NcZto9RD11f_A1Ep8M0Edo05yrtrvllO/view?usp=drivesdk" 
                target="_blank" class="apk-download-btn">
                 <span class="apk-icon">📥</span>
                 <small class="apk-text">Download APK</small>
             </a>
         </header>
-        
-        <section id="dashboard-section" class="content-section" style="display: block;">
-            <h2>Popular Brands</h2>
-            <div id="brandsContainer" class="brand-grid">
-                </div>
-            ---
+
+        <section id="find-music-section" class="content-section" style="display: none;">
+            <h2>Find Music</h2>
+            <p>Use the search bar above to find songs.</p>
+        </section>
+
+        <section id="featured-tracks-section" class="content-section active" style="display: block;">
             <h2>Featured Tracks</h2>
             <div id="featuredTracksContainer" class="song-grid">
-                </div>
+            </div>
             <button onclick="fetchRandomSongs()">Refresh Tracks</button>
+        </section>
+
+        <section id="popular-brands-section" class="content-section" style="display: block;">
+            <h2>Popular Brands</h2>
+            <div class="brand-grid">
+                <a href="#" class="brand-card" onclick="searchByBrand('T-Series')">
+                    <img src="https://yt3.googleusercontent.com/y1_E0JvD5B2H-r-kC13o88_93Jp_0g7b64q-6jWwL19E3a8P_n5l1lW2tQ5_4w6c_1_Q5hJtK5-4g=s900-c-k-c0xffffffff-no-rj-mo" alt="T-Series">
+                    <p>T-Series</p>
+                </a>
+                <a href="#" class="brand-card" onclick="searchByBrand('Sony Music India')">
+                    <img src="https://yt3.googleusercontent.com/y0_f3pW7t2o_h1oX1w-6qX4j2-J6t-jH6w5G2q-w-6F2s5Q-6h0J9z7i-7k-7-y-5w=s900-c-k-c0xffffffff-no-rj-mo" alt="Sony Music India">
+                    <p>Sony Music</p>
+                </a>
+                <a href="#" class="brand-card" onclick="searchByBrand('Saregama Music')">
+                    <img src="https://yt3.googleusercontent.com/yS4u5aLgSj5e5S5tD6r-4f8Q-6S4g-5l4R-6g-5f-4d-7i-6f-6f-5l5S-5e6Q6i4s-6i4g-5d6P-6d-5i-5c=s900-c-k-c0xffffffff-no-rj-mo" alt="Saregama Music">
+                    <p>Saregama</p>
+                </a>
+                <a href="#" class="brand-card" onclick="searchByBrand('Zee Music Company')">
+                    <img src="https://yt3.googleusercontent.com/yVq3K8nF-0b923H-s6-0q9b-j-0l-g-0w-3g-6b-3n-4a-4g-4k-3g-3j-8f8c-8a-8a-8-c-9r-5l-5r=s900-c-k-c0xffffffff-no-rj-mo" alt="Zee Music Company">
+                    <p>Zee Music</p>
+                </a>
+                <a href="#" class="brand-card" onclick="searchByBrand('Times Music')">
+                    <img src="https://yt3.googleusercontent.com/yU4l2sS0t-1i6p7q-1b6p-4d-4o-7c-9b-2a-1r-6n-7q-9u-5j-7m-8d-5k-9f-8l-4j-1y-2l-3n=s900-c-k-c0xffffffff-no-rj-mo" alt="Times Music">
+                    <p>Times Music</p>
+                </a>
+            </div>
         </section>
 
         <section id="search-results-section" class="content-section" style="display: none;">
@@ -748,18 +750,12 @@
             <div id="searchResultsContainer" class="song-grid">
             </div>
         </section>
-
-        <section id="brand-songs-section" class="content-section" style="display: none;">
-            <h2 id="brandSongsTitle"></h2>
-            <div id="brandSongsContainer" class="song-grid">
-            </div>
-        </section>
     </div>
-
+    
     <section id="now-playing-full-screen" class="full-screen-player">
         <i class="fas fa-chevron-down minimize-player-btn" onclick="minimizePlayer()"></i>
         <i class="fas fa-download download-btn-full" onclick="downloadCurrentSong()" title="Download Song"></i>
-
+        
         <div class="player-details">
             <img id="fullPlayerThumbnail" src="" alt="Album Art">
             <h3 id="fullPlayerTitle"></h3>
@@ -840,27 +836,12 @@
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeIcon = document.getElementById('volumeIcon');
 
-        // New elements for Brands section
-        const brandsContainer = document.getElementById('brandsContainer');
-        const brandSongsSection = document.getElementById('brand-songs-section');
-        const brandSongsTitle = document.getElementById('brandSongsTitle');
-        const brandSongsContainer = document.getElementById('brandSongsContainer');
-
 
         let currentPlayingSong = null;
         let currentSongList = []; 
         let currentSongIndex = -1; 
         let isPlaying = false;
-        let lastVolume = 1; // To store volume before mute
-        
-        // Define a list of popular Bangladeshi brands (channels)
-        const popularBrands = [
-            { name: "Palki", id: "UCLd-LqH_HqC4w0l0q12-b2g", thumbnail: "https://yt3.googleusercontent.com/yv-z08uG8K0wW4bHj_S4l5T4p_fL6Wz5e_E8J1G_j_F7i-J1l5M8n1N5s1D5e-B4pQ=s176-c-k-c0x00ffffff-no-rj" },
-            { name: "G-Series", id: "UCTb1kK-8Z1gLg4G0c3bK2aQ", thumbnail: "https://yt3.googleusercontent.com/7gK5x-SgG2v4c-K8_J2s_1d-J_4i7c-P_R-q1H8k-R_L-4h_Q7v-G7h-X_9k-C9g=s176-c-k-c0x00ffffff-no-rj" },
-            { name: "Laser Vision", id: "UCm1WlY74-qX-3x-Q8r-q_Q", thumbnail: "https://yt3.googleusercontent.com/4g_b1s_T_7_j-x-z_W-l_1-v_3-w_6-t_9-l_3-q_5-a_8-l_6-w_5-f_7-i_4-j_2-f_3-c_5-h_9-t_6-r_0-w_8-g_2-u_1-s_4-x-c-k-c0x00ffffff-no-rj" },
-            { name: "Sangeeta", id: "UC_1gq_K_v_p_h_j_n_f_m_f_v_p_t_j_c_w_p_q_f_u_p_j_v_f_c_f_s_p_k-v-p_p_c-u_t-u_p_k-a_c-p_t_r_c-h_r_c-i_o_c-g_g_c-v-c_s_c-o-w_t-h_r-i_o-f_r_c_p-e-r_k_c-j_f-s_p_k-s-t_u_n_g_e_n-r_c-g_p_v_g-c_u_c-k-c0x00ffffff-no-rj" },
-            { name: "Rinku", id: "UCoN_N_1_l_u_T_o_Z_o_c_l_g_j_i_o_n-r_c-h_d_f-n_t_r_r_g_t-a_c_i-e_m_l_n-t_g_j-a_k_c_p_i-p-a_e_t_a_s_p_g-s-r_e_t_o-s_t-t_s-s_h-s_c_r-o_n-g_m_k_e-p-e_r_k_p-i_n_k_u-p_l_a_y_s_o_n_g-o_o_c-t_w_t_s-c-k-c0x00ffffff-no-rj" }
-        ];
+        let lastVolume = 1;
 
         function toggleSidebar() {
             sidebar.classList.toggle('open');
@@ -876,42 +857,15 @@
                 searchResultsContainer.innerHTML = '';
             }
         }
-
-        function displayBrands() {
-            brandsContainer.innerHTML = '';
-            popularBrands.forEach(brand => {
-                const brandCard = document.createElement('div');
-                brandCard.classList.add('brand-card');
-                brandCard.innerHTML = `
-                    <img src="${brand.thumbnail}" alt="${brand.name} logo">
-                    <h4>${brand.name}</h4>
-                `;
-                brandCard.onclick = () => fetchBrandSongs(brand.id, brand.name);
-                brandsContainer.appendChild(brandCard);
-            });
-        }
         
-        async function fetchBrandSongs(channelId, channelName) {
-            brandSongsTitle.textContent = `Songs from ${channelName}`;
-            brandSongsContainer.innerHTML = '<p>Loading songs...</p>';
-            showSection('brand-songs-section');
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/channel-songs?channelId=${channelId}`);
-                const songs = await response.json();
-                if (songs && songs.length > 0) {
-                    currentSongList = songs;
-                    displaySongs(songs, brandSongsContainer, 'brand');
-                } else {
-                    brandSongsContainer.innerHTML = '<p>No songs found for this brand.</p>';
-                }
-            } catch (error) {
-                console.error('Failed to load brand songs:', error);
-                brandSongsContainer.innerHTML = '<p>Failed to load songs. Please try again later.</p>';
-            }
+        // New function to search by brand name
+        function searchByBrand(brandName) {
+            searchInput.value = brandName;
+            performSearch();
         }
 
         async function fetchRandomSongs() {
-            showSection('dashboard-section');
+            showSection('featured-tracks-section');
             featuredTracksContainer.innerHTML = '<p>Loading songs...</p>';
             try {
                 const response = await fetch(`${BACKEND_URL}/api/random-songs`);
@@ -1117,7 +1071,7 @@
                 audioElement.currentTime = (clickX / width) * duration;
             }
         }
-
+        
         audioElement.addEventListener('timeupdate', () => {
             const { currentTime, duration } = audioElement;
             if (duration) {
@@ -1130,7 +1084,6 @@
             }
         });
 
-        // Event listener for when the audio metadata is loaded (duration becomes available)
         audioElement.addEventListener('loadedmetadata', () => {
             fullPlayerDuration.textContent = formatTime(audioElement.duration);
         });
@@ -1155,22 +1108,21 @@
             updateAllPlayPauseButtons(currentSongIndex);
         });
 
-        // Volume control functionality
         volumeSlider.addEventListener('input', () => {
             audioElement.volume = volumeSlider.value;
             updateVolumeIcon(volumeSlider.value);
             if (volumeSlider.value > 0) {
-                lastVolume = volumeSlider.value; // Update last volume if not muted
+                lastVolume = volumeSlider.value;
             }
         });
 
         volumeIcon.addEventListener('click', () => {
             if (audioElement.volume > 0) {
-                lastVolume = audioElement.volume; // Save current volume
+                lastVolume = audioElement.volume;
                 audioElement.volume = 0;
                 volumeSlider.value = 0;
             } else {
-                audioElement.volume = lastVolume; // Restore to last volume
+                audioElement.volume = lastVolume;
                 volumeSlider.value = lastVolume;
             }
             updateVolumeIcon(audioElement.volume);
@@ -1189,10 +1141,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchRandomSongs();
-            displayBrands();
-            showSection('dashboard-section'); 
-            audioElement.volume = volumeSlider.value; // Initialize audio volume
-            updateVolumeIcon(audioElement.volume); // Set initial volume icon
+            audioElement.volume = volumeSlider.value;
+            updateVolumeIcon(audioElement.volume);
         });
     </script>
 </body>
