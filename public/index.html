@@ -920,38 +920,6 @@
             });
         }
 
-        async function playSong(videoId, title, artist, thumbnail, index) {
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/audio?videoId=${videoId}`);
-                const data = await response.json();
-
-                if (data.downloadLink) {
-                    currentPlayingSong = { videoId, title, artist, thumbnail };
-                    currentSongIndex = index;
-
-                    audioElement.src = data.downloadLink;
-
-                    nowPlayingThumbnail.src = thumbnail;
-                    nowPlayingTitle.textContent = title;
-                    nowPlayingArtist.textContent = artist;
-
-                    fullPlayerThumbnail.src = thumbnail;
-                    fullPlayerTitle.textContent = title;
-                    fullPlayerArtist.textContent = artist;
-
-                    await audioElement.play();
-                    isPlaying = true;
-                    updateAllPlayPauseButtons(index);
-                    nowPlayingBar.style.display = 'flex';
-                } else {
-                    alert('Could not find audio for this song.');
-                }
-            } catch (error) {
-                console.error('Error playing song:', error);
-                alert('Failed to play song. Please try again.');
-            }
-        }
-
         async function downloadCurrentSong() {
             if (!currentPlayingSong) {
                 alert('No song is currently playing to download.');
