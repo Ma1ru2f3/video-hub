@@ -118,7 +118,7 @@
             justify-content: space-between;
             padding: 10px 0;
             margin-bottom: 20px;
-            gap: 15px; /* Add space between search bar and new button */
+            gap: 15px;
         }
 
         .menu-icon {
@@ -226,7 +226,6 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
 
-        /* Popular Brands section styles */
         .brand-grid {
             display: flex;
             flex-wrap: wrap;
@@ -257,7 +256,7 @@
             width: 60px;
             height: 60px;
             object-fit: contain;
-            border-radius: 50%; /* This makes the image circular */
+            border-radius: 50%;
             margin-bottom: 8px;
         }
         .brand-card p {
@@ -498,7 +497,6 @@
             cursor: pointer;
         }
 
-        /* New download button for full screen player */
         .full-screen-player .download-btn-full {
             position: absolute;
             top: 20px;
@@ -552,7 +550,7 @@
             display: flex;
             gap: clamp(20px, 10vw, 50px);
             align-items: center;
-            margin-bottom: 30px; /* Space for progress bar */
+            margin-bottom: 30px;
         }
 
         .player-controls .control-btn {
@@ -621,7 +619,7 @@
             font-size: 24px;
             color: var(--subtle-text-color);
             cursor: pointer;
-            width: 30px; /* Fixed width for consistent alignment */
+            width: 30px;
             text-align: center;
         }
 
@@ -686,7 +684,7 @@
             <h2>M.H Music Hub</h2>
         </div>
         <div class="sidebar-menu">
-            <a href="#" class="active" onclick="showSection('featured-tracks-section'); toggleSidebar();"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="#" class="active" onclick="showSection('home-sections'); toggleSidebar();"><i class="fas fa-th-large"></i> Home</a>
             <a href="#" onclick="showSection('search-section'); toggleSidebar();"><i class="fas fa-search"></i> Search</a>
             <a href="#" onclick="alert('This feature is coming soon!');"><i class="fas fa-list"></i> Your Library</a>
         </div>
@@ -707,49 +705,47 @@
             </a>
         </header>
 
-        <section id="find-music-section" class="content-section" style="display: none;">
+        <section id="search-section" class="content-section" style="display: none;">
             <h2>Find Music</h2>
             <p>Use the search bar above to find songs.</p>
-        </section>
-
-        <section id="featured-tracks-section" class="content-section active" style="display: block;">
-            <h2>Featured Tracks</h2>
-            <div id="featuredTracksContainer" class="song-grid">
-            </div>
-            <button onclick="fetchRandomSongs()">Refresh Tracks</button>
-        </section>
-
-        <section id="popular-brands-section" class="content-section" style="display: block;">
-            <h2>Your favorite artists</h2>
-            <div class="brand-grid">
-                <a href="#" class="brand-card" onclick="searchByBrand('T-Series')">
-                    <img src="https://yt3.googleusercontent.com/y1_E0JvD5B2H-r-kC13o88_93Jp_0g7b64q-6jWwL19E3a8P_n5l1lW2tQ5_4w6c_1_Q5hJtK5-4g=s900-c-k-c0xffffffff-no-rj-mo" alt="T-Series">
-                    <p>T-Series</p>
-                </a>
-                <a href="#" class="brand-card" onclick="searchByBrand('Sony Music India')">
-                    <img src="https://yt3.googleusercontent.com/y0_f3pW7t2o_h1oX1w-6qX4j2-J6t-jH6w5G2q-w-6F2s5Q-6h0J9z7i-7k-7-y-5w=s900-c-k-c0xffffffff-no-rj-mo" alt="Sony Music India">
-                    <p>Sony Music</p>
-                </a>
-                <a href="#" class="brand-card" onclick="searchByBrand('Saregama Music')">
-                    <img src="https://yt3.googleusercontent.com/yS4u5aLgSj5e5S5tD6r-4f8Q-6S4g-5l4R-6g-5f-4d-7i-6f-6f-5l5S-5e6Q6i4s-6i4g-5d6P-6d-5i-5c=s900-c-k-c0xffffffff-no-rj-mo" alt="Saregama Music">
-                    <p>Saregama</p>
-                </a>
-                <a href="#" class="brand-card" onclick="searchByBrand('Zee Music Company')">
-                    <img src="https://yt3.googleusercontent.com/yVq3K8nF-0b923H-s6-0q9b-j-0l-g-0w-3g-6b-3n-4a-4g-4k-3g-3j-8f8c-8a-8a-8-c-9r-5l-5r=s900-c-k-c0xffffffff-no-rj-mo" alt="Zee Music Company">
-                    <p>Zee Music</p>
-                </a>
-                <a href="#" class="brand-card" onclick="searchByBrand('Times Music')">
-                    <img src="https://yt3.googleusercontent.com/yU4l2sS0t-1i6p7q-1b6p-4d-4o-7c-9b-2a-1r-6n-7q-9u-5j-7m-8d-5k-9f-8l-4j-1y-2l-3n=s900-c-k-c0xffffffff-no-rj-mo" alt="Times Music">
-                    <p>Times Music</p>
-                </a>
-            </div>
-        </section>
-
-        <section id="search-results-section" class="content-section" style="display: none;">
-            <h2>Search Results</h2>
             <div id="searchResultsContainer" class="song-grid">
             </div>
         </section>
+
+        <div id="home-sections" class="home-sections" style="display: block;">
+            <section id="popular-brands-section" class="content-section">
+                <h2>Popular Brands</h2>
+                <div class="brand-grid">
+                    <a href="#" class="brand-card" onclick="searchByBrand('Palki')">
+                        <img src="https://yt3.googleusercontent.com/y1_E0JvD5B2H-r-kC13o88_93Jp_0g7b64q-6jWwL19E3a8P_n5l1lW2tQ5_4w6c_1_Q5hJtK5-4g=s900-c-k-c0xffffffff-no-rj-mo" alt="Palki">
+                        <p>Palki</p>
+                    </a>
+                    <a href="#" class="brand-card" onclick="searchByBrand('G-Series')">
+                        <img src="https://yt3.googleusercontent.com/y0_f3pW7t2o_h1oX1w-6qX4j2-J6t-jH6w5G2q-w-6F2s5Q-6h0J9z7i-7k-7-y-5w=s900-c-k-c0xffffffff-no-rj-mo" alt="G-Series">
+                        <p>G-Series</p>
+                    </a>
+                    <a href="#" class="brand-card" onclick="searchByBrand('Laser Vision')">
+                        <img src="https://yt3.googleusercontent.com/yS4u5aLgSj5e5S5tD6r-4f8Q-6S4g-5l4R-6g-5f-4d-7i-6f-6f-5l5S-5e6Q6i4s-6i4g-5d6P-6d-5i-5c=s900-c-k-c0xffffffff-no-rj-mo" alt="Laser Vision">
+                        <p>Laser Vision</p>
+                    </a>
+                    <a href="#" class="brand-card" onclick="searchByBrand('Sangeeta')">
+                        <img src="https://yt3.googleusercontent.com/yVq3K8nF-0b923H-s6-0q9b-j-0l-g-0w-3g-6b-3n-4a-4g-4k-3g-3j-8f8c-8a-8a-8-c-9r-5l-5r=s900-c-k-c0xffffffff-no-rj-mo" alt="Sangeeta">
+                        <p>Sangeeta</p>
+                    </a>
+                    <a href="#" class="brand-card" onclick="searchByBrand('Rinku')">
+                        <img src="https://yt3.googleusercontent.com/yU4l2sS0t-1i6p7q-1b6p-4d-4o-7c-9b-2a-1r-6n-7q-9u-5j-7m-8d-5k-9f-8l-4j-1y-2l-3n=s900-c-k-c0xffffffff-no-rj-mo" alt="Rinku">
+                        <p>Rinku</p>
+                    </a>
+                </div>
+            </section>
+    
+            <section id="featured-tracks-section" class="content-section">
+                <h2>Featured Tracks</h2>
+                <div id="featuredTracksContainer" class="song-grid">
+                </div>
+                <button onclick="fetchRandomSongs()">Refresh Tracks</button>
+            </section>
+        </div>
     </div>
 
     <section id="now-playing-full-screen" class="full-screen-player">
@@ -836,7 +832,6 @@
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeIcon = document.getElementById('volumeIcon');
 
-
         let currentPlayingSong = null;
         let currentSongList = []; 
         let currentSongIndex = -1; 
@@ -849,32 +844,31 @@
         }
 
         function showSection(sectionId) {
-            document.querySelectorAll('.content-section').forEach(section => {
+            document.querySelectorAll('.content-section, .home-sections').forEach(section => {
                 section.style.display = 'none';
             });
             document.getElementById(sectionId).style.display = 'block';
-            if (sectionId !== 'search-results-section') {
+            if (sectionId !== 'search-section') {
                 searchResultsContainer.innerHTML = '';
             }
         }
 
-        // New function to search by brand name
         function searchByBrand(brandName) {
             searchInput.value = brandName;
             performSearch();
         }
 
         async function fetchRandomSongs() {
-            showSection('featured-tracks-section');
-            featuredTracksContainer.innerHTML = '<p>Loading songs...</p>';
+            const section = document.getElementById('featured-tracks-section');
+            section.innerHTML = '<h2>Featured Tracks</h2><div id="featuredTracksContainer" class="song-grid"><p>Loading songs...</p></div>';
             try {
                 const response = await fetch(`${BACKEND_URL}/api/random-songs`);
                 const songs = await response.json();
                 currentSongList = songs; 
-                displaySongs(songs, featuredTracksContainer, 'featured');
+                displaySongs(songs, document.getElementById('featuredTracksContainer'), 'featured');
             } catch (error) {
                 console.error('Failed to load random songs:', error);
-                featuredTracksContainer.innerHTML = '<p>Failed to load songs. Please try again later.</p>';
+                document.getElementById('featuredTracksContainer').innerHTML = '<p>Failed to load songs. Please try again later.</p>';
             }
         }
 
@@ -884,7 +878,7 @@
                 alert('Please enter a song name to search.');
                 return;
             }
-            showSection('search-results-section');
+            showSection('search-section');
             searchResultsContainer.innerHTML = '<p>Searching...</p>';
             try {
                 const response = await fetch(`${BACKEND_URL}/api/search?query=${encodeURIComponent(query)}`);
@@ -1012,10 +1006,14 @@
             }
 
             document.querySelectorAll('.play-pause-toggle').forEach((button, index) => {
-                if (index === playingIndex && isPlaying) {
-                    button.innerHTML = '<i class="fas fa-pause"></i>';
-                } else {
-                    button.innerHTML = '<i class="fas fa-play"></i>';
+                const buttonSource = button.id.split('-')[2];
+                if (buttonSource === 'featured' && document.getElementById('featured-tracks-section').style.display !== 'none' ||
+                    buttonSource === 'search' && document.getElementById('search-section').style.display !== 'none') {
+                    if (index === playingIndex && isPlaying) {
+                        button.innerHTML = '<i class="fas fa-pause"></i>';
+                    } else {
+                        button.innerHTML = '<i class="fas fa-play"></i>';
+                    }
                 }
             });
         }
