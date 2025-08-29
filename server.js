@@ -30,7 +30,7 @@ const baseApiUrl = async () => {
 app.get('/api/random-songs', async (req, res) => {
     try {
         const base = await baseApiUrl();
-        const keywords = ['latest songs', 'trending songs', 'top hits', 'bangla songs', 'hindi songs', 'english pop']; 
+        const keywords = ['latest songs', 'trending songs', 'top hits', 'bangla songs', 'hindi songs', 'english pop'];
         const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
         const response = await axios.get(`${base}/ytFullSearch?songName=${encodeURIComponent(randomKeyword)}`);
         const randomSongs = response.data.slice(0, 15);
