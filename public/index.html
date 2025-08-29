@@ -99,7 +99,7 @@
             margin-left: 0;
             transition: margin-left 0.5s;
             padding: 20px;
-            padding-bottom: 100px; /* Add space for now playing bar */
+            padding-bottom: 100px;
         }
 
         .main-content.sidebar-open {
@@ -345,7 +345,6 @@
             transform: scale(1.05);
         }
 
-        /* Now Playing Bar */
         .now-playing-bar {
             position: fixed;
             bottom: 0;
@@ -464,7 +463,6 @@
             transition: width 0.1s linear;
         }
 
-        /* Full Screen Player */
         .full-screen-player {
             position: fixed;
             top: 0;
@@ -573,7 +571,6 @@
             transform: scale(1.05);
         }
 
-        /* Full screen player progress bar */
         .full-player-progress-container {
             width: clamp(250px, 80vw, 500px);
             display: flex;
@@ -606,7 +603,6 @@
             transition: width 0.1s linear;
         }
 
-        /* Full screen player volume control */
         .volume-control-container {
             width: clamp(200px, 70vw, 400px);
             display: flex;
@@ -653,7 +649,6 @@
             cursor: pointer;
             box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
-
 
         button {
             background-color: var(--primary-color);
@@ -717,23 +712,23 @@
                 <h2>Popular Brands</h2>
                 <div class="brand-grid">
                     <a href="#" class="brand-card" onclick="searchByBrand('Palki')">
-                        <img src="https://yt3.googleusercontent.com/y1_E0JvD5B2H-r-kC13o88_93Jp_0g7b64q-6jWwL19E3a8P_n5l1lW2tQ5_4w6c_1_Q5hJtK5-4g=s900-c-k-c0xffffffff-no-rj-mo" alt="Palki">
+                        <img src="https://i.imgur.com/your-palki-logo-url.png" alt="Palki">
                         <p>Palki</p>
                     </a>
                     <a href="#" class="brand-card" onclick="searchByBrand('G-Series')">
-                        <img src="https://yt3.googleusercontent.com/y0_f3pW7t2o_h1oX1w-6qX4j2-J6t-jH6w5G2q-w-6F2s5Q-6h0J9z7i-7k-7-y-5w=s900-c-k-c0xffffffff-no-rj-mo" alt="G-Series">
+                        <img src="https://i.imgur.com/your-gseries-logo-url.png" alt="G-Series">
                         <p>G-Series</p>
                     </a>
                     <a href="#" class="brand-card" onclick="searchByBrand('Laser Vision')">
-                        <img src="https://yt3.googleusercontent.com/yS4u5aLgSj5e5S5tD6r-4f8Q-6S4g-5l4R-6g-5f-4d-7i-6f-6f-5l5S-5e6Q6i4s-6i4g-5d6P-6d-5i-5c=s900-c-k-c0xffffffff-no-rj-mo" alt="Laser Vision">
+                        <img src="https://i.imgur.com/your-laservision-logo-url.png" alt="Laser Vision">
                         <p>Laser Vision</p>
                     </a>
                     <a href="#" class="brand-card" onclick="searchByBrand('Sangeeta')">
-                        <img src="https://yt3.googleusercontent.com/yVq3K8nF-0b923H-s6-0q9b-j-0l-g-0w-3g-6b-3n-4a-4g-4k-3g-3j-8f8c-8a-8a-8-c-9r-5l-5r=s900-c-k-c0xffffffff-no-rj-mo" alt="Sangeeta">
+                        <img src="https://i.imgur.com/your-sangeeta-logo-url.png" alt="Sangeeta">
                         <p>Sangeeta</p>
                     </a>
                     <a href="#" class="brand-card" onclick="searchByBrand('Rinku')">
-                        <img src="https://yt3.googleusercontent.com/yU4l2sS0t-1i6p7q-1b6p-4d-4o-7c-9b-2a-1r-6n-7q-9u-5j-7m-8d-5k-9f-8l-4j-1y-2l-3n=s900-c-k-c0xffffffff-no-rj-mo" alt="Rinku">
+                        <img src="https://i.imgur.com/your-rinku-logo-url.png" alt="Rinku">
                         <p>Rinku</p>
                     </a>
                 </div>
@@ -824,7 +819,6 @@
         const fullPlayerPlayPause = document.getElementById('fullPlayerPlayPause');
         const progressBarFill = document.getElementById('progressBarFill');
 
-        // New elements for full screen player
         const fullPlayerCurrentTime = document.getElementById('fullPlayerCurrentTime');
         const fullPlayerDuration = document.getElementById('fullPlayerDuration');
         const fullPlayerProgressBarFill = document.getElementById('fullPlayerProgressBarFill');
@@ -859,16 +853,16 @@
         }
 
         async function fetchRandomSongs() {
-            const section = document.getElementById('featured-tracks-section');
-            section.innerHTML = '<h2>Featured Tracks</h2><div id="featuredTracksContainer" class="song-grid"><p>Loading songs...</p></div>';
+            const container = document.getElementById('featuredTracksContainer');
+            container.innerHTML = '<p>Loading songs...</p>';
             try {
                 const response = await fetch(`${BACKEND_URL}/api/random-songs`);
                 const songs = await response.json();
                 currentSongList = songs; 
-                displaySongs(songs, document.getElementById('featuredTracksContainer'), 'featured');
+                displaySongs(songs, container, 'featured');
             } catch (error) {
                 console.error('Failed to load random songs:', error);
-                document.getElementById('featuredTracksContainer').innerHTML = '<p>Failed to load songs. Please try again later.</p>';
+                container.innerHTML = '<p>Failed to load songs. Please try again later.</p>';
             }
         }
 
