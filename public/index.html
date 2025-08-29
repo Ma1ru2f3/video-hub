@@ -257,7 +257,7 @@
             width: 60px;
             height: 60px;
             object-fit: contain;
-            border-radius: 50%;
+            border-radius: 50%; /* This makes the image circular */
             margin-bottom: 8px;
         }
         .brand-card p {
@@ -682,7 +682,7 @@
 <body>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <span class="close-btn" onclick="toggleSidebar()">&times;</span>
+            <span class="close-btn" onclick="toggleSidebar()">×</span>
             <h2>M.H Music Hub</h2>
         </div>
         <div class="sidebar-menu">
@@ -720,7 +720,7 @@
         </section>
 
         <section id="popular-brands-section" class="content-section" style="display: block;">
-            <h2>Popular Brands</h2>
+            <h2>Your favorite artists</h2>
             <div class="brand-grid">
                 <a href="#" class="brand-card" onclick="searchByBrand('T-Series')">
                     <img src="https://yt3.googleusercontent.com/y1_E0JvD5B2H-r-kC13o88_93Jp_0g7b64q-6jWwL19E3a8P_n5l1lW2tQ5_4w6c_1_Q5hJtK5-4g=s900-c-k-c0xffffffff-no-rj-mo" alt="T-Series">
