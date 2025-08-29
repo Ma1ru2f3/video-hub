@@ -701,9 +701,14 @@
         </header>
 
         <section id="search-section" class="content-section" style="display: none;">
-            <h2>Find Music</h2>
-            <p>Use the search bar above to find songs.</p>
+            <h2>Search Results</h2>
             <div id="searchResultsContainer" class="song-grid">
+            </div>
+        </section>
+
+        <section id="channel-songs-section" class="content-section" style="display: none;">
+            <h2 id="channel-songs-title"></h2>
+            <div id="channelSongsContainer" class="song-grid">
             </div>
         </section>
 
@@ -711,23 +716,23 @@
             <section id="popular-brands-section" class="content-section">
                 <h2>Popular Brands</h2>
                 <div class="brand-grid">
-                    <a href="#" class="brand-card" onclick="searchByBrand('Palki')">
+                    <a href="#" class="brand-card" onclick="fetchChannelSongs('UCs89h2S6F7aM5H2aF9uL49g', 'Palki')">
                         <img src="https://i.imgur.com/your-palki-logo-url.png" alt="Palki">
                         <p>Palki</p>
                     </a>
-                    <a href="#" class="brand-card" onclick="searchByBrand('G-Series')">
+                    <a href="#" class="brand-card" onclick="fetchChannelSongs('UCTF-dC2V0kK5f6g9p-B9f1Q', 'G-Series')">
                         <img src="https://i.imgur.com/your-gseries-logo-url.png" alt="G-Series">
                         <p>G-Series</p>
                     </a>
-                    <a href="#" class="brand-card" onclick="searchByBrand('Laser Vision')">
+                    <a href="#" class="brand-card" onclick="fetchChannelSongs('UC0fL-d2dG6l8vY1bW_4T87A', 'Laser Vision')">
                         <img src="https://i.imgur.com/your-laservision-logo-url.png" alt="Laser Vision">
                         <p>Laser Vision</p>
                     </a>
-                    <a href="#" class="brand-card" onclick="searchByBrand('Sangeeta')">
+                    <a href="#" class="brand-card" onclick="fetchChannelSongs('UCnF2_H2nF-R_r4F7C7A87A', 'Sangeeta')">
                         <img src="https://i.imgur.com/your-sangeeta-logo-url.png" alt="Sangeeta">
                         <p>Sangeeta</p>
                     </a>
-                    <a href="#" class="brand-card" onclick="searchByBrand('Rinku')">
+                    <a href="#" class="brand-card" onclick="fetchChannelSongs('UCjY2XF-Q0d4M-A4B7D2m5A', 'Rinku')">
                         <img src="https://i.imgur.com/your-rinku-logo-url.png" alt="Rinku">
                         <p>Rinku</p>
                     </a>
@@ -806,6 +811,8 @@
         const searchInput = document.getElementById('searchInput');
         const featuredTracksContainer = document.getElementById('featuredTracksContainer');
         const searchResultsContainer = document.getElementById('searchResultsContainer');
+        const channelSongsContainer = document.getElementById('channelSongsContainer');
+        const channelSongsTitle = document.getElementById('channel-songs-title');
         const nowPlayingBar = document.getElementById('nowPlayingBar');
         const nowPlayingThumbnail = document.getElementById('nowPlayingThumbnail');
         const nowPlayingTitle = document.getElementById('nowPlayingTitle');
@@ -845,11 +852,9 @@
             if (sectionId !== 'search-section') {
                 searchResultsContainer.innerHTML = '';
             }
-        }
-
-        function searchByBrand(brandName) {
-            searchInput.value = brandName;
-            performSearch();
+            if (sectionId !== 'channel-songs-section') {
+                channelSongsContainer.innerHTML = '';
+            }
         }
 
         async function fetchRandomSongs() {
@@ -863,6 +868,25 @@
             } catch (error) {
                 console.error('Failed to load random songs:', error);
                 container.innerHTML = '<p>Failed to load songs. Please try again later.</p>';
+            }
+        }
+
+        async function fetchChannelSongs(channelId, channelName) {
+            showSection('channel-songs-section');
+            channelSongsTitle.textContent = channelName;
+            channelSongsContainer.innerHTML = '<p>Loading songs from ' + channelName + '...</p>';
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/channel-videos?channelId=${channelId}`);
+                const songs = await response.json();
+                if (songs && songs.length > 0) {
+                    currentSongList = songs; 
+                    displaySongs(songs, channelSongsContainer, 'channel');
+                } else {
+                    channelSongsContainer.innerHTML = '<p>No songs found for this channel.</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load channel songs:', error);
+                channelSongsContainer.innerHTML = '<p>Failed to load songs. Please check the channel ID.</p>';
             }
         }
 
@@ -1002,7 +1026,8 @@
             document.querySelectorAll('.play-pause-toggle').forEach((button, index) => {
                 const buttonSource = button.id.split('-')[2];
                 if (buttonSource === 'featured' && document.getElementById('featured-tracks-section').style.display !== 'none' ||
-                    buttonSource === 'search' && document.getElementById('search-section').style.display !== 'none') {
+                    buttonSource === 'search' && document.getElementById('search-section').style.display !== 'none' ||
+                    buttonSource === 'channel' && document.getElementById('channel-songs-section').style.display !== 'none') {
                     if (index === playingIndex && isPlaying) {
                         button.innerHTML = '<i class="fas fa-pause"></i>';
                     } else {
