@@ -73,6 +73,40 @@ app.get('/api/audio', async (req, res) => {
     }
 });
 
+// New endpoint to get channel logo URL
+app.get('/api/channel-logo', async (req, res) => {
+    const { channelId } = req.query;
+    if (!channelId) {
+        return res.status(400).json({ error: 'Channel ID is required.' });
+    }
+    try {
+        const base = await baseApiUrl();
+        const response = await axios.get(`${base}/ytChannel?id=${channelId}`);
+        const logoUrl = response.data.logo;
+        res.json({ logoUrl });
+    } catch (error) {
+        console.error('Error fetching channel logo:', error);
+        res.status(500).json({ error: 'Failed to retrieve channel logo.' });
+    }
+});
+
+// Endpoint to get songs from a specific channel
+app.get('/api/channel-videos', async (req, res) => {
+    const { channelId } = req.query;
+    if (!channelId) {
+        return res.status(400).json({ error: 'Channel ID is required.' });
+    }
+    try {
+        const base = await baseApiUrl();
+        const response = await axios.get(`${base}/ytChannel?id=${channelId}`);
+        const songs = response.data.videos.slice(0, 15);
+        res.json(songs);
+    } catch (error) {
+        console.error('Error fetching channel videos:', error);
+        res.status(500).json({ error: 'Failed to fetch channel videos.' });
+    }
+});
+
 // Handle 404 errors (optional but good practice)
 app.use((req, res) => {
     res.status(404).send('404: Not Found');
